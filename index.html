@@ -4,7 +4,6 @@ description: "毕生求一败而不可得 终埋剑于剑冢 诚寂寥难堪也"
 ---
 
 {% for post in paginator.posts %}
-  {% if post.top != true and post.hidden != true %}
 <div class="post-preview">
     <a href="{{ post.url | prepend: site.baseurl }}">
         <h2 class="post-title">
