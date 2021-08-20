@@ -1,6 +1,6 @@
 {% if site.friends %}
 <hr>
-<h5>资源网站</h5>
+<h5><a href="{{'/resources/' | prepend: site.baseurl }}">资源网站</a></h5>
 <ul class="list-inline">
   {% for friend in site.friends %}
   <li><a href="{{friend.href}}">{{friend.title}}</a></li>
