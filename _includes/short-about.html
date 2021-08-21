@@ -9,6 +9,11 @@
     <p>{{site.sidebar-about-description}}</p>
     {% endif %}
     <!-- SNS Link -->
+{% if include.center %}
+<ul class="list-inline text-center">
+{% else %}
+<ul class="list-inline">
+{% endif %}
      <li>
                                 <a target="_blank" href="http://weibo.com/" title="weibo">
                                     <span class="fa-stack fa-lg">
@@ -41,5 +46,6 @@
                             </span>
                         </a>
                     </li>
+</ul>
   </div>
 </section>
