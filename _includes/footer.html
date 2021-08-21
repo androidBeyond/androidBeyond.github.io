@@ -31,23 +31,7 @@
         }
       </style>
 </footer>
-<script>
-    $(function(){
-        $(window).scroll(function () {
-             		if ($(this).scrollTop() > 300) {
-             			$(".top_scroll").fadeIn();
-            		} else {
-             			$(".top_scroll").fadeOut();
-             		}
-             	});
-        $(".top_scroll").click(function () {
-             		if ($(window).scrollTop() > 0) {
-             			$("html,body").stop().animate({ scrollTop: 0 }, 600);
-             		}
-             	});
-    })
-    
-</script>
+
 <!-- jQuery -->
 <script src="{{ "/js/jquery.min.js " | prepend: site.baseurl }}"></script>
 
@@ -77,6 +61,24 @@
         if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
         s.parentNode.insertBefore(o, s);
     }
+</script>
+
+<script>
+    $(function(){
+        $(window).scroll(function () {
+             		if ($(this).scrollTop() > 300) {
+             			$(".top_scroll").fadeIn();
+            		} else {
+             			$(".top_scroll").fadeOut();
+             		}
+             	});
+        $(".top_scroll").click(function () {
+             		if ($(window).scrollTop() > 0) {
+             			$("html,body").stop().animate({ scrollTop: 0 }, 600);
+             		}
+             	});
+    })
+    
 </script>
 
 <!--
