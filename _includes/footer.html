@@ -14,8 +14,40 @@
             </div>
         </div>
     </div>
+     <div class="top_scroll">
+           <i class="fa fa-chevron-up fa-3x" aria-hidden="false"></i>
+        </div>
+    <style>
+        .top_scroll{
+            position: fixed;
+            bottom: 50px;
+            right: 30px;
+            width: 70px;
+            height: 70px;
+            background:#ffffffff;
+            text-align: center;
+            cursor: pointer;
+            display: none;
+        }
+      </style>
 </footer>
-
+<script>
+    $(function(){
+        $(window).scroll(function () {
+             		if ($(this).scrollTop() > 300) {
+             			$(".top_scroll").fadeIn();
+            		} else {
+             			$(".top_scroll").fadeOut();
+             		}
+             	});
+        $(".top_scroll").click(function () {
+             		if ($(window).scrollTop() > 0) {
+             			$("html,body").stop().animate({ scrollTop: 0 }, 600);
+             		}
+             	});
+    })
+    
+</script>
 <!-- jQuery -->
 <script src="{{ "/js/jquery.min.js " | prepend: site.baseurl }}"></script>
 
