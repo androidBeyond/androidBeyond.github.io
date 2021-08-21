@@ -5,19 +5,19 @@ header-img: img/home-bg.jpg
 email: zh85725@gmail.com
 description: "android framework"
 keyword: ""
-url: "https://androidbeyond.github.io/"          # your host, for absolute URL
+url: "https://androidbeyond.gitee.io/"          # your host, for absolute URL
 baseurl: ""      # for example, '/blog' if your blog hosted on 'host/blog'
-github_repo: "https://github.com/androidbeyond" # you code repository
+github_repo: "https://gitee.com/androidbeyond" # you code repository
 
 # Publish posts or collection documents with a future date.
 future: true
 
 # SNS settings
 RSS: false
-weibo_username:     huxpro
-zhihu_username:     huxpro
-github_username:    huxpro
-twitter_username:   huxpro
+#weibo_username:     huxpro
+#zhihu_username:     huxpro
+#github_username:    huxpro
+#twitter_username:   huxpro
 #facebook_username:  huxpro
 #linkedin_username:  firstname-lastname-idxxxx
 
