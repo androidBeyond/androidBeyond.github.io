@@ -193,7 +193,7 @@
 
 
 <!-- Side Catalog -->
-{% unless page.no-catalog %}
+{% if page.catalog %}
 <script type="text/javascript">
     function generateCatalog(selector) {
 
@@ -251,7 +251,7 @@
         });
     });
 </script>
-{% endunless %}
+{% endif %}
 
 
 <!-- Multi-Lingual -->
