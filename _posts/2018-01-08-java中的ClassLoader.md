@@ -16,21 +16,20 @@ tags:
 
 >本文主要讲述Java ClassLoader的工作原理，为后面将Android App代码热替换或者插件化升级做铺垫
 
-<h3><a id="_16"></a><strong>类加载器</strong></h3> 
 <p>ClassLoader即常说的类加载器，其功能是用于从Class文件加载所需的类，主要场景用于热部署、代码热替换等场景。 系统提供3种的类加载器：Bootstrap ClassLoader、Extension ClassLoader、Application ClassLoader</p> 
  
 <h3><a id="1ClassLoader_19"></a><strong>1.ClassLoader的类型</strong></h3> 
-Java中的类加载器主要有两种类型&#xff0c;系统类加载和自定义类加载器。其中系统类加载器包括3种&#xff0c;分别是Bootstrap ClassLoader、 Extensions ClassLoader和 App ClassLoader。</p> 
+Java中的类加载器主要有两种类型&#xff0c;系统类加载和自定义类加载器。其中系统类加载器包括3种&#xff0c;分别是Bootstrap ClassLoader、 Extensions ClassLoader和 App ClassLoader
 <h4><a id="11_Bootstrap_ClassLoader_23"></a><strong>1.1 Bootstrap ClassLoader</strong></h4> 
 <p>用C/C&#43;&#43;代码实现的加载器&#xff0c;用于加载Java虚拟机运行时所需要的系统类&#xff0c;如<code>java.lang.*、java.uti.*</code>等这些系统类&#xff0c;它们默认在$JAVA_HOME/jre/lib目录中&#xff0c;也可以通过启动Java虚拟机时指定-Xbootclasspath选项&#xff0c;来改变Bootstrap ClassLoader的加载目录。<br /> Java虚拟机的启动就是通过 Bootstrap ClassLoader创建一个初始类来完成的。由于Bootstrap ClassLoader是使用C/C&#43;&#43;语言实现的&#xff0c; 所以该加载器不能被Java代码访问到。需要注意的是Bootstrap ClassLoader并不继承java.lang.ClassLoader。<br /> 我们可以通过如下代码来得出Bootstrap ClassLoader所加载的目录&#xff1a;</p> 
-<pre><code class="prism language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">ClassLoaderTest</span> <span class="token punctuation">{<!-- --></span>
+<pre><code class="highlighter-rouge"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">ClassLoaderTest</span> <span class="token punctuation">{<!-- --></span>
     <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span>String<span class="token punctuation">[</span><span class="token punctuation">]</span>args<span class="token punctuation">)</span> <span class="token punctuation">{<!-- --></span>
         System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>System<span class="token punctuation">.</span><span class="token function">getProperty</span><span class="token punctuation">(</span><span class="token string">&#34;sun.boot.class.path&#34;</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 </code></pre> 
 <p>打印结果为&#xff1a;</p> 
-<pre><code>C:\Program Files\Java\jdk1.8.0_102\jre\lib\resources.jar;
+<pre><code class="highlighter-rouge">C:\Program Files\Java\jdk1.8.0_102\jre\lib\resources.jar;
 C:\Program Files\Java\jdk1.8.0_102\jre\lib\rt.jar;
 C:\Program Files\Java\jdk1.8.0_102\jre\lib\sunrsasign.jar;
 C:\Program Files\Java\jdk1.8.0_102\jre\lib\jsse.jar;
@@ -234,5 +233,4 @@ sun.misc.Launcher$ExtClassLoader&#64;1b6d3586
 One more thing
 </code></pre> 
 <p>使用了DiskClassLoader来加载Class文件&#xff0c;say方法也正确执行&#xff0c;显然我们的目的达到了。</p> 
-<h3><a id="_298"></a><strong>后记</strong></h3> 
 <p>下一篇学习Android中的ClassLoader。</p> 
