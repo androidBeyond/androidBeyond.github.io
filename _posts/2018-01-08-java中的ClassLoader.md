@@ -14,8 +14,10 @@ tags:
     - classloader
 ---
 
-<h3><a id="_16"></a><strong>前言</strong></h3> 
-<p>热修复和插件化是目前比较热门的技术&#xff0c;要想更好的掌握它们需要了解ClassLoader&#xff0c;因此也就有了本系列的产生&#xff0c;这一篇我们先来学习Java中的ClassLoader。</p> 
+>本文主要讲述Java ClassLoader的工作原理，为后面将Android App代码热替换或者插件化升级做铺垫
+
+<h3><a id="_16"></a><strong>类加载器</strong></h3> 
+<p>ClassLoader即常说的类加载器，其功能是用于从Class文件加载所需的类，主要场景用于热部署、代码热替换等场景。 系统提供3种的类加载器：Bootstrap ClassLoader、Extension ClassLoader、Application ClassLoader</p> 
  
 <h3><a id="1ClassLoader_19"></a><strong>1.ClassLoader的类型</strong></h3> 
 <p>在<a href="http://liuwangshu.cn/java/jvm/1-runtime-data-area.html">Java虚拟机&#xff08;一&#xff09;结构原理与运行时数据区域</a>这篇文章中&#xff0c;我提到过类加载子系统&#xff0c;它的主要作用就是通过多种类加载器&#xff08;ClassLoader&#xff09;来查找和加载Class文件到 Java 虚拟机中。<br /> Java中的类加载器主要有两种类型&#xff0c;系统类加载和自定义类加载器。其中系统类加载器包括3种&#xff0c;分别是Bootstrap ClassLoader、 Extensions ClassLoader和 App ClassLoader。</p> 
