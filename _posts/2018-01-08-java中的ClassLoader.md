@@ -20,7 +20,7 @@ tags:
 <p>ClassLoader即常说的类加载器，其功能是用于从Class文件加载所需的类，主要场景用于热部署、代码热替换等场景。 系统提供3种的类加载器：Bootstrap ClassLoader、Extension ClassLoader、Application ClassLoader</p> 
  
 <h3><a id="1ClassLoader_19"></a><strong>1.ClassLoader的类型</strong></h3> 
-<p>在<a href="http://liuwangshu.cn/java/jvm/1-runtime-data-area.html">Java虚拟机&#xff08;一&#xff09;结构原理与运行时数据区域</a>这篇文章中&#xff0c;我提到过类加载子系统&#xff0c;它的主要作用就是通过多种类加载器&#xff08;ClassLoader&#xff09;来查找和加载Class文件到 Java 虚拟机中。<br /> Java中的类加载器主要有两种类型&#xff0c;系统类加载和自定义类加载器。其中系统类加载器包括3种&#xff0c;分别是Bootstrap ClassLoader、 Extensions ClassLoader和 App ClassLoader。</p> 
+Java中的类加载器主要有两种类型&#xff0c;系统类加载和自定义类加载器。其中系统类加载器包括3种&#xff0c;分别是Bootstrap ClassLoader、 Extensions ClassLoader和 App ClassLoader。</p> 
 <h4><a id="11_Bootstrap_ClassLoader_23"></a><strong>1.1 Bootstrap ClassLoader</strong></h4> 
 <p>用C/C&#43;&#43;代码实现的加载器&#xff0c;用于加载Java虚拟机运行时所需要的系统类&#xff0c;如<code>java.lang.*、java.uti.*</code>等这些系统类&#xff0c;它们默认在$JAVA_HOME/jre/lib目录中&#xff0c;也可以通过启动Java虚拟机时指定-Xbootclasspath选项&#xff0c;来改变Bootstrap ClassLoader的加载目录。<br /> Java虚拟机的启动就是通过 Bootstrap ClassLoader创建一个初始类来完成的。由于Bootstrap ClassLoader是使用C/C&#43;&#43;语言实现的&#xff0c; 所以该加载器不能被Java代码访问到。需要注意的是Bootstrap ClassLoader并不继承java.lang.ClassLoader。<br /> 我们可以通过如下代码来得出Bootstrap ClassLoader所加载的目录&#xff1a;</p> 
 <pre><code class="prism language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">ClassLoaderTest</span> <span class="token punctuation">{<!-- --></span>
@@ -235,4 +235,4 @@ One more thing
 </code></pre> 
 <p>使用了DiskClassLoader来加载Class文件&#xff0c;say方法也正确执行&#xff0c;显然我们的目的达到了。</p> 
 <h3><a id="_298"></a><strong>后记</strong></h3> 
-<p>这一篇文章我们学习了Java中的ClassLoader&#xff0c;包括ClassLoader的类型、双亲委托模式、ClassLoader继承关系以及自定义ClassLoader&#xff0c;为的是就是更好的理解下一篇所要讲解的Android中的ClassLoader。</p> 
+<p>下一篇学习Android中的ClassLoader。</p> 
