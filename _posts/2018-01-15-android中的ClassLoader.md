@@ -14,7 +14,6 @@ tags:
     - classloader
 ---
 
-  <h3><a id="_9"></a><strong>前言</strong></h3> 
   <p>在上一篇文章我们学习了Java的ClassLoader，很多同学会把Java和Android的ClassLoader搞混，甚至会认为Android中的ClassLoader和Java中的ClassLoader是一样的，这显然是不对的。这一篇文章我们就来学习Android中的ClassLoader，来看看它和Java中的ClassLoader有何不同。</p> 
   <h3><a id="1ClassLoader_13"></a><strong>1.ClassLoader的类型</strong></h3> 
   <p>我们知道Java中的ClassLoader可以加载jar文件和Class文件（本质是加载Class文件），这一点在Android中并不适用，因为无论是DVM还是ART它们加载的不再是Class文件，而是dex文件，这就需要重新设计ClassLoader相关类，我们先来学习ClassLoader的类型。<br /> Android中的ClassLoader类型和Java中的ClassLoader类型类似，也分为两种类型，分别是系统ClassLoader和自定义ClassLoader。其中系统ClassLoader主要有3种分别是BootClassLoader、PathClassLoader和DexClassLoader。</p> 
@@ -37,7 +36,7 @@ tags:
 </code></pre> 
   <p>BootClassLoader是ClassLoader的内部类，并继承自ClassLoader。BootClassLoader是一个单例类，需要注意的是BootClassLoader的访问修饰符是默认的，只有在同一个包中才可以访问，因此我们在应用程序中是无法直接调用的。</p> 
   <h4><a id="12_DexClassLoader_34"></a><strong>1.2 DexClassLoader</strong></h4> 
-  <p>DexClassLoader可以加载dex文件以及包含dex的压缩文件（apk和jar文件），不管是加载哪种文件，最终都是要加载dex文件，为了方便理解和叙述，将dex文件以及包含dex的压缩文件统称为dex相关文件。<br /> 来查看DexClassLoader的代码，如下所示。<br /> <strong>libcore/dalvik/src/main/java/dalvik/system/DexClassLoader.java</strong></p> 
+  <p>DexClassLoader可以加载dex文件以及包含dex的压缩文件（apk和jar文件），不管是加载哪种文件，最终都是要加载dex文件，为了方便理解和叙述，将dex文件以及包含dex的压缩文件统称为dex相关文件。来查看DexClassLoader的代码，如下所示。<br /> <strong>libcore/dalvik/src/main/java/dalvik/system/DexClassLoader.java</strong></p> 
   <pre><code>public class DexClassLoader extends BaseDexClassLoader {
     public DexClassLoader(String dexPath, String optimizedDirectory,
             String librarySearchPath, ClassLoader parent) {
@@ -289,5 +288,4 @@ android.app.Fragment
     <span class="token punctuation">}</span>
 </code></pre> 
   <p>在PathClassLoaderFactory的createClassLoader方法中会创建PathClassLoader。</p> 
-  <h3><a id="_294"></a><strong>结语</strong></h3> 
   <p>在这篇文章中我们学习了Android的ClassLoader的类型、ClassLoader的继承关系以及BootClassLoader和PathClassLoader是何时创建的。BootClassLoader是在Zygote进程的入口方法中创建的，PathClassLoader则是在Zygote进程创建SystemServer进程时创建的。后续有时间会分析下Android中的ClassLoader的其他知识点。</p> 
