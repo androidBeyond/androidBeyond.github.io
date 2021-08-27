@@ -13,6 +13,7 @@ tags:
     - java
     - classloader
 ---
+> 本文学习android中的ClassLoader，可以结合前文看看和java中的classloader有何不同
 
   <p>在上一篇文章我们学习了Java的ClassLoader，很多同学会把Java和Android的ClassLoader搞混，甚至会认为Android中的ClassLoader和Java中的ClassLoader是一样的，这显然是不对的。这一篇文章我们就来学习Android中的ClassLoader，来看看它和Java中的ClassLoader有何不同。</p> 
   <h3><a id="1ClassLoader_13"></a><strong>1.ClassLoader的类型</strong></h3> 
