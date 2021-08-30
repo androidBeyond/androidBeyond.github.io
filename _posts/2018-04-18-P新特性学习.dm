@@ -1,0 +1,114 @@
+---
+layout:     post
+title:      android P新特性
+subtitle:   android P新特性学习
+date:       2018-04-18
+author:     duguma
+header-img: img/article-bg.jpg
+top: false
+catalog: true
+tags:
+    - Android
+---    
+    <article class="baidu_pl">
+        <div id="article_content" class="article_content clearfix">
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-1a85854398.css">
+                <div id="content_views" class="htmledit_views">
+                    <p>Google于2018年3月8日悄无声息的推送了Android P&#xff0c;Android P 为用户和开发者引入众多新特性和新功能。 </p> 
+<p><img alt="" class="has" src="https://mmbiz.qpic.cn/mmbiz_jpg/4JKSq9VBXbnPuYdoGiawQtK3QCqkibvTxgq5hLaK4icoTv6ZicibvdmNjaWlz6QBe3WpS2z41EEicJPwFI3ibNALFBP4g/640?tp&#61;webp&amp;wxfrom&#61;5&amp;wx_lazy&#61;1" /></p> 
+<h2><strong>利用 Wi-Fi RTT 进行室内定位</strong></h2> 
+<p>        Android P 添加了对 IEEE 802.11mc Wi-Fi 协议&#xff08;也称为 <em>Wi-Fi Round-Trip-Time</em> (RTT)&#xff09;的平台支持&#xff0c;从而让开发者的应用可以利用室内定位功能。</p> 
+<p>        在提供硬件支持的 Android P 设备上&#xff0c;应用可以使用全新的 RTT API 来测量与附近支持 RTT 的 Wi-Fi <em>接入点</em> (AP) 的距离。 设备必须已启用定位并开启了 Wi-Fi 扫描&#xff08;在 <strong>Settings &gt; Location</strong> 下&#xff09;&#xff0c;同时开发者的应用必须具有 <code>ACCESS_FINE_LOCATION</code> 权限。 设备不需要连接至 AP 即可使用 RTT。 为保证隐私性&#xff0c;只有手机可以确定与 AP 的距离&#xff1b;AP 不具备该信息。</p> 
+<p>        如果开发者的设备测量与 3 个或更多 AP 的距离&#xff0c;开发者可以使用一个多点定位算法来预估与这些测量值最相符的设备位置。 结果通常精准至 1 至 2 米。</p> 
+<p>//注&#xff1a;该处在2018.3.8的版本中还有bug&#xff0c;WIFI_RTT_RANGING_SERVICE没有添加到&#64;ServiceName标记中WifiRttManager wifiRttManager &#61; (WifiRttManager) getSystemService(Context.WIFI_RTT_RANGING_SERVICE); RangingRequest.Builder builder &#61; new RangingRequest.Builder(); builder.addAccessPoint(); builder.addWifiAwarePeer(); wifiRttManager.startRanging(builder.build(), () -&gt; {...}, new RangingResultCallback{...});</p> 
+<p>        通过这种精确性&#xff0c;开发者可以打造新的体验&#xff0c;例如楼内导航、基于精细位置的服务&#xff0c;如无歧义语音控制&#xff08;例如&#xff0c;<em>“打开这盏灯”</em>&#xff09;&#xff0c;以及基于位置的信息&#xff08;如 <em>“此产品是否有特别优惠&#xff1f;”</em>&#xff09;。</p> 
+<h2><strong>屏幕缺口支持</strong></h2> 
+<p>        Android P 支持最新的全面屏以及为摄像头和扬声器预留空间的凹口屏幕。 通过全新的 <code>DisplayCutout</code> 类&#xff0c;可以确定非功能区域的位置和形状&#xff0c;这些区域不应显示内容。 要确定这些凹口屏幕区域是否存在及其位置&#xff0c;请使用<code>getDisplayCutout()</code>函数。</p> 
+<p>        全新的窗口布局属性<code>layoutInDisplayCutoutMode</code> 让开发者的应用可以为设备凹口屏幕周围的内容进行布局。 开发者可以将此属性设为下列值之一&#xff1a;</p> 
+<p> </p> 
+<ul><li> <p><code>LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT</code></p> <p> </p> </li><li> <p><code>LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS</code></p> <p> </p> </li><li> <p><code>LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER</code></p> </li></ul>
+<p>   开发者可以按如下方法在任何运行 Android P 的设备或模拟器上模拟屏幕缺口&#xff1a;</p> 
+<ol><li> <p>启用开发者选项。</p> </li></ol>
+<p>    2.在 <strong>Developer options</strong> 屏幕中&#xff0c;向下滚动至 <strong>Drawing</strong> 部分并选择         <strong>Simulate a display with a cutout</strong>。</p> 
+<p>    3.选择凹口屏幕的大小。</p> 
+<p> </p> 
+<p>    注&#xff1a;建议通过使用运行 Android P 的设备或模拟器测试凹口屏幕周围的内容显示。</p> 
+<h2><strong>通知</strong></h2> 
+<p>        Android P 引入了多个通知增强功能&#xff0c;可供以 Android P 及更高版本作为目标平台的开发者使用。</p> 
+<p><img alt="" class="has" height="1" src="https://img-blog.csdn.net/20180803113210837?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2h1eGlhb3lvbmdsYW4x/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA&#61;&#61;/dissolve/70" width="1" /></p> 
+<p>        附带了照片的 MessagingStyle。</p> 
+<p><img alt="" class="has" height="1" src="https://img-blog.csdn.net/20180803113210844?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2h1eGlhb3lvbmdsYW4x/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA&#61;&#61;/dissolve/70" width="1" /></p> 
+<p>        含回复和对话的 MessagingStyle。</p> 
+<h3><strong>提升短信体验</strong></h3> 
+<p>        从 Android 7.0&#xff08;API 级别 24&#xff09;开始&#xff0c;开发者可以添加一个操作以回复短信或直接从通知中输入其他文本。 Android P 通过下列增强提升了该功能&#xff1a;</p> 
+<ul><li> <p>支持图像&#xff1a;现在&#xff0c;Android P 可在手机的“短信通知”中显示图像。开发者可以使用短信中的 <code>setData()</code> 来显示图像。</p> </li><li> <p>简化了针对对话参与者的支持&#xff1a;全新的 <code>Notification.Person</code> 类可用于识别参与对话的人员&#xff0c;包括他们的头像和 URI。 现在&#xff0c;许多其他 API&#xff08;如<code>addMessage()</code>&#xff09;均可利用 <code>Person</code> 类&#xff0c;而不是 <code>CharSequence</code>。</p> </li><li> <p>将回复另存为草稿&#xff1a;当用户无意中关闭一个短信通知时&#xff0c;开发者的应用可以检索系统发送的 <code>EXTRA_REMOTE_INPUT_DRAFT</code>。开发者可以使用此 extra 预填充应用中的文本字段&#xff0c;以便用户可以完成他们的回复。</p> </li><li> <p>确定对话是否为群组对话。开发者可以使用 <code>setGroupConversation()</code> 以明确确定对话是否为群组对话。</p> </li><li> <p>为 Intent 设置语义操作&#xff1a;<code>setSemanticAction()</code> 函数允许开发者为操作提供语义含义&#xff0c;如标记为已读、删除、回复等。</p> </li><li> <p>SmartReply&#xff1a;Android P 支持开发者的短信应用中提供的建议回复。 使用 <code>RemoteInput.setChoices()</code> 为用户提供一组标准回复。</p> <p> </p> </li></ul>
+<h3><strong>渠道设置、广播和请勿打扰</strong></h3> 
+<p>        Android O 引入了通知渠道&#xff0c;从而允许开发者为要显示的每种通知类型创建可由用户自定义的渠道。</p> 
+<p>Android P 通过下列变更简化通知渠道设置&#xff1a;</p> 
+<ul><li> <p>屏蔽渠道组&#xff1a;现在&#xff0c;用户可以针对某个应用在通知设置中屏蔽整个渠道组。开发者可以使用 <code>isBlocked()</code> 函数确定何时屏蔽一个渠道组&#xff0c;从而不会向该组中的渠道发送任何通知。</p> </li><li> <p>此外&#xff0c;开发者的应用可以使用全新的 <code>getNotificationChannelGroup()</code> 函数查询当前渠道组设置。</p> </li><li> <p>全新的广播 Intent 类型&#xff1a;现在&#xff0c;当通知渠道和渠道组的屏蔽状态发生变更时&#xff0c;Android 系统将发送广播 Intent。 拥有已屏蔽的渠道或渠道组的应用可以侦听这些 Intent 并做出相应的回应。 有关这些 Intent 操作和 extra 的更多信息&#xff0c;请参阅 <code>NotificationManager</code> 参考中更新的常量列表。 有关响应广播 Intent 的信息&#xff0c;请参阅广播。</p> </li><li> <p>新的“请勿打扰”优先级类别&#xff1a;<code>NotificationManager.Policy</code> 具有两个新的策略常量&#xff1a;<code>PRIORITY_CATEGORY_ALARMS</code>&#xff08;确定闹铃优先级&#xff09;和 <code>PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER</code>&#xff08;确定媒体、系统和游戏声音优先级&#xff09;。</p> <p> </p> </li></ul>
+<h2><strong>多摄像头支持和摄像头更新</strong></h2> 
+<p>        现在&#xff0c;在运行 Android P 的设备上&#xff0c;开发者可以通过两个或更多物理摄像头来同时访问多个视频流。 在配备双前置摄像头或双后置摄像头的设备上&#xff0c;开发者可以创建只配备单摄像头的设备所不可能实现的创新功能&#xff0c;例如无缝缩放、虚化和立体成像。 通过此 API&#xff0c;开发者还可以调用逻辑或融合的摄像头视频流&#xff0c;该视频流可在两个或更多摄像头之间自动切换。</p> 
+<p>        摄像头方面的其他改进还包括新的会话参数和 Surface 共享&#xff0c;前者有助于降低首次拍照期间的延迟&#xff0c;而后者则让摄像头客户端能够处理各种用例&#xff0c;而无需停止并启动摄像头视频流。 还针对基于显示屏的 flash 支持和 OIS 时间戳访问新增了一些 API&#xff0c;用以实现应用级的图像稳定化和特效。</p> 
+<p>        在受支持的设备上&#xff0c;Android P 还支持外置 USB/UVC 摄像头。</p> 
+<h2><strong>适用于位图和可绘制对象的 ImageDecoder</strong></h2> 
+<p>        Android P 引入<code>ImageDecoder</code>&#xff0c;以提供现代化的图像解码方法。开发者应使用<code>ImageDecoder</code> 来解码图像&#xff0c;而不是使用<code>BitmapFactory</code> 和<code>BitmapFactory.Options</code>API。</p> 
+<p><code>    ImageDecoder</code> 让开发者可以从字节缓冲区、文件或 URI 来创建<code>Drawable</code> 或<code>Bitmap</code>。 要解码图像&#xff0c;请首先以编码图像的来源为参数&#xff0c;调用<code>createSource()</code>。 然后&#xff0c;通过传递 <code>ImageDecoder.Source</code>对象来调用<code>decodeBitmap()</code>或<code>decodeDrawable()</code>&#xff0c;从而创建<code>Bitmap</code>或<code>Drawable</code>。 要更改默认设置&#xff0c;请将 <code>OnHeaderDecodedListener</code> 传递给<code>decodeBitmap()</code>或<code>decodeDrawable()</code>。 <code>ImageDecoder</code> 以图像的默认宽度和高度&#xff08;若已知的话&#xff09;为参数&#xff0c;调用<code>onHeaderDecoded()</code>。 如果编码图像是动画 GIF 或 WebP&#xff0c;<code>decodeDrawable()</code>将返回 <code>Drawable</code>&#xff0c;后者是 <code>AnimatedImageDrawable</code> 类的一个实例。</p> 
+<p>        开发者可以使用不同的方法来设置图像属性。 这些方法包括&#xff1a;</p> 
+<ul><li> <p>要将解码的图像缩放到精确尺寸&#xff0c;请以目标尺寸为参数&#xff0c;调用 <code>setResize()</code>。 开发者也可以使用样图尺寸来缩放图像。 将样图尺寸直接传递给 <code>setResize()</code>&#xff0c;或者调用<code>getSampledSize()</code> 以查看 <code>ImageDecoder</code> 能够最高效地获取何种尺寸的样图。</p> </li><li> <p>要在缩放图像的范围内裁剪图像&#xff0c;请调用 setCrop()。</p> </li><li> <p>要创建可变的 <code>Bitmap</code>&#xff0c;请调用 <code>setMutable(true)</code>。</p> </li></ul>
+<p>        通过 <code>ImageDecoder</code>&#xff0c;开发者还可以为圆角或圆形遮罩之类的图像添加复杂的定制效果。 以 <code>PostProcessor</code>类的一个实例作为参数&#xff0c;使用 <code>setPostProcessor()</code>来执行开发者希望绘制命令执行的任何工作。 当开发者对<code>AnimatedImageDrawable</code> 进行后处理时&#xff0c;这些效果会作用与所有框。</p> 
+<h2><strong>动画</strong></h2> 
+<p>        Android P 引入了一个新的<code>AnimatedImageDrawable</code>类&#xff0c;用于绘制和显示 GIF 和 WebP 动画图像。<code>AnimatedImageDrawable</code> 的工作方式 AnimatedVectorDrawable 的相似之处在于&#xff0c;都是 RenderThread 驱动 <code>AnimatedImageDrawable</code> 的动画。 RenderThread 还使用工作线程进行解码&#xff0c;因此&#xff0c;解码不会干扰 RenderThread。 这种实现机制允许开发者的应用在使用动画图像时不必管理其更新&#xff0c;也不会干扰应用的界面线程。</p> 
+<p>        可使用新的 ImageDecoder 解码 <code>AnimagedImageDrawable</code>。 以下代码段演示如何使用 <code>ImageDecoder</code> 来解码<code>AnimatedImageDrawable</code>&#xff1a;</p> 
+<pre class="has"><code>Drawable d &#61; ImageDecoder.decodeDrawable(...);
+if (d instanceof AnimatedImageDrawable) {
+    ((AnimatedImageDrawable) d).start();   // Prior to start(), the first frame is displayed
+}
+</code></pre> 
+<p><code>        ImageDecoder</code> 有几种方法可用来进一步修改图像。 例如&#xff0c;开发者可以使用 setPostProcessor() 函数来修改图像的外观&#xff0c;例如应用圆形遮罩或圆角。</p> 
+<p>        Android P 新增对 High Dynamic Range (HDR) VP9 Profile 2 的内置支持&#xff0c;因此&#xff0c;现在开发者可以在支持 HDR 的设备上为用户提供来自 YouTube、Play Movies 和其他来源的采用 HDR 的影片。</p> 
+<p>        Android P 为平台增加了对 HEIF (heic) 图像编码的支持。 <code>MediaMuxer</code> 和 <code>MediaExtractor</code> 类中可支持 HEIF 静态图像示例 HEIF 改进了压缩&#xff0c;可节省存储空间和网络数据流量。 借助 Android P 设备上的平台支持&#xff0c;从后端服务器发送和使用 HEIF 图像轻而易举。 确保应用兼容这种便于共享和显示的数据格式后&#xff0c;尝试在应用中使用 HEIF 作为图像存储格式。 开发者可以使用 ImageDecoder 或 BitmapFactory 进行 jpeg 到 heicto 的转换&#xff0c;以通过 jpeg 获取位图&#xff0c;并且可以使用全新支持库 alpha 版中的 HeifWriter 编写来自 YUV 字节缓冲区、Surface 或 Bitmap 的 HEIF 静态图像。</p> 
+<p>        另外&#xff0c;Android P 还引入了 <code>MediaPlayer2</code>。 此播放器支持使用 <code>DataSourceDesc</code> 构建的播放列表。 要创建 <code>MediaPlayer2</code> 的实例&#xff0c;请使用 <code>MediaPlayer2.create()</code>。</p> 
+<p>        现在&#xff0c;还可通过 <code>AudioTrack</code>、<code>AudioRecord</code> 和 <code>MediaDrm</code> 类获取媒体指标。</p> 
+<p>        Android P 向 <code>MediaDRM</code> 类添加了新函数以获取指标、高带宽数字内容保护 (HDCP) 级别、安全级别和会话数&#xff0c;并对安全性级别和安全停止进行更多控制。 如需了解更多详情&#xff0c;请参阅 API 差异报告。</p> 
+<h2><strong>JobScheduler 中的数据成本敏感度</strong></h2> 
+<p>        Android P 中对 <code>JobScheduler</code> 进行了改进&#xff0c;使其可以更好地为用户处理网络相关的作业&#xff0c;从而与运营商独立提供的网络状态信号相协调。</p> 
+<p>        现在&#xff0c;作业可以声明其预估的数据大小、信号预提取&#xff0c;并指定具体的网络要求&#xff0c;而运营商可以报告网络<em>拥塞</em>或<em>无限流量</em>。 然后&#xff0c;<code>JobScheduler</code> 根据网络状态管理工作。 例如&#xff0c;当网络拥塞时&#xff0c;<code>JobScheduler</code> 可能会延迟较大的网络请求。 如果使用的是无限流量网络&#xff0c;则 <code>JobScheduler</code> 可运行预提取作业以提升用户体验&#xff08;例如预提取标题&#xff09;。</p> 
+<p>        添加作业时&#xff0c;确保使用 <code>setEstimatedNetworkBytes()</code>、<code>setIsPrefetch()</code> 和 <code>setRequiredNetwork()</code>&#xff08;如果适用&#xff09;&#xff0c;以帮助 <code>JobScheduler</code> 正确处理工作。 在执行作业时&#xff0c;请确保使用 <code>JobParameters.getNetwork()</code> 返回的 <code>Network</code> 对象。 否则&#xff0c;开发者将隐式使用设备的默认网络&#xff0c;其可能不符合开发者的要求&#xff0c;从而导致意外的流量消耗</p> 
+<h2><strong>Neural Networks API 1.1</strong></h2> 
+<p>        Android 8.1&#xff08;API 级别 27&#xff09;中引入了 Neural Networks API 以加快 Android 设备上机器学习的速度。 Android P 扩展并改进了该 API&#xff0c;从而增加了对 Pad、BatchToSpaceND、SpaceToBatchND、Transpose、Strided Slice、Mean、Div、Sub 和 Squeeze 九个新运算的支持。</p> 
+<h2><strong>自动填充框架</strong></h2> 
+<p>        Android 8.0&#xff08;API 级别 26&#xff09;引入了自动填充框架&#xff0c;简化了应用中的表单填写。 Android P 引入了多项改进&#xff0c;自动填充服务可以利用这些改进进一步增强用户填写表单时的体验。 如需了解更多详情&#xff0c;请参阅自动填充框架页面。</p> 
+<h2><strong>安全增强功能</strong></h2> 
+<p>        Android P 引入了许多新的安全功能&#xff0c;包括统一的指纹身份验证对话框和针对敏感交易的高可信度用户确认。 如需了解更多详情&#xff0c;请参阅安全性更新页面。</p> 
+<h2><strong>Android 备份的客户端加密</strong></h2> 
+<p>        Android P 支持使用客户端密钥加密 Android 备份。 由于此隐私措施&#xff0c;在从用户设备制作的备份恢复数据时&#xff0c;会要求提供设备的 PIN 码、图案或密码。 如需详细了解这项新功能背后的技术&#xff0c;请参阅 Google 云密钥保险柜服务白皮书。</p> 
+<h2><strong>无障碍功能</strong></h2> 
+<p>        Android P 引入一些操作、属性和函数&#xff0c;让开发者可以更轻松地使用无障碍功能框架&#xff0c;从而改善针对用户的无障碍服务。</p> 
+<h3><strong>导航语义</strong></h3> 
+<p>        Android P新增了一些属性&#xff0c;可用来改善从屏幕的某个部分导航到另一个部分的体验。 开发者可以使用这些属性来帮助用户在应用的文本内部移动并将用户快速导航至应用界面的某个区域。</p> 
+<p>        例如&#xff0c;在购物应用中&#xff0c;屏幕阅读器可以将用户直接从某个交易类别导航至下一个交易类别&#xff0c;而不必经过这些类别内部的每一项交易。</p> 
+<p><strong>无障碍功能窗格标题</strong></p> 
+<p>        在 Android P 之前&#xff0c;无障碍服务无法轻松确定屏幕的某个区域是否经过更新&#xff0c;例如在 Fragment 过渡期间。</p> 
+<p>        在 Android P 中&#xff0c;各个窗格区域的标题现在采用 <em>accessibility pane titles</em> 的格式。 无障碍服务可以收到这些标题的变更&#xff0c;从而能够提供关于所做变更的更精细信息。</p> 
+<p>        要指定某个区域的标题&#xff0c;请使用新的<code>android:accessibilityPaneTitle</code>属性。 开发者也可以更新开发者在运行时使用 <code>setAccessibilityPaneTitle()</code> 替换的某个界面区域的标题。 例如&#xff0c;开发者可以为某个<code>Fragment</code> 对象的内容区域提供标题。</p> 
+<p><strong>基于标题的导航</strong></p> 
+<p>        如果开发者的应用显示的内容包含具有逻辑含义的标题&#xff0c;则对于表示这些标题的<code>View</code>实例&#xff0c;将新的<code>android:accessibilityHeading</code>属性设置为 <code>true</code>。 这样&#xff0c;用户可以从一个标题导航至下一个标题。 在用户操作屏幕阅读器时&#xff0c;这种导航过程尤其方便。</p> 
+<p><strong>群组导航和输出</strong></p> 
+<p>        传统上&#xff0c;屏幕阅读器一直使用<code>android:focusable</code> 属性来确定应该将屏幕的哪些区域作为一个整体进行读取。 有时&#xff0c;这些屏幕阅读器需要将几个<code>View</code> 对象的内容视作一个整体。 这样&#xff0c;用户就可以了解&#xff0c;这些视图在逻辑上彼此相关。</p> 
+<p>        在 Android P 之前&#xff0c;开发者需要将每个内部<code>View</code> 对象标记为不可聚焦的对象并且将包含这些对象的群组标记为可聚焦。 这种安排导致<code>View</code> 的某些实例被标记为可聚焦&#xff0c;这使得键盘导航变得更为繁琐。</p> 
+<p>        在 Android P 中&#xff0c;在将 <code>View</code> 对象标记为可聚焦会造成不想要的负面作用时&#xff0c;开发者可以使用新的<code>android:screenReaderFocusable</code> 属性代替 <code>android:focusable</code> 属性。 屏幕阅读器应当聚焦在所有将 <code>android:screenReaderFocusable</code> 或 <code>android:focusable</code> 设置为 <code>true</code> 的元素上。</p> 
+<h3><strong>便捷操作</strong></h3> 
+<p>        Android P 新增了一些方便用户执行操作的支持功能&#xff1a;</p> 
+<p>        访问提示&#xff1a; 无障碍框架中的新功能让开发者可在应用界面中访问提示。 使用<code>getTooltipText()</code>读取提示文本&#xff0c;使用新的<code>ACTION_SHOW_TOOLTIP</code>和 <code>ACTION_HIDE_TOOLTIP</code>来指示 <code>View</code> 的实例显示或隐藏提示。</p> 
+<p>        新的全局操作&#xff1a; Android P 在<code>AccessibilityService</code>类中引入了对两个新设备操作的支持。 开发者的 Service 现在可以帮助用户分别使用<code>GLOBAL_ACTION_LOCK_SCREEN</code>和 <code>GLOBAL_ACTION_TAKE_SCREENSHOT</code>操作锁定其设备并进行屏幕截图。</p> 
+<h3><strong>窗口变更详情</strong></h3> 
+<p>        Android P 让开发者可以在应用同时重绘多个窗口时&#xff0c;更轻松地跟踪应用窗口的更新。 当发生<code>TYPE_WINDOWS_CHANGED</code>事件时&#xff0c;可使用<code>getWindowChanges()</code>API 来确定窗口发生的变更。 现在&#xff0c;在多窗口更新期间&#xff0c;每个窗口都会生成自己的一组事件。<code>getSource()</code>函数返回与每个事件相关联的窗口的根视图。</p> 
+<p>        如果应用已为其<code>View</code> 对象定义无障碍功能窗格标题&#xff0c;开发者的 Service 将可以识别应用界面何时进行更新。 当发生<code>TYPE_WINDOW_STATE_CHANGED</code>事件时&#xff0c;可使用<code>getContentChangeTypes()</code>所返回的新类型来确定窗口发生的变更。 例如&#xff0c;框架现在可以检测窗格何时有新标题或者窗格何时消失。</p> 
+<h2><strong>旋转</strong></h2> 
+<p>        为避免无意的旋转&#xff0c;Android P新增了一个模式&#xff0c;哪怕设备位置发生变化&#xff0c;也会固定在当前屏幕方向上。 必要时用户可以通过按系统栏上的一个新增按钮手动触发旋转。</p> 
+<p>        在大多数情况下&#xff0c;对应用的兼容性影响应该微不足道。 不过&#xff0c;如果开发者的应用有任何自定义旋转行为&#xff0c;或使用了任何机密的屏幕方向设置&#xff0c;则可能会遇到以前用户旋转首选项始终设置为纵向时被忽视的问题。 鼓励开发者审视一下开发者的应用所有关键 Activity 中的旋转行为&#xff0c;并确保开发者的所有屏幕方向设置仍可提供最佳体验。</p> 
+<p>   一个新的旋转模式允许用户在必要时利用系统栏上的一个按钮手动触发旋转。 </p> 
+<p><img alt="" class="has" src="https://mmbiz.qpic.cn/mmbiz_png/4JKSq9VBXbmaqpTmL7L10JNOmSWt7GjUia3u7p8J0XSEX5GMGXsicpSS2iaHQktcPkaQxryC2EcZyXK1PBguJskeg/640?tp&#61;webp&amp;wxfrom&#61;5&amp;wx_lazy&#61;1" /></p>
+                </div>
+        </div>
+ </article>
