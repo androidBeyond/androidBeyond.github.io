@@ -1,7 +1,7 @@
 ---
 layout:     post
-title:      Android基础探究之Thread学习
-subtitle:   Thread与runable的原理有什么不同，本篇文章试着剖析一下
+title:      Android基础探究之初探Thread
+subtitle:   对Thread的实现原理进行一番剖析
 date:       2019-01-02
 author:     duguma
 header-img: img/article-bg.jpg
