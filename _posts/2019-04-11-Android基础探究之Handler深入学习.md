@@ -13,7 +13,7 @@ tags:
 ---
 
 
- <p>Handler作为Android应用层开发&#xff0c;进程通信一大重点&#xff0c;可以说是使用最频繁的一个机制&#xff0c;不管是IntentService,ThreadHandler都绕不开它。本文详解Handler机制的内部源码</p> 
+ <p>Handler作为Android应用层开发&#xff0c;线程通信一大重点&#xff0c;可以说是使用最频繁的一个机制&#xff0c;不管是IntentService,ThreadHandler都绕不开它。本文详解Handler机制的内部源码</p> 
 
 
 <p><strong>带着以下几个问题我们来开始本篇文章</strong></p> 
@@ -521,6 +521,3 @@ tags:
     flags |&#61; FLAG_IN_USE;
 } 
 </code></pre> 
-<h2><a id="_582"></a>六、总结</h2> 
-<p>本文整理了对Handler源码的阅读总结&#xff0c;虽然东西很多也很繁琐&#xff0c;不过如果认真去看&#xff0c;是不是发现越深入就越有趣&#xff0c;也越发发现Android源码的严谨性。平常至少简单一用&#xff0c;只要深入了解才能更好地去使用它理解它&#xff0c;比如Message对象池的应用&#xff0c;这不就是享元模式吗&#xff0c;希望大家都能有所体悟。</p>
-  
