@@ -12,7 +12,7 @@ tags:
     - 组件学习
 --- 
 
-<h3><a id="_3"></a>概述</h3> 
+<h3><a id="_3"></a>前言</h3> 
 <p>对常用的Thread做一次源码剖析&#xff0c;更好的去理解和使用它&#xff0c;看完之后你会明白的几个问题&#xff1a;</p> 
 <ol><li>调用start发生了什么&#xff1f;多次调用start会怎么样&#xff1f;</li><li>start和run方法的区别</li><li>join和sleep的区别</li><li>什么是守护进程</li></ol> 
 <h3><a id="_12"></a>一、创建使用</h3> 
@@ -267,10 +267,6 @@ public State getState() {
 }
 </code></pre> 
 <ul><li><strong>NEW</strong>&#xff1a;线程创建还未启动时状态</li><li><strong>RUNNABLE</strong>&#xff1a;线程运行状态&#xff0c;包括一些系统资源等待&#xff0c;如&#xff1a;IO等待&#xff0c;CPU时间片切换等</li><li><strong>BLOCKED</strong>&#xff1a;正在等待monitor lock的状态&#xff0c;比如&#xff1a;1. 即将进入synchronized方法或者块前等待获取锁的这个临界时期状态。2.调用wait方法释放锁之后再次进入synchronized方法或者块前的临界状态</li><li><strong>WAITING</strong>&#xff1a;基于上个BLOCKED状态来说&#xff0c;WAITING就是拿到锁了&#xff0c;处于wait过程中的状态&#xff0c;<strong>注意它是特指无限期的等待</strong>&#xff0c;也就是join()或者wait()等,它是join或者直接wait方法当获取到lock执行后&#xff0c;处于等待notify的WAITING状态。</li><li><strong>TIMED_WAITING</strong>&#xff1a;与上面WAITING相对&#xff0c;WAITING是指无限期的等待&#xff0c;TIMED_WAITING就是有限期的等待状态&#xff0c;包括join(long),wait(long),sleep(long)等。</li><li><strong>TERMINATED</strong>&#xff1a;线程执行完成&#xff0c;run结束的状态<br /> <img src="https://i.imgur.com/GCevkZb.png" alt="" /></li></ul> 
-<h3><a id="_296"></a>五、总结&#xff1a;回答概述问题</h3> 
+<h3><a id="_296"></a>五、总结&#xff1a;</h3> 
 <ol><li>调用2次start时&#xff0c;看start源码中&#xff0c;里面判断如果当前线程状态和是否启动标记&#xff0c;<code>if (threadStatus !&#61; 0 || started)</code>&#xff0c;如果已经启动则抛出IllegalThreadStateException异常&#xff0c;可以通过继承Thread类或者实现Runnable去开启线程&#xff0c;这样每次new了新的对象启动线程</li><li>start是启动当前Thread线程&#xff0c;Thread实现了Runnable接口的run方法&#xff0c;当线程启动&#xff0c;run方法会被调用&#xff0c;Thread里面的Run会调用传入Runnable Target的run方法&#xff0c;达到实现我们自定义任务的目的。如果没有传入Runnable参数则do nothing</li><li>join是等待线程执行完成&#xff0c;方法通过内部一个while(alive)的循环函数去实现wait等待&#xff0c;alive是一直检测线程的存活状态&#xff0c;它相当于&#xff0c;在那个线程执行join&#xff0c;即在哪个线程执行wait,调用的线程对象可以理解为lock对象&#xff0c;即调用了lock.wait(), sleep方法是一直持有锁的状态&#xff0c;同时sleep是静态方法&#xff0c;它通过currentThread获取当前线程的lock&#xff0c;并只能作用当前线程</li><li>守护线程意思是后台服务线程&#xff0c;比如垃圾回收线程&#xff0c;要理解它就知道另一个用户线程&#xff0c;用户线程是维持程序运行状态&#xff0c;或者说jvm存活的线程&#xff0c;如果用户线程都跑完了&#xff0c;那么不管守护线程是否运行&#xff0c;程序和jvm都会退出&#xff0c;当然此时&#xff0c;守护线程也会退出&#xff0c;由此可以看出守护线程和用户线程对于程序运行的相关性。由上述线程的init方法可以看出&#xff0c;子线程的创建会继承一些默认参数&#xff0c;包含是否为守护线程&#xff0c;它是低级别的线程&#xff0c;不依赖于终端&#xff0c;但是依赖于系统&#xff0c;与系统“同生共死”。</li></ol>
-                </div>
-                <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/markdown_views-d7a94ec6ab.css" rel="stylesheet">
-                <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/style-49037e4d27.css" rel="stylesheet">
-        </div>
-    </article>
+               
