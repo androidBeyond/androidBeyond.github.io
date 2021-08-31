@@ -19,7 +19,7 @@ tags:
 <h4><a id="1__13"></a>1. 初始化</h4> 
 <blockquote> 
  <p>Thread构造函数</p> 
- <p>内部调用—&gt;init&#xff08;&#xff09;方法</p> 
+ <p>内部调用— init方法</p> 
 </blockquote> 
 <pre><code>java.lang.Thread#Thread()
 java.lang.Thread#Thread(java.lang.Runnable)
