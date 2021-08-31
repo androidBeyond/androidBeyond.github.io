@@ -217,7 +217,7 @@ throws InterruptedException {
 <ol><li>join里面调用的wait方法&#xff0c;wait方法可以释放锁&#xff0c;而sleep方法是持有锁</li><li>join&#xff08;0&#xff09;是一直等待线程执行完成&#xff0c;只有这个线程执行完后&#xff0c;才能执行其他线程&#xff0c;中间通过循环lock.wait(delay)实现&#xff0c;它是非静态方法&#xff0c;</li><li>sleep是静态方法&#xff0c;通过currentThread获取当前线程的lock&#xff0c;它只能作用当前线程</li></ol> 
 <h3><a id="Thread_224"></a>三、Thread终止</h3> 
 <h4><a id="1_stop_225"></a>1. stop方法</h4> 
-<p>stop方法以及被弃用&#xff0c;强行调用的话会抛出UnsupportedOperationException异常</p> 
+<p>stop方法已经被弃用&#xff0c;强行调用的话会抛出UnsupportedOperationException异常</p> 
 <pre><code> &#64;Deprecated
 public final void stop() {
     stop(new ThreadDeath());
