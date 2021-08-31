@@ -6,7 +6,7 @@ date:       2019-01-21
 author:     duguma
 header-img: img/article-bg.jpg
 top: false
-catalog: true
+no-catalog: true
 tags:
     - Android
     - 组件学习
@@ -118,8 +118,8 @@ tags:
 
     <span class="hljs-comment">//下一次查找失效key的起始位置</span>
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">int</span> clean;</code></pre> 
-<pre><code>由上面一些基础的定义我们知道&#xff0c;Values作为ThreadLocal的静态内部类&#xff0c;是真正意义上对数据进行存储、更新、及删除的类&#xff0c;内部使用数组对数据进行存储&#xff0c;存储结构为&#xff1a;key&#xff0c;value&#xff0c;key&#xff0c;value......
-</code></pre> 
+由上面一些基础的定义我们知道&#xff0c;Values作为ThreadLocal的静态内部类&#xff0c;是真正意义上对数据进行存储、更新、及删除的类&#xff0c;内部使用数组对数据进行存储&#xff0c;存储结构为&#xff1a;key&#xff0c;value&#xff0c;key&#xff0c;value......
+
 <p>5、Values的构造函数</p> 
 <pre class="prettyprint"><code class=" hljs cs"> <span class="hljs-comment">//普通构造函数</span>
     Values() {
@@ -189,9 +189,8 @@ tags:
             }
         }
     }</code></pre> 
-<pre><code>可以看到&#xff0c;put方法其实很简单&#xff0c;使用key的hash和table数组的长度减1进行&amp;运算&#xff0c;获取index&#xff0c;然后有则更新&#xff0c;无则添加&#xff0c;添加时则利用key的有效性及失效的key
+可以看到&#xff0c;put方法其实很简单&#xff0c;使用key的hash和table数组的长度减1进行&amp;运算&#xff0c;获取index&#xff0c;然后有则更新&#xff0c;无则添加&#xff0c;添加时则利用key的有效性及失效的key
 尽可能的节省空间。
-</code></pre> 
 <p>7、clearUp方法&#xff1a;将失效的key进行标记&#xff0c;释放它的值</p> 
 <pre class="prettyprint"><code class=" hljs axapta"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> cleanUp() {
         <span class="hljs-comment">//如果需要扩容&#xff0c;则直接返回&#xff0c;扩容的过程中对失效的地方进行了标记</span>
