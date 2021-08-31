@@ -12,32 +12,13 @@ tags:
     - 组件学习
 ---
 
-<article class="baidu_pl">
-        <div id="article_content" class="article_content clearfix">
-        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-1a85854398.css">
-                <div id="content_views" class="markdown_views prism-atom-one-dark">
-                    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-                        <path stroke-linecap="round" d="M5,0 0,2.5 5,5z" id="raphael-marker-block" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
-                    </svg>
-                    <blockquote> 
+
  <p>Handler作为Android应用层开发&#xff0c;进程通信一大重点&#xff0c;可以说是使用最频繁的一个机制&#xff0c;不管是IntentService,ThreadHandler都绕不开它。本文详解Handler机制的内部源码</p> 
-</blockquote> 
-<p><strong>深入剖析Handler&#xff0c;没有看错&#xff0c;比别人更深更精准&#xff01;</strong></p> 
-<p><strong>看本文可以回答你这几个问题&#xff1a;</strong></p> 
+
+
+<p><strong>带着以下几个问题我们来开始本篇文章</strong></p> 
 <ol><li> <p><em>UI线程的Looper在哪里创建&#xff1f;</em></p> </li><li> <p><em>MessageQueue真的是个队列吗&#xff1f;</em></p> </li><li> <p><em>延迟处理机制的原理&#xff1f;</em></p> </li><li> <p><em>Handler中的Message同步和MessageQueue同步&#xff1f;</em><br /> </p>
-  <div class="toc">
-   <h3>文章目录</h3>
-   <ul><li><ul><li><a href="#Handler_15">一、Handler介绍</a></li><li><a href="#Handler_21">二、Handler源码剖析</a></li><li><ul><li><ul><li><a href="#1_Handler_23">1. Handler构造函数&#xff1a;</a></li><li><a href="#2_LoopermQueue_63">2. 创建Looper对象和mQueue消息队列</a></li><li><a href="#3_sendMessage_65">3. sendMessage</a></li><li><a href="#4_removeMessages_112">4. removeMessages</a></li><li><a href="#5_postRunnable_r_115">5. post(Runnable r)</a></li><li><a href="#6_dispatchMessagehandlerMessage_129">6. dispatchMessage和handlerMessage</a></li></ul>
-     </li></ul>
-     </li><li><a href="#Looper_149">三、Looper源码剖析</a></li><li><ul><li><ul><li><a href="#1_myLooper_151">1. myLooper方法</a></li><li><a href="#2_Looperprepare_161">2. Looper.prepare()创建对象</a></li><li><a href="#3_UIHandlerLooper_183">3. UI线程调用Handler&#xff0c;Looper怎么创建</a></li><li><a href="#4_Looperloop_228">4. Looper.loop()</a></li></ul>
-     </li></ul>
-     </li><li><a href="#MessageQueue_308">四、MessageQueue源码剖析</a></li><li><ul><li><ul><li><a href="#1_enqueueMessage_310">1. enqueueMessage</a></li><li><a href="#2_next_364">2. next取出</a></li><li><a href="#3_quit_480">3. quit操作</a></li></ul>
-     </li></ul>
-     </li><li><a href="#Message_507">五、Message源码剖析</a></li><li><ul><li><ul><li><a href="#1_obtain_509">1. obtain()</a></li><li><a href="#2recycleUnchecked__531">2.recycleUnchecked 回收消息</a></li><li><a href="#3_Message_564">3. Message标签&#xff1a;是否使用&#xff0c;同步标签</a></li></ul>
-     </li></ul>
-     </li><li><a href="#_582">六、总结</a></li></ul>
-   </li></ul>
-  </div><p></p> </li></ol> 
+  
 <h2><a id="Handler_15"></a>一、Handler介绍</h2> 
 <p>Handler在Android os包下&#xff0c;当我们创建Handler时&#xff0c;它会绑定一个线程&#xff0c;并且创建一个消息队列&#xff0c;通过发送Message或者Runnable对象到队列并轮询取出&#xff0c;实现关联。<br /> 我们常用的Handler功能是&#xff0c;定时执行Runnable或者处理不同线程通信的问题&#xff0c;比如UI线程和子线程等。<br /> 由此可见Handler内部机制中的几大元素&#xff1a;Handler,Message,MessageQueue,Looper,ThreadLocal等&#xff0c;接下来&#xff0c;分别查看它的内部源码。<br /> <img src="https://i.imgur.com/GjFob24.png" alt="" /></p> 
 <h2><a id="Handler_21"></a>二、Handler源码剖析</h2> 
@@ -541,9 +522,5 @@ tags:
 } 
 </code></pre> 
 <h2><a id="_582"></a>六、总结</h2> 
-<p>废了小半天功夫&#xff0c;整理了对Handler源码的阅读总结&#xff0c;虽然东西很多也很繁琐&#xff0c;不过如果认真去看&#xff0c;是不是发现越深入就越有趣&#xff0c;也越发发现Android源码的严谨性。平常至少简单一用&#xff0c;只要深入了解才能更好地去使用它理解它&#xff0c;比如Message对象池的应用&#xff0c;这不就是享元模式吗&#xff0c;希望大家都能有所体悟。</p>
-                </div>
-                <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/markdown_views-d7a94ec6ab.css" rel="stylesheet">
-                <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/style-49037e4d27.css" rel="stylesheet">
-        </div>
-    </article>
+<p>本文整理了对Handler源码的阅读总结&#xff0c;虽然东西很多也很繁琐&#xff0c;不过如果认真去看&#xff0c;是不是发现越深入就越有趣&#xff0c;也越发发现Android源码的严谨性。平常至少简单一用&#xff0c;只要深入了解才能更好地去使用它理解它&#xff0c;比如Message对象池的应用&#xff0c;这不就是享元模式吗&#xff0c;希望大家都能有所体悟。</p>
+  
