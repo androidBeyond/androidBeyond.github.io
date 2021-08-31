@@ -392,8 +392,4 @@ loop方法内部先调用了myLooper方法&#xff1a;
 }</code></pre> 
 <p>很明显&#xff0c;Looper 的prepare方法先创建Looper&#xff0c;并使用ThreadLocal存储即与当前的线程进行关联&#xff0c;然后loop方法开启消息机制的时候&#xff0c;使用ThreadLocal方法获取到当前线程的Looper <br /> 方法。</p> 
 <p>结语&#xff1a;ThreadLocal是一种针对线程间数据副本不同的巧妙设计&#xff0c;开发者无需理会内部的复杂实现&#xff0c;只需在调用的时候使用get和set方法即可&#xff01;对外屏蔽了细节&#xff0c;是一种设计思想的体现&#xff0c;其内在table数组内存的利用和空间的扩展也值得我们学习。</p>
-                </div>
-                <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/markdown_views-d7a94ec6ab.css" rel="stylesheet">
-                <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/style-49037e4d27.css" rel="stylesheet">
-        </div>
-    </article>
+             
