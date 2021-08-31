@@ -9,14 +9,11 @@ top: false
 catalog: true
 tags:
     - Android
-    - 组件学习
+    - 基础学习
+    - 系统线程
 ---    
 
- <article class="baidu_pl">
-        <div id="article_content" class="article_content clearfix">
-        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-1a85854398.css">
-                <div id="content_views" class="htmledit_views">
-                    <p>最近面试被问了Thread与runable的原理有什么不同&#xff0c;本人当时回答的是没什么不同&#xff0c;都是开一个新线程而已&#xff0c;面试官也没有给我个正面反馈告诉我到底有什么不同&#xff0c;索性趁着这个热乎劲我就去深入剖析一下这个Thread。首先写一个例子看看Thread和runable分别是怎么用的。<a href="https://github.com/wk415190639/blog/commit/6bf974ab7ad418c69879f8aa794522a063cfaf53">&#xff08;查看源码&#xff09;</a></p> 
+   <p>最近面试被问了Thread与runable的原理有什么不同&#xff0c;本人当时回答的是没什么不同&#xff0c;都是开一个新线程而已&#xff0c;面试官也没有给我个正面反馈告诉我到底有什么不同&#xff0c;索性趁着这个热乎劲我就去深入剖析一下这个Thread。首先写一个例子看看Thread和runable分别是怎么用的。<a href="https://github.com/wk415190639/blog/commit/6bf974ab7ad418c69879f8aa794522a063cfaf53">&#xff08;查看源码&#xff09;</a></p> 
 <p>先添加一个Thread的子类&#xff0c;并重新run方法即可</p> 
 <pre class="has"><code class="language-java">package com.example.threaddemo;
 
@@ -490,6 +487,4 @@ void JavaThread::thread_main_inner() {
 }
 </code></pre> 
 <p>到这里就实现了在新线程内运行了run函数</p>
-                </div>
-        </div>
-    </article>
+ 
