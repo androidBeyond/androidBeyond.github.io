@@ -229,7 +229,6 @@ public final void stop(Throwable obj) {
 }
 </code></pre> 
 <h4><a id="2_interrupt_238"></a>2. interrupt方法</h4> 
-<p><strong>部分内容引用一篇很详细的文章&#xff0c;戳–&gt;</strong><a href="https://www.jianshu.com/p/1492434f2810" title="https://www.jianshu.com/p/1492434f2810">《Java线程源码解析之interrupt》</a></p> 
 <blockquote> 
  <ul><li> <p>interrupt的作用是中断线程&#xff0c;我们经常调用&#xff0c;interrupt的使用有几个注意点</p> </li><li> <p>当线程处于wait,sleep,join等方法阻塞状态时&#xff0c;它会清除当前阻塞状态&#xff0c;并抛出InterruptedException异常</p> </li><li> <p>在I/O通讯状态中调用interrupt&#xff0c;数据通道会被关闭&#xff0c;并将线程状态标记为中断&#xff0c;并抛出ClosedByInterruptException异常</p> </li><li> <p>如果在java.nio.channels.Selector上堵塞&#xff0c;会标记中断状态&#xff0c;并马上返回select方法</p> </li><li> <p>Lock.lock()方法不会响应中断&#xff0c;Lock.lockInterruptibly()方法则会响应中断并抛出异常&#xff0c;区别在于park()等待被唤醒时lock会继续执行park()来等待锁&#xff0c;而 lockInterruptibly会抛出异常</p> </li><li> <p>synchronized被唤醒后会尝试获取锁&#xff0c;失败则会通过循环继续park()等待&#xff0c;因此实际上是不会被interrupt()中断的;</p> </li><li> <p>一般情况下&#xff0c;抛出异常时&#xff0c;会清空Thread的interrupt状态&#xff0c;在编程时需要注意&#xff1b;</p> </li></ul> 
 </blockquote> 
