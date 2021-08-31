@@ -12,14 +12,8 @@ tags:
     - 组件学习
 ---   
 
-  <article class="baidu_pl">
-        <div id="article_content" class="article_content clearfix">
-        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-1a85854398.css">
-                <div id="content_views" class="markdown_views prism-github-gist">
-                    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-                        <path stroke-linecap="round" d="M5,0 0,2.5 5,5z" id="raphael-marker-block" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
-                    </svg>
-                    <h3><a id="_0"></a>前言</h3> 
+
+ <h3><a id="_0"></a>前言</h3> 
 <p>今天我们将使用AccessibilityService实现:</p> 
 <ol><li>监听第三方程序的界面变化&#xff08;监听第三方程序的启动的实现原理&#xff09;。</li><li>模拟点击第三方应用的按钮&#xff08;自动抢红包程序的实现原理&#xff09;。</li><li>监听第三方程序的点击事件。</li></ol> 
 <p>如果要测试的第三方应用不为自己的&#xff0c;则需要获取第三方应用的包名&#xff0c;当前Acvtivity等信息。可以参考&#xff1a;<br /> <a href="https://blog.csdn.net/DeMonliuhui/article/details/81563802">Android获取第三方程序的包名</a></p> 
@@ -254,14 +248,4 @@ tags:
 <h4><a id="_264"></a>效果</h4> 
 <p>运行监听程序&#xff0c;给与服务支持后&#xff0c;打开监听程序。<br /> 然后运行模拟程序&#xff0c;效果如下。</p> 
 <blockquote> 
- <p>监听到com.demon.simulationclick/.MainActivity-------模拟点击按钮-----监听到按钮被点击------从监听Service发出响应<br /> <img src="https://img-blog.csdn.net/20180813180236344?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0RlTW9ubGl1aHVp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA&#61;&#61;/dissolve/70" alt="这里写图片描述" /></p> 
-</blockquote> 
-<h3><a id="_271"></a>代码</h3> 
-<p><a href="https://github.com/MyAndroidDemo/ActivtyChange">https://github.com/MyAndroidDemo/ActivtyChange</a></p> 
-<h3><a id="_274"></a>参考</h3> 
-<p><a href="https://blog.csdn.net/c794904140/article/details/52153148">https://blog.csdn.net/c794904140/article/details/52153148</a></p>
-                </div>
-                <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/markdown_views-d7a94ec6ab.css" rel="stylesheet">
-                <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/style-49037e4d27.css" rel="stylesheet">
-        </div>
-    </article>
+ <p>监听到com.demon.simulationclick/.MainActivity-------模拟点击按钮-----监听到按钮被点击------从监听Service发出响应<br /> <img src="https://img-blog.csdn.net/20180813180236344?/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0RlTW9ubGl1aHVp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA&#61;&#61;/dissolve/70" alt="这里写图片描述" /></p> 
