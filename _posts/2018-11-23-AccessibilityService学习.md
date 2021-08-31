@@ -248,4 +248,5 @@ tags:
 <h4><a id="_264"></a>效果</h4> 
 <p>运行监听程序&#xff0c;给与服务支持后&#xff0c;打开监听程序。<br /> 然后运行模拟程序&#xff0c;效果如下。</p> 
 
- <p>监听到com.demon.simulationclick/.MainActivity-------模拟点击按钮-----监听到按钮被点击------从监听Service发出响应<br /> <img src="https://img-blog.csdn.net/20180813180236344?aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0RlTW9ubGl1aHVp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70" alt="这里写图片描述" /></p> 
+ <p>监听到com.demon.simulationclick/.MainActivity-------模拟点击按钮-----监听到按钮被点击------从监听Service发出响应<br /> 
+<imgsrc="https://img-blog.csdn.net/20180813180236344?aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0RlTW9ubGl1aHVp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70" /></p> 
