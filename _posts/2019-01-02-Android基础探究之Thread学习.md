@@ -6,7 +6,7 @@ date:       2019-01-02
 author:     duguma
 header-img: img/article-bg.jpg
 top: false
-catalog: true
+no-catalog: true
 tags:
     - Android
     - 基础学习
