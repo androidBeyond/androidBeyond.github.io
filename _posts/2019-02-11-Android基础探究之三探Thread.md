@@ -12,7 +12,7 @@ tags:
     - 组件学习
 --- 
 
-<p><strong>一、概念</strong></p> 
+<p><strong>一、前言</strong></p> 
 <p>ThreadLocal是一个线程内部的数据存储类&#xff0c;通过它可以在指定的线程中存储数据&#xff0c;数据存储以后&#xff0c;只有在指定的线程中才可以访问&#xff0c;其他线程则无法获取。</p> 
 <p><strong>二、使用场景</strong></p> 
 <p>1、当某些数据是以线程为作用域且不同线程之间具有不同数据副本的时候&#xff0c;就可以考虑使用ThreadLocal&#xff0c;例如Android中的Handler消息机制&#xff0c;Looper的作用域就是线程且不同线程之间具有不同的Looper&#xff0c;这里就使用的是ThreadLocal对Looper与线程进行关联&#xff0c;如果不使用ThreadLocal&#xff0c;那么系统就必须提供一个全局的哈希表供Handler <br /> 查找指定的线程的Looper&#xff0c;这肯定比ThreadLocal复杂多了。</p> 
