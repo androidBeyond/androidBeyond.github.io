@@ -12,29 +12,13 @@ tags:
     - 组件学习
 ---  
 
- <article class="baidu_pl">
-        <div id="article_content" class="article_content clearfix">
-        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-1a85854398.css">
-                <div id="content_views" class="markdown_views prism-atom-one-dark">
-                    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-                        <path stroke-linecap="round" d="M5,0 0,2.5 5,5z" id="raphael-marker-block" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
-                    </svg>
-                    <blockquote> 
+
  <p>HandlerThread作为子线程管理常用类&#xff0c;他自带封装的Looper处理Message&#xff0c;可以说是十分实用。子线程调度任务&#xff0c;方便我们在子线程中做更多的花样。</p> 
-</blockquote> 
-<p></p>
-<div class="toc">
- <h3>文章目录</h3>
- <ul><li><ul><li><ul><li><a href="#_4">介绍&#xff1a;</a></li><li><a href="#HandlerThread_13">HandlerThread用法</a></li><li><ul><li><a href="#1_14">1.创建使用</a></li><li><a href="#2_47">2.测试</a></li><li><a href="#3_90">3.退出</a></li></ul>
-    </li><li><a href="#HandlerThread_99">HandlerThread源码分析</a></li><li><ul><li><a href="#1__102">1. 构造函数中指定线程等级</a></li><li><a href="#2_Runlooper_118">2. Run方法中初始化looper</a></li><li><a href="#3_getLooper_141">3. getLooper获取当前线程的轮询器</a></li><li><a href="#4_HandlerLooper_quitMessageQueue_161">4. 退出轮询&#xff0c;还记得Handler源码剖析里说的&#xff0c;Looper quit时会清理MessageQueue里面所有的消息</a></li></ul>
-   </li></ul>
-  </li></ul>
- </li></ul>
-</div>
-<p></p> 
+
+
 <h3><a id="_4"></a>介绍&#xff1a;</h3> 
-<p>HandlerThread内部实现很简单&#xff0c;主要用在需要进行子线程调度任务的时候创建&#xff0c;但是想要完善熟悉原理&#xff0c;你必须熟悉Handler的内部原理实现。请看我的文章&#xff1a;<a href="https://blog.csdn.net/sslinp/article/details/84451313" title="https://blog.csdn.net/sslinp/article/details/84451313">【Android源码篇】 最详细的AsyncTask源码剖析</a></p> 
-<p><strong>看完本文你会知道&#xff1a;</strong></p> 
+<p>HandlerThread内部实现很简单&#xff0c;主要用在需要进行子线程调度任务的时候创建&#xff0c;但是想要完善熟悉原理&#xff0c;你必须熟悉Handler的内部原理实现。
+
 <ol><li> <p>HandlerThread的用法</p> </li><li> <p>HandlerThread内部原理</p> </li></ol> 
 <h3><a id="HandlerThread_13"></a>HandlerThread用法</h3> 
 <h4><a id="1_14"></a>1.创建使用</h4> 
