@@ -13,8 +13,8 @@ tags:
     - 系统线程
 ---    
 
-   <p>最近面试被问了Thread与runable的原理有什么不同&#xff0c;本人当时回答的是没什么不同&#xff0c;都是开一个新线程而已&#xff0c;面试官也没有给我个正面反馈告诉我到底有什么不同&#xff0c;索性趁着这个热乎劲我就去深入剖析一下这个Thread。首先写一个例子看看Thread和runable分别是怎么用的。<a href="https://github.com/wk415190639/blog/commit/6bf974ab7ad418c69879f8aa794522a063cfaf53">&#xff08;查看源码&#xff09;</a></p> 
-<p>先添加一个Thread的子类&#xff0c;并重新run方法即可</p> 
+   <p>Thread与runable的原理有什么不同，本篇文章试着剖析一下，首先写一个例子看看Thread和runable分别是怎么用的。</p> 
+<p>先添加一个Thread的子类&#xff0c;并重写run方法即可</p> 
 <pre class="has"><code class="language-java">package com.example.threaddemo;
 
 import android.util.Log;
@@ -68,7 +68,7 @@ public class RunnableImpl implements Runnable,TAG {
         new Thread(new RunnableImpl(&#34;createThreadWay2&#34;)).start();
     }
 </code></pre> 
-<p>然后点击运行就可以了&#xff0c;实现非常简单&#xff0c;下面就先来看一下Thread是如何在调用start()之后让run()方法运行在新创建的线程里的&#xff0c;这个过程需要jdk源码的协助&#xff0c;这次的学习是基于openjdk8的版本,我下载了一份放到了github上&#xff08;<a href="https://github.com/wk415190639/openJdk8">点这里去下载</a>&#xff09;&#xff0c;接下来就从start()入手</p> 
+<p>然后点击运行就可以了&#xff0c;实现非常简单&#xff0c;下面就先来看一下Thread是如何在调用start()之后让run()方法运行在新创建的线程里的&#xff0c;这个过程需要jdk源码的协助&#xff0c;这次的学习是基于openjdk8的版本，接下来就从start()入手</p> 
 <pre class="has"><code class="language-java">  public synchronized void start() {
   
         
