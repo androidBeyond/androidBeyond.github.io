@@ -249,4 +249,4 @@ tags:
 <p>运行监听程序&#xff0c;给与服务支持后&#xff0c;打开监听程序。<br /> 然后运行模拟程序&#xff0c;效果如下。</p> 
 
  <p>监听到com.demon.simulationclick/.MainActivity-------模拟点击按钮-----监听到按钮被点击------从监听Service发出响应<br /> 
-<imgsrc="https://img-blog.csdn.net/20180813180236344?aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0RlTW9ubGl1aHVp/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70" /></p> 
+<img src="https://img-blog.csdnimg.cn/e3cd8acf7dec4d6cb10d5c3324fbe4e1.png" /></p> 
