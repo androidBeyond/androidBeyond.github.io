@@ -16,7 +16,7 @@ tags:
  <p>HandlerThread作为子线程管理常用类&#xff0c;他自带封装的Looper处理Message&#xff0c;可以说是十分实用。子线程调度任务&#xff0c;方便我们在子线程中做更多的花样。</p> 
 
 
-<h3><a id="_4"></a>介绍&#xff1a;</h3> 
+<h3><a id="_4"></a>前言</h3> 
 <p>HandlerThread内部实现很简单&#xff0c;主要用在需要进行子线程调度任务的时候创建&#xff0c;但是想要完善熟悉原理&#xff0c;你必须熟悉Handler的内部原理实现。
 
 <ol><li> <p>HandlerThread的用法</p> </li><li> <p>HandlerThread内部原理</p> </li></ol> 
