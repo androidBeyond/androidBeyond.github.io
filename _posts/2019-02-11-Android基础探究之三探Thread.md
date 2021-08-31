@@ -52,8 +52,8 @@ tags:
     }
 }</code></pre> 
 <p>执行结果&#xff1a;</p> 
-<pre class="prettyprint"><code class=" hljs avrasm"><span class="hljs-number">07</span>-<span class="hljs-number">05</span> <span class="hljs-number">10</span>:<span class="hljs-number">57</span>:<span class="hljs-number">02.995</span> <span class="hljs-number">15966</span>-<span class="hljs-number">15992</span>/android_p<span class="hljs-preprocessor">.lbjfan</span><span class="hljs-preprocessor">.cm</span><span class="hljs-preprocessor">.memoryanalysedemo</span> I/ThreadLocal子线程: false
-<span class="hljs-number">07</span>-<span class="hljs-number">05</span> <span class="hljs-number">10</span>:<span class="hljs-number">57</span>:<span class="hljs-number">05.995</span> <span class="hljs-number">15966</span>-<span class="hljs-number">15966</span>/android_p<span class="hljs-preprocessor">.lbjfan</span><span class="hljs-preprocessor">.cm</span><span class="hljs-preprocessor">.memoryanalysedemo</span> I/ThreadLocal主线程: true</code></pre> 
+<pre class="prettyprint"><code class=" hljs avrasm"><span class="hljs-number">07</span>-<span class="hljs-number">05</span> <span class="hljs-number">10</span>:<span class="hljs-number">57</span>:<span class="hljs-number">02.995</span> <span class="hljs-number">15966</span>-<span class="hljs-number">15992</span>/android_p<span class="hljs-preprocessor">.zhh</span><span class="hljs-preprocessor">.cm</span><span class="hljs-preprocessor">.memoryanalysedemo</span> I/ThreadLocal子线程: false
+<span class="hljs-number">07</span>-<span class="hljs-number">05</span> <span class="hljs-number">10</span>:<span class="hljs-number">57</span>:<span class="hljs-number">05.995</span> <span class="hljs-number">15966</span>-<span class="hljs-number">15966</span>/android_p<span class="hljs-preprocessor">.zhh</span><span class="hljs-preprocessor">.cm</span><span class="hljs-preprocessor">.memoryanalysedemo</span> I/ThreadLocal主线程: true</code></pre> 
 <p>结论&#xff1a;ThreadLocal在当前线程操作数据只对当前线程有效</p> 
 <p><strong>三、源码分析</strong></p> 
 <p>1、构造方法</p> 
