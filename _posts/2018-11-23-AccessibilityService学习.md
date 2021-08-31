@@ -1,7 +1,7 @@
 ---
 layout:     post
 title:      AccessibilityService学习
-subtitle:   项目中要用到AccessibilityService在此学习记录一下
+subtitle:   AccessibilityService学习记录
 date:       2018-11-23
 author:     duguma
 header-img: img/article-bg.jpg
@@ -16,7 +16,7 @@ tags:
  <h3><a id="_0"></a>前言</h3> 
 <p>今天我们将使用AccessibilityService实现:</p> 
 <ol><li>监听第三方程序的界面变化&#xff08;监听第三方程序的启动的实现原理&#xff09;。</li><li>模拟点击第三方应用的按钮&#xff08;自动抢红包程序的实现原理&#xff09;。</li><li>监听第三方程序的点击事件。</li></ol> 
-<p>如果要测试的第三方应用不为自己的&#xff0c;则需要获取第三方应用的包名&#xff0c;当前Acvtivity等信息。可以参考&#xff1a;<br /> <a href="https://blog.csdn.net/DeMonliuhui/article/details/81563802">Android获取第三方程序的包名</a></p> 
+
 <h3><a id="_10"></a>模拟程序</h3> 
 <p>我们先写一个模拟程序&#xff0c;该模拟程序只有一个按钮用于模拟点击事件。</p> 
 <pre><code class="prism language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">MainActivity</span> <span class="token keyword">extends</span> <span class="token class-name">AppCompatActivity</span> <span class="token punctuation">{<!-- --></span>
