@@ -12,11 +12,8 @@ tags:
     - 组件学习
 ---
 
-<article class="baidu_pl">
-        <div id="article_content" class="article_content clearfix">
-        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-1a85854398.css">
-                <div id="content_views" class="htmledit_views">
-                    <p>        最近用到了Adapter,以前只是知道怎么用&#xff0c;从没去研究他的原理&#xff0c;这次就想以baseadapter为例研究一下其原理&#xff0c;从设计模式角度看Android在adapter这块用到了典型的适配器模式&#xff0c;那就从这个点开始&#xff0c;看看他是怎样的一个适配器。一般我们会这样设置一个ListView的适配器</p> 
+
+ <p>最近用到了Adapter,以前只是知道怎么用&#xff0c;从没去研究他的原理&#xff0c;这次就想以baseadapter为例研究一下其原理&#xff0c;从设计模式角度看Android在adapter这块用到了典型的适配器模式和观察者模式&#xff0c;那就从这个点开始&#xff0c;看看他是怎样的一个适配器。一般我们会这样设置一个ListView的适配器</p> 
 <p></p> 
 <pre><code class="language-html"> list.setAdapter(adapter);</code></pre>从这里开始&#xff0c;就开始adapter的神奇探索之旅 
 <p></p> 
@@ -443,12 +440,4 @@ void measure(int widthMeasureSpec, int heightMeasureSpec)中的final意味着这
             onDrawForeground(canvas);
             return;
         }
-</code></pre><br />
-<br />
-<p></p>
-<br />
-<br />
-</pre></pre>
-                </div>
-        </div>
-    </article>
+</code></pre>
