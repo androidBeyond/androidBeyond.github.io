@@ -12,14 +12,7 @@ tags:
     - framework
 ---
 
-<article class="baidu_pl">
-        <div id="article_content" class="article_content clearfix">
-        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-1a85854398.css">
-                <div id="content_views" class="markdown_views prism-atom-one-dark">
-                    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-                        <path stroke-linecap="round" d="M5,0 0,2.5 5,5z" id="raphael-marker-block" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
-                    </svg>
-                    <h2 id="1-selinux-背景知识">1. SELinux 背景知识</h2> 
+ <h2 id="">1. SELinux 背景知识</h2> 
 <p>详细了解 SELinux 可以参阅 <a href="https://source.android.com/security/selinux/images/SELinux_Treble.pdf">Google 官方文档</a></p> 
 <h3 id="11-dac-与-mac">1.1 DAC 与 MAC</h3> 
 <p>在 SELinux 出现之前&#xff0c;Linux 上的安全模型叫 DAC&#xff0c;全称是 Discretionary Access Control&#xff0c;翻译为自主访问控制。</p> 
@@ -429,9 +422,4 @@ int main(int argc, char** argv) {
     sehandle &#61; selinux_android_file_context_handle();
     selinux_android_set_sehandle(sehandle);
     sehandle_prop &#61; selinux_android_prop_context_handle();
-}</code></pre>
-                </div>
-                <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/markdown_views-d7a94ec6ab.css" rel="stylesheet">
-                <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/style-49037e4d27.css" rel="stylesheet">
-        </div>
-    </article>
+}</code></pre>               
