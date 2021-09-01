@@ -20,7 +20,6 @@ tags:
                         <path stroke-linecap="round" d="M5,0 0,2.5 5,5z" id="raphael-marker-block" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
                     </svg>
                     <h2 id="1-selinux-背景知识">1. SELinux 背景知识</h2> 
-<p>详细了解 Android 8.0 SELinux&#xff0c;可以参阅 <a href="https://source.android.com/security/selinux/images/SELinux_Treble.pdf">Google 官方文档</a></p> 
 <h3 id="11-dac-与-mac">1.1 DAC 与 MAC</h3> 
 <p>在 SELinux 出现之前&#xff0c;Linux 上的安全模型叫 DAC&#xff0c;全称是 Discretionary Access Control&#xff0c;翻译为自主访问控制。</p> 
 <p>DAC 的核心思想很简单&#xff0c;就是&#xff1a;进程理论上所拥有的权限与执行它的用户的权限相同。比如&#xff0c;以 root 用户启动 Browser&#xff0c;那么 Browser 就有 root 用户的权限&#xff0c;在 Linux 系统上能干任何事情。</p> 
@@ -70,7 +69,7 @@ tags:
 <span class="hljs-tag">allow</span> <span class="hljs-tag">appdomain</span> <span class="hljs-tag">app_data_file</span><span class="hljs-pseudo">:file</span> <span class="hljs-tag">rw_file_perms</span>;
 
 这表示所有应用域都可以读取和写入带有 <span class="hljs-tag">app_data_file</span> 标签的文件</code></pre> 
-<h5 id="相关实例">—&gt; 相关实例</h5> 
+<h5 id="相关实例">相关实例</h5> 
 <pre class="prettyprint"><code class=" hljs bash"><span class="hljs-number">1</span>. SEAndroid 中的安全策略文件 policy.conf
 <span class="hljs-comment"># 允许 zygote 域中的进程向 init 域中的进程&#xff08;Object Class 为 process&#xff09;发送 sigchld 信号</span>
 
@@ -257,10 +256,10 @@ init_options &#43;&#61; \
 <h5 id="packagemanagerservice-installed-app-数据目录的安全上下文">PackageManagerService &amp; installed —— app 数据目录的安全上下文</h5> 
 <p>PackageManagerService 在启动的时候&#xff0c;会找到我们前面分析的 mac_permissions.xml 文件&#xff0c;然后对它进行解析&#xff0c;得到 App 签名或者包名与 seinfo 的对应关系。当 PackageManagerService 安装 App 的时候&#xff0c;它就会根据其签名或者包名查找到对应的 seinfo&#xff0c;并且将这个 seinfo 传递给另外一个守护进程 installed。</p> 
 <p>守护进程 installd 负责创建 App 数据目录。在创建 App 数据目录的时候&#xff0c;需要给它设置安全上下文&#xff0c;使得 SEAndroid 安全机制可以对它进行安全访问控制。Installd 根据 PackageManagerService 传递过来的 seinfo&#xff0c;并且调用 libselinux 库提供的 selabel_lookup 函数到前面我们分析的 seapp_contexts 文件中查找到对应的 Type。有了这个 Type 之后&#xff0c;installd 就可以给正在安装的 App 的数据目录设置安全上下文了&#xff0c;这是通过调用 libselinux 库提供的 lsetfilecon 函数来实现的。</p> 
-<h5 id="zygote-设置进程的安全上下文">Zygote —— 设置进程的安全上下文</h5> 
+<h5 id="zygote-设置进程的安全上下文">Zygote 设置进程的安全上下文</h5> 
 <p>在 Android 系统中&#xff0c;Zygote 进程负责创建应用程序进程。应用程序进程是 SEAndroid 安全机制中的主体&#xff0c;因此它们也需要设置安全上下文&#xff0c;这是由 Zygote 进程来设置的。</p> 
 <p>ActivityManagerService 在请求 Zygote 进程创建应用程序进程之前&#xff0c;会到 PackageManagerService 中去查询对应的 seinfo&#xff0c;并且将这个 seinfo 传递到 Zygote 进程。于是&#xff0c;Zygote 进程在 fork 一个应用程序进程之后&#xff0c;就会使用 ActivityManagerService 传递过来的 seinfo&#xff0c;并且调用 libselinux 库提供的 selabel_lookup 函数到前面我们分析的 seapp_contexts 文件中查找到对应的 Domain。有了这个 Domain 之后&#xff0c;Zygote 进程就可以给刚才创建的应用程序进程设置安全上下文了&#xff0c;这是通过调用 libselinux 库提供的 lsetcon 函数来实现的。</p> 
-<h5 id="init-系统属性的安全上下文">init —— 系统属性的安全上下文</h5> 
+<h5 id="init-系统属性的安全上下文">init 系统属性的安全上下文</h5> 
 <p>init 进程在启动的时候会创建一块内存区域来维护系统中的属性&#xff0c;接着还会创建一个 Property 服务系统&#xff0c;这个服务系统通过 socket 提供接口给其他进程访问 android 系统中的属性。</p> 
 <p>其他进程通过 socket 和属性系统通信请求访问某项系统属性的值&#xff0c;属性服务系统可以通过 libselinux 库提供的 selabel_lookup 函数到前面我们分析的 property_contexts 中查找要访问的属性的安全上下文了。有了该进程的安全上下文和要访问属性的安全上下文之后&#xff0c;属性系统就能决定是否允许一个进程访问它所指定的服务了。</p> 
 <h2 id="4-seandroid-源码分析">4. SEAndroid 源码分析</h2> 
