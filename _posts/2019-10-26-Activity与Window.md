@@ -14,7 +14,6 @@ tags:
 
 <h2><a id="_15"></a>概述</h2> 
 <p>我们知道 Activity 启动后就可以看到我们写的 Layout 布局界面&#xff0c;Activity 从 setContentView() 到显示中间做了什么呢&#xff1f;下面我们就来分析下这个过程。</p> 
-<p>如不了解 Activity 的启动过程请参阅&#xff1a;<a href="https://github.com/jeanboydev/Android-ReadTheFuckingSourceCode/blob/master/article/android/framework/Android-Activity%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B.md">Activity 启动过程</a></p> 
 <p>本文主要对于以下问题进行分析&#xff1a;</p> 
 <ul><li>Window 是什么&#xff1f;</li><li>Activity 与 PhoneWindow 与 DecorView 之间什么关系&#xff1f;</li></ul> 
 <h2><a id="onCreate__Window__26"></a>onCreate() - Window 创建过程</h2> 
