@@ -300,7 +300,6 @@ public void setView(View view, WindowManager.LayoutParams attrs, View panelParen
     ...
 }
 </code></pre> 
-<p>创建 Surface 的过程详见&#xff1a;<a href="https://github.com/jeanboydev/Android-ReadTheFuckingSourceCode/blob/master/article/android/framework/Android-SurfaceFlinger%E5%9B%BE%E5%BD%A2%E7%B3%BB%E7%BB%9F.md">SurfaceFlinger 图形系统</a></p> 
 <p>Activity 中 Window 创建过程&#xff1a;</p> 
 <p><img src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy5ibG9nLmNzZG4ubmV0LzIwMTgwMzAxMTAyMzE3ODMx" alt="这里写图片描述" /></p> 
 <h2><a id="_358"></a>总结</h2> 
