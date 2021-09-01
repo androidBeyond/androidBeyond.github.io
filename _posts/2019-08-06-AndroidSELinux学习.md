@@ -147,8 +147,8 @@ init_options &#43;&#61; \
 <p>SEAndroid 安全机制所要保护的对象是系统中的资源&#xff0c;这些资源分布在各个子系统中&#xff0c;例如我们经常接触的文件就是分布文件子系统中的。实际上&#xff0c;系统中需要保护的资源非常多&#xff0c;除了前面说的文件之外&#xff0c;还有进程、socket 和 IPC 等等。对于 Android 系统来说&#xff0c;由于使用了与传统 Linux 系统不一样的用户空间运行时&#xff0c;即应用程序运行时框架&#xff0c;因此它在用户空间有一些特有的资源是需要特别保护的&#xff0c;例如系统属性的设置等。</p> 
 <h3 id="31-seandroid-框架流程">3.1 SEAndroid 框架流程</h3> 
 <p>SEAndroid 安全机制的整体框架&#xff0c;可以使用下图来概括&#xff1a;</p> 
-<p><img src="https://gitee.com/kevin1993175/image_resource/raw/master/SEAndroid_logic.png" alt="SEAndroid_frame" title="" /></p> 
-<p>以 SELinux 文件系统接口问边界&#xff0c;SEAndroid 安全机制包含内核空间和用户空间两部分支持。</p> 
+<p><img src="https://img-blog.csdnimg.cn/630b3ecb5dea439d89df4396b3ecd502.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_14,color_FFFFFF,t_70,g_se,x_16" alt="SEAndroid_frame" title="" /></p> 
+<p>以 SELinux 文件系统接口为边界&#xff0c;SEAndroid 安全机制包含内核空间和用户空间两部分支持。</p> 
 <p>这些内核空间模块与用户空间模块空间的作用及交互有&#xff1a;</p> 
 <pre class="prettyprint"><code class=" hljs markdown"><span class="hljs-bullet">1. </span>内核空间的 SELinux LSM 模块负责内核资源的安全访问控制
 <span class="hljs-bullet">2. </span>用户空间的 SEAndroid Policy 描述的是资源安全访问策略。
@@ -165,7 +165,7 @@ init_options &#43;&#61; \
 <h4 id="311-内核空间">3.1.1 内核空间</h4> 
 <ol><li>在内核空间&#xff0c;存在一个 SELinux LSM&#xff08;Linux Secrity Moudle&#xff09;模块&#xff0c;&#xff08;用 MAC 强制访问控制&#xff09;负责资源的安全访问控制。</li><li>LSM 模块中包含一个访问向量缓冲&#xff08;Access Vector Cache&#xff09;和一个安全服务&#xff08;Security Server&#xff09;。Security Server 负责安全访问控制逻辑&#xff0c;即由它来决定一个主体访问一个客体是否是合法的&#xff0c;这个主体一般是指进程&#xff0c;而客体主要指资源&#xff0c;例如文件。</li><li>SELinux、LSM 和内核中的子系统是如何交互的呢&#xff1f;首先&#xff0c;SELinux 会在 LSM 中注册相应的回调函数。其次&#xff0c;LSM 会在相应的内核对象子系统中会加入一些 Hook 代码。例如&#xff0c;我们调用系统接口 read 函数来读取一个文件的时候&#xff0c;就会进入到内核的文件子系统中。在文件子系统中负责读取文件函数 vfs_read 就会调用 LSM 加入的 Hook 代码。这些 Hook 代码就会调用之前 SELinux 注册进来的回调函数&#xff0c;以便后者可以进行安全检查。</li><li>SELinux 在进行安全检查的时候&#xff0c;首先是看一下自己的 Access Vector Cache 是否已经有结果。如果有的话&#xff0c;就直接将结果返回给相应的内核子系统就可以了。如果没有的话&#xff0c;就需要到 Security Server 中去进行检查。检查出来的结果在返回给相应的内核子系统的同时&#xff0c;也会保存在自己的 Access Vector Cache 中&#xff0c;以便下次可以快速地得到检查结果</li></ol> 
 <p>上面概述的安全访问控制流程&#xff0c;可以使用下图来总结&#xff1a;</p> 
-<p><img src="https://gitee.com/kevin1993175/image_resource/raw/master/SELinux_check_logic.png" alt="SELinux_check_logic" title="" /></p> 
+<p><img src="https://img-blog.csdnimg.cn/54152c681ef147b68328e7bcf949eff6.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_12,color_FFFFFF,t_70,g_se,x_16" alt="SELinux_check_logic" title="" /></p> 
 <pre class="prettyprint"><code class=" hljs markdown"><span class="hljs-bullet">1. </span>一般性错误检查&#xff0c;例如访问的对象是否存在、访问参数是否正确等
 <span class="hljs-bullet">2. </span>DAC 检查&#xff0c;即基于 Linux UID/GID 的安全检查
 <span class="hljs-bullet">3. </span>SELinux 检查&#xff0c;即基于安全上下文和安全策略的安全检查</code></pre> 
