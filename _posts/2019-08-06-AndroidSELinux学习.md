@@ -20,6 +20,7 @@ tags:
                         <path stroke-linecap="round" d="M5,0 0,2.5 5,5z" id="raphael-marker-block" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
                     </svg>
                     <h2 id="1-selinux-背景知识">1. SELinux 背景知识</h2> 
+<p>详细了解 SELinux 可以参阅 <a href="https://source.android.com/security/selinux/images/SELinux_Treble.pdf">Google 官方文档</a></p> 
 <h3 id="11-dac-与-mac">1.1 DAC 与 MAC</h3> 
 <p>在 SELinux 出现之前&#xff0c;Linux 上的安全模型叫 DAC&#xff0c;全称是 Discretionary Access Control&#xff0c;翻译为自主访问控制。</p> 
 <p>DAC 的核心思想很简单&#xff0c;就是&#xff1a;进程理论上所拥有的权限与执行它的用户的权限相同。比如&#xff0c;以 root 用户启动 Browser&#xff0c;那么 Browser 就有 root 用户的权限&#xff0c;在 Linux 系统上能干任何事情。</p> 
