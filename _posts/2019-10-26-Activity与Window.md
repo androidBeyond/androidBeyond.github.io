@@ -12,16 +12,6 @@ tags:
     - 系统组件
 ---  
 
- <article class="baidu_pl">
-        <div id="article_content" class="article_content clearfix">
-        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-1a85854398.css">
-                <div id="content_views" class="markdown_views prism-dracula">
-                    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-                        <path stroke-linecap="round" d="M5,0 0,2.5 5,5z" id="raphael-marker-block" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
-                    </svg>
-                    <h1><a id="Android__Activity__Window__View__0"></a>Android - Activity 与 Window 与 View 之间的关系</h1> 
-<h2><a id="_3"></a>相关系列</h2> 
-<ul><li><a href="https://blog.csdn.net/freekiteyu/article/details/79175010">一篇文章看明白 Android 系统启动时都干了什么</a></li><li><a href="https://blog.csdn.net/freekiteyu/article/details/70082302">一篇文章了解相见恨晚的 Android Binder 进程间通讯机制</a></li><li><a href="https://blog.csdn.net/freekiteyu/article/details/79318031">一篇文章看明白 Android 从点击应用图标到界面显示的过程</a></li><li><a href="https://blog.csdn.net/freekiteyu/article/details/79408969">一篇文章看明白 Activity 与 Window 与 View 之间的关系</a></li><li><a href="https://blog.csdn.net/freekiteyu/article/details/79483406">一篇文章看明白 Android 图形系统 Surface 与 SurfaceFlinger 之间的关系</a></li><li><a href="https://blog.csdn.net/freekiteyu/article/details/79785720">一篇文章看明白 Android Service 启动过程</a></li><li><a href="https://blog.csdn.net/freekiteyu/article/details/82774947">一篇文章看明白 Android PackageManagerService 工作流程</a></li><li><a href="https://blog.csdn.net/freekiteyu/article/details/84849651">一篇文章看明白 Android v1 &amp; v2 签名机制</a></li></ul> 
 <h2><a id="_15"></a>概述</h2> 
 <p>我们知道 Activity 启动后就可以看到我们写的 Layout 布局界面&#xff0c;Activity 从 setContentView() 到显示中间做了什么呢&#xff1f;下面我们就来分析下这个过程。</p> 
 <p>如不了解 Activity 的启动过程请参阅&#xff1a;<a href="https://github.com/jeanboydev/Android-ReadTheFuckingSourceCode/blob/master/article/android/framework/Android-Activity%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B.md">Activity 启动过程</a></p> 
@@ -319,21 +309,3 @@ public void setView(View view, WindowManager.LayoutParams attrs, View panelParen
 <p>Window 是 Android 中窗口的宏观定义&#xff0c;主要是管理 View 的创建&#xff0c;以及与 ViewRootImpl 的交互&#xff0c;将 Activity 与 View 解耦。</p> 
 <ul><li>Activity 与 PhoneWindow 与 DecorView 之间什么关系&#xff1f;</li></ul> 
 <p>一个 Activity 对应一个 Window 也就是 PhoneWindow&#xff0c;一个 PhoneWindow 持有一个 DecorView 的实例&#xff0c;DecorView 本身是一个 FrameLayout。</p> 
-<h2><a id="_368"></a>参考资料</h2> 
-<ul><li><a href="http://gityuan.com/2017/01/22/start-activity-wms/">以Window视角来看startActivity</a></li><li><a href="https://silencedut.github.io/2016/08/10/Android%E8%A7%86%E5%9B%BE%E6%A1%86%E6%9E%B6Activity,Window,View,ViewRootImpl%E7%90%86%E8%A7%A3">Android视图框架Activity,Window,View,ViewRootImpl理解</a></li><li>《深入理解 Android 内核设计思想》</li></ul> 
-<h2><a id="_375"></a>其他系列</h2> 
-<ul><li><a href="https://blog.csdn.net/freekiteyu/article/details/70790711">Android 屏幕适配全攻略</a></li><li><a href="https://blog.csdn.net/freekiteyu/article/details/70939672">Windows 环境下载 Android 源码</a></li><li><a href="https://blog.csdn.net/freekiteyu/article/details/77862670">Android 性能优化-UI优化</a></li><li><a href="https://blog.csdn.net/freekiteyu/article/details/78060938">Android 性能优化-内存优化</a></li><li><a href="https://blog.csdn.net/freekiteyu/article/details/77992277">Java 虚拟机内存分配机制</a></li><li><a href="https://blog.csdn.net/freekiteyu/article/details/78029495">Java 虚拟机垃圾回收机制</a></li><li><a href="https://blog.csdn.net/freekiteyu/article/details/72236734">一篇文章看明白 TCP/IP&#xff0c;TCP&#xff0c;UDP&#xff0c;IP&#xff0c;Socket 之间的关系</a></li><li><a href="https://blog.csdn.net/freekiteyu/article/details/76423436">一篇文章看明白 HTTP&#xff0c;HTTPS&#xff0c;SSL/TSL 之间的关系</a></li></ul> 
-<h2><a id="Gradle__386"></a>Gradle 系列</h2> 
-<ul><li><a href="https://blog.csdn.net/freekiteyu/article/details/80677361">Gradle - 简介</a></li><li><a href="https://blog.csdn.net/freekiteyu/article/details/80846149">Gradle - Groovy Language</a></li><li><a href="https://blog.csdn.net/freekiteyu/article/details/81066845">Gradle - DSL</a></li><li><a href="https://blog.csdn.net/freekiteyu/article/details/81173683">Gradle - Android Plugin DSL</a></li><li><a href="https://blog.csdn.net/freekiteyu/article/details/81353922">Gradle - 插件开发</a></li><li><a href="https://blog.csdn.net/freekiteyu/article/details/81449721">Gradle - 插件发布</a></li></ul> 
-<h2><a id="_395"></a>更多文章&#xff1a;</h2> 
-<p>这是我博客长期更新的项目&#xff0c;欢迎大家 Star。<br /> <a href="https://github.com/jeanboydev/Android-ReadTheFuckingSourceCode">https://github.com/jeanboydev/Android-ReadTheFuckingSourceCode</a></p> 
-<h2><a id="_399"></a>我的公众号</h2> 
-<p>欢迎你「扫一扫」下面的二维码&#xff0c;关注我的公众号&#xff0c;可以接受最新的文章推送&#xff0c;有丰厚的抽奖活动和福利等着你哦&#xff01;?</p> 
-<img src="https://raw.githubusercontent.com/jeanboydev/Android-ReadTheFuckingSourceCode/master/resources/images/about_me/qrcode_android_besos_black_512.png" width="250" height="250" /> 
-<p>如果你有什么疑问或者问题&#xff0c;可以 <a href="https://github.com/jeanboydev/Android-ReadTheFuckingSourceCode/issues">点击这里</a> 提交 issue&#xff0c;也可以发邮件给我 <a href="mailto:jeanboy&#64;foxmail.com">jeanboy&#64;foxmail.com</a>。</p> 
-<p>同时欢迎你 <a href="http://shang.qq.com/wpa/qunwpa?idkey&#61;0b505511df9ead28ec678df4eeb7a1a8f994ea8b75f2c10412b57e667d81b50d"><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly9jYW1vLmdpdGh1YnVzZXJjb250ZW50LmNvbS82MTVjOTkwMTY3N2Y1MDE1ODJiNjA1N2VmYzkzOTZiM2VkMjdkYzI5LzY4NzQ3NDcwM2EyZjJmNzA3NTYyMmU2OTY0NzE3MTY5NmQ2NzJlNjM2ZjZkMmY3NzcwNjEyZjY5NmQ2MTY3NjU3MzJmNjc3MjZmNzU3MDJlNzA2ZTY3" alt="Android技术进阶&#xff1a;386463747" /></a> 来一起交流学习&#xff0c;群里有很多大牛和学习资料&#xff0c;相信一定能帮助到你&#xff01;</p>
-                </div>
-                <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/markdown_views-d7a94ec6ab.css" rel="stylesheet">
-                <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/style-49037e4d27.css" rel="stylesheet">
-        </div>
-    </article>
