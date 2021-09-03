@@ -1,7 +1,7 @@
 ---
 layout:     post
 title:      Android10系统启动之init进程详解
-subtitle:   init进程是linux系统中用户空间的第一个进程，进程号为1. 这篇文章我们来详细学习下init进程的启动过程
+subtitle:   这篇文章我们来详细学习下Android10系统启动中init进程的启动过程
 date:       2020-02-15
 author:     duguma
 header-img: img/article-bg.jpg
@@ -24,13 +24,13 @@ tags:
 <ul><li>初始化属性系统</li><li>执行SELinux第二阶段并恢复一些文件安全上下文</li><li>新建epoll并初始化子进程终止信号处理函数</li><li>设置其他系统属性并开启属性服务</li></ul>
 <h2>2.架构</h2> 
 <h3>2.1 Init进程如何被启动&#xff1f;</h3> 
-<p><img alt="" class="has" height="364" src="https://img-blog.csdnimg.cn/20191215154631193.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" width="633" /></p> 
+<p><img alt="" class="has" height="364" src="https://img-blog.csdnimg.cn/20191215154631193.png?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" width="633" /></p> 
 <p>Init进程是在Kernel启动后&#xff0c;启动的第一个用户空间进程&#xff0c;PID为1。</p> 
 <p>kernel_init启动后&#xff0c;完成一些init的初始化操作&#xff0c;然后去系统根目录下依次找ramdisk_execute_command和execute_command设置的应用程序&#xff0c;如果这两个目录都找不到&#xff0c;就依次去根目录下找 /sbin/init&#xff0c;/etc/init&#xff0c;/bin/init,/bin/sh 这四个应用程序进行启动&#xff0c;只要这些应用程序有一个启动了&#xff0c;其他就不启动了。</p> 
 <p>Android系统一般会在根目录下放一个init的可执行文件&#xff0c;也就是说Linux系统的init进程在内核初始化完成后&#xff0c;就直接执行init这个文件。</p> 
 <p> </p> 
 <h3>2.2Init进程启动后&#xff0c;做了哪些事&#xff1f;</h3> 
-<p><img alt="" class="has" height="299" src="https://img-blog.csdnimg.cn/2019121515470388.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" width="731" /></p> 
+<p><img alt="" class="has" height="299" src="https://img-blog.csdnimg.cn/2019121515470388.png?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" width="731" /></p> 
 <p>Init进程启动后&#xff0c;首先挂载文件系统、再挂载相应的分区&#xff0c;启动SELinux安全策略&#xff0c;启动属性服务&#xff0c;解析rc文件&#xff0c;并启动相应属性服务进程&#xff0c;初始化epoll&#xff0c;依次设置signal、property、keychord这3个fd可读时相对应的回调函数。进入无线循环&#xff0c;用来响应各个进程的变化与重建。</p> 
 <p> </p> 
 <p> </p> 
@@ -431,7 +431,7 @@ bool LoadPolicy() {
 <p>第二阶段主要内容&#xff1a;</p> 
 <ol><li>创建进程会话密钥并初始化属性系统</li><li>进行SELinux第二阶段并恢复一些文件安全上下文</li><li>新建epoll并初始化子进程终止信号处理函数&#xff0c;详细看第五节-信号处理</li><li>启动匹配属性的服务端&#xff0c; 详细查看第六节-属性服务</li><li>解析init.rc等文件&#xff0c;建立rc文件的action 、service&#xff0c;启动其他进程&#xff0c;详细查看第七节-rc文件解析</li></ol>
 <p> </p> 
-<p><img alt="" class="has" height="286" src="https://img-blog.csdnimg.cn/20191215155613672.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" width="759" /></p> 
+<p><img alt="" class="has" height="286" src="https://img-blog.csdnimg.cn/20191215155613672.png?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" width="759" /></p> 
 <h3>4.5.1 SecondStageMain</h3> 
 <p> </p> 
 <pre class="has"><code class="language-cpp">int SecondStageMain(int argc, char** argv) {
@@ -703,7 +703,7 @@ bool LoadPolicy() {
 <p style="text-indent:33px;">init是一个守护进程&#xff0c;为了防止init的子进程成为僵尸进程(zombie process)&#xff0c;需要init在子进程在结束时获取子进程的结束码&#xff0c;通过结束码将程序表中的子进程移除&#xff0c;防止成为僵尸进程的子进程占用程序表的空间&#xff08;程序表的空间达到上限时&#xff0c;系统就不能再启动新的进程了&#xff0c;会引起严重的系统问题&#xff09;。</p> 
 <p style="text-indent:33px;"><strong>子进程重启流程如下图所示&#xff1a;</strong></p> 
 <p> </p> 
-<p><img alt="" class="has" height="214" src="https://img-blog.csdnimg.cn/20191215155741981.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" width="579" /></p> 
+<p><img alt="" class="has" height="214" src="https://img-blog.csdnimg.cn/20191215155741981.png?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" width="579" /></p> 
 <p><strong>信号处理主要工作&#xff1a;</strong></p> 
 <ul><li>初始化信号signal句柄</li><li>循环处理子进程</li><li>注册epoll句柄</li><li>处理子进程终止</li></ul>
 <p><strong>注: </strong> EPOLL类似于POLL&#xff0c;是Linux中用来做事件触发的&#xff0c;跟EventBus功能差不多。linux很长的时间都在使用select来做事件触发&#xff0c;它是通过轮询来处理的&#xff0c;轮询的fd数目越多&#xff0c;自然耗时越多&#xff0c;对于大量的描述符处理&#xff0c;EPOLL更有优势</p> 
@@ -714,7 +714,7 @@ bool LoadPolicy() {
 <p>终上所述&#xff0c;InstallSignalFdHandler函数的作用就是&#xff0c;接收到SIGCHLD信号时触发HandleSignalFd进行信号处理</p> 
 <p>                   <strong>                信号处理示意图&#xff1a;</strong></p> 
 <p> </p> 
-<p><img alt="" class="has" height="213" src="https://img-blog.csdnimg.cn/20191215155935532.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" width="500" /></p> 
+<p><img alt="" class="has" height="213" src="https://img-blog.csdnimg.cn/20191215155935532.png?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" width="500" /></p> 
 <p> </p> 
 <p><strong>代码路径&#xff1a;</strong>platform/system/core/init.cpp</p> 
 <p><strong>说明&#xff1a;</strong>该函数主要的作用是初始化子进程终止信号处理过程</p> 
@@ -1061,7 +1061,7 @@ static bool ReapOneProcess() {
 <p style="text-indent:33px;">init.rc在手机的目录&#xff1a;./init.rc</p> 
 <p style="text-indent:33px;">init.rc主要包含五种类型语句&#xff1a;</p> 
 <ul><li>Action</li><li>Command</li><li>Service</li><li>Option</li><li>Import</li></ul>
-<p> <img alt="" class="has" height="452" src="https://img-blog.csdnimg.cn/20191215160534809.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" width="433" /></p> 
+<p> <img alt="" class="has" height="452" src="https://img-blog.csdnimg.cn/20191215160534809.png?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" width="433" /></p> 
 <h2>7.1 Action</h2> 
 <p style="text-indent:33px;">动作表示了一组命令(commands)组成.动作包括一个触发器&#xff0c;决定了何时运行这个动作</p> 
 <p>Action&#xff1a; 通过触发器trigger&#xff0c;即以on开头的语句来决定执行相应的service的时机&#xff0c;具体有如下时机&#xff1a;</p> 
