@@ -67,7 +67,7 @@ tags:
 <h1> </h1> 
 <h1>3.架构</h1> 
 <p><strong>Android启动流程图&#xff1a;</strong></p> 
-<p><img alt="" class="has" src="https://img-blog.csdnimg.cn/20191229115243250.png?x-oss-process&#61;,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" /></p> 
+<p><img alt="" class="has" src="https://img-blog.csdnimg.cn/af46a60443a949cfbf154218f2ff03a0.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" /></p> 
 <p> </p> 
 <p><strong>Launcher启动序列图&#xff1a;</strong></p> 
 <p>    内容较多&#xff0c;例如Zygote的fork流程&#xff0c;realStartActivityLocked启动Activity的中间过程&#xff0c;都没有列出&#xff0c;下一个章节会单独来讲这部分内容</p> 
