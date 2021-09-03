@@ -67,11 +67,11 @@ tags:
 <h1> </h1> 
 <h1>3.架构</h1> 
 <p><strong>Android启动流程图&#xff1a;</strong></p> 
-<p><img alt="" class="has" src="https://img-blog.csdnimg.cn/20191229115243250.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" /></p> 
+<p><img alt="" class="has" src="https://img-blog.csdnimg.cn/20191229115243250.png?x-oss-process&#61;,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" /></p> 
 <p> </p> 
 <p><strong>Launcher启动序列图&#xff1a;</strong></p> 
 <p>    内容较多&#xff0c;例如Zygote的fork流程&#xff0c;realStartActivityLocked启动Activity的中间过程&#xff0c;都没有列出&#xff0c;下一个章节会单独来讲这部分内容</p> 
-<p><img alt="" class="has" src="https://img-blog.csdnimg.cn/20191229115305398.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" /></p> 
+<p><img alt="" class="has" src="https://img-blog.csdnimg.cn/20191229115305398.png?x-oss-process&#61;,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" /></p> 
 <p> </p> 
 <h1><strong>4.源码分析</strong></h1> 
 <p>    上一节在AMS启动过程中&#xff0c;我们知道了AMS启动完成前&#xff0c;在systemReady()中会去调用startHomeOnAllDisplays()来启动Launcher&#xff0c;本次就从startHomeOnAllDisplays()函数入口&#xff0c;来看看Launcher是如何被启动起来的。</p> 
@@ -89,7 +89,7 @@ traceLog) {
 <p> </p> 
 <p><strong>4.1第一阶段SystemServer 启动HomeActivity的调用阶段</strong></p> 
 <p><strong>调用栈&#xff1a;</strong></p> 
-<p><img alt="" class="has" src="https://img-blog.csdnimg.cn/201912291153587.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" /></p> 
+<p><img alt="" class="has" src="https://img-blog.csdnimg.cn/201912291153587.png?x-oss-process&#61;,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" /></p> 
 <p><strong>[ActivityTaskManagerService.java] startHomeOnAllDisplays()</strong></p> 
 <p><strong>说明&#xff1a;</strong>ActivityTaskManagerInternal是 ActivityTaskManagerService的一个抽象类&#xff0c;正在的实现是在ActivityTaskManagerService的LocalService&#xff0c;所以mAtmInternal.startHomeOnAllDisplays()最终调用的是ActivityTaskManagerService的startHomeOnAllDisplays()方法</p> 
 <p><strong>源码&#xff1a;</strong></p> 
@@ -257,7 +257,7 @@ traceLog) {
 <p><strong>源码&#xff1a;</strong></p> 
 <pre><code>public void startProcess(String processName, ApplicationInfo info,</code><code>        boolean knownToBeDead, String hostingType, ComponentName hostingName) {<!-- --></code><code>        ..</code><code>        //同步操作&#xff0c;避免死锁</code><code>        synchronized (ActivityManagerService.this) {<!-- --></code><code>            //调用startProcessLocked,然后到 Process的start&#xff0c;最终到ZygoteProcess的attemptUsapSendArgsAndGetResult()</code><code>            //用来fork一个新的Launcher的进程&#xff0c;参考[4.3.6]</code><code>            startProcessLocked(processName, info, knownToBeDead, 0 /* intentFlags */,</code><code>                    new HostingRecord(hostingType, hostingName),</code><code>                    false /* allowWhileBooting */, false /* isolated */,</code><code>                    true /* keepIfLarge */);</code><code>        }</code><code>        ...</code><code>}</code></pre> 
 <p><strong>调用栈如下:</strong></p> 
-<p><img alt="" class="has" src="https://img-blog.csdnimg.cn/20191229120148881.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" /></p> 
+<p><img alt="" class="has" src="https://img-blog.csdnimg.cn/20191229120148881.png?x-oss-process&#61;,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" /></p> 
 <p><strong>4.3.6 [ZygoteProcess.java]  attemptZygoteSendArgsAndGetResult()</strong></p> 
 <p><strong>说明&#xff1a;</strong>通过Socket连接Zygote进程&#xff0c;把之前组装的msg发给Zygote&#xff0c;其中processClass &#61;&#34;android.app.ActivityThread&#34;&#xff0c;通过Zygote进程来Fork出一个新的进程&#xff0c;并执行 &#34;android.app.ActivityThread&#34;的main方法</p> 
 <p><strong>源码&#xff1a;</strong></p> 
@@ -292,9 +292,9 @@ traceLog) {
 <p><strong>说明&#xff1a;</strong>Zygote的启动过程我们前面有详细讲到过。SystemServer的AMS服务向启动Home Activity发起一个fork请求&#xff0c;Zygote进程通过Linux的fork函数&#xff0c;孵化出一个新的进程。</p> 
 <p>    由于Zygote进程在启动时会创建Java虚拟机&#xff0c;因此通过fork而创建的Launcher程序进程可以在内部获取一个Java虚拟机的实例拷贝。fork采用copy-on-write机制&#xff0c;有些类如果不做改变&#xff0c;甚至都不用复制&#xff0c;子进程可以和父进程共享这部分数据&#xff0c;从而省去不少内存的占用。</p> 
 <p>    fork过程&#xff0c;参考下图&#xff1a;</p> 
-<p><img alt="" class="has" src="https://img-blog.csdnimg.cn/20191229120247407.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" /></p> 
+<p><img alt="" class="has" src="https://img-blog.csdnimg.cn/20191229120247407.png?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" /></p> 
 <p><strong>Zygote的调用栈如下&#xff1a;</strong></p> 
-<p><strong><img alt="" class="has" src="https://img-blog.csdnimg.cn/20191229120258467.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" /></strong></p> 
+<p><strong><img alt="" class="has" src="https://img-blog.csdnimg.cn/20191229120258467.png?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" /></strong></p> 
 <p><strong>4.4.1 [ZygoteInit.java] main()</strong></p> 
 <p><strong>说明&#xff1a;</strong>Zygote先fork出SystemServer进程&#xff0c;接着进入循环等待&#xff0c;用来接收Socket发来的消息&#xff0c;用来fork出其他应用进程&#xff0c;比如Launcher</p> 
 <p><strong>源码&#xff1a;</strong></p> 
@@ -449,7 +449,7 @@ static class MethodAndArgsCaller implements Runnable {
 <p><strong>4.5 第三个阶段&#xff0c;Launcher在自己的进程中进行onCreate等后面的动作</strong></p> 
 <p>    从[4.4]可以看到&#xff0c;Zygote fork出了Launcher的进程&#xff0c;并把接下来的Launcher启动任务交给了ActivityThread来进行&#xff0c;接下来我们就从ActivityThread main()来分析Launcher的创建过程。</p> 
 <p>调用栈如下&#xff1a;</p> 
-<p><img alt="" class="has" src="https://img-blog.csdnimg.cn/20191229120537586.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" /></p> 
+<p><img alt="" class="has" src="https://img-blog.csdnimg.cn/20191229120537586.png?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" /></p> 
 <p><strong>4.5.1 [ActivityThread.java] main()</strong></p> 
 <p><strong>说明&#xff1a;</strong>主线程处理&#xff0c; 创建ActivityThread对象&#xff0c;调用attach进行处理&#xff0c;最终进入Looper循环</p> 
 <p><strong>源码&#xff1a;</strong></p> 
@@ -545,7 +545,7 @@ static class MethodAndArgsCaller implements Runnable {
 <p>LaunchActivityItem的execute()方法进行最终的执行</p> 
 <p>    参考上面的第三阶段的调用栈流程</p> 
 <p>    调用栈如下&#xff1a;</p> 
-<p><img alt="" class="has" src="https://img-blog.csdnimg.cn/20191229120714923.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" /></p> 
+<p><img alt="" class="has" src="https://img-blog.csdnimg.cn/20191229120714923.png?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" /></p> 
 <p><strong>源码&#xff1a;</strong></p> 
 <pre class="has"><code>boolean realStartActivityLocked(ActivityRecord r, WindowProcessController proc,
         boolean andResume, boolean checkConfig) throws RemoteException {
