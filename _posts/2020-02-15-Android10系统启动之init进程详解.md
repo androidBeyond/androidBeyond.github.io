@@ -42,7 +42,7 @@ tags:
 kernel_init()
   |
 run_init_process(ramdisk_execute_command)  //运行可执行文件&#xff0c;启动init进程</code></pre> 
-<pre class="has"><code class="language-cpp">static int __ref kernel_init(void *unused)
+<pre class="highlight"><code class="language-java highlighter-rouge">static int __ref kernel_init(void *unused)
 {
 	kernel_init_freeable(); //进行init进程的一些初始化操作
 	/* need to finish all async __init code before freeing the memory */
