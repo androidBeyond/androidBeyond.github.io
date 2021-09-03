@@ -10,7 +10,7 @@ catalog: true
 tags:
     - Android10
     - 系统启动
-	- Zygote
+    - Zygote
 --- 
 
 <h1>1.概述</h1> 
