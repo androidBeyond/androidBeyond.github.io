@@ -10,7 +10,7 @@ catalog: true
 tags:
     - Android10
     - 系统启动
-	- init进程
+    - init进程
 --- 
 
 <h2>1.概述&#xff1a;</h2> 
