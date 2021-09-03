@@ -40,13 +40,13 @@ tags:
 <h1>3.架构</h1> 
 <h2>3.1 架构图</h2> 
 <p>    SystemServer 被Zygote进程fork出来后&#xff0c;用来创建ActivityManagerService、PowerManagerService、DisplayManagerService、PackageManagerService、WindowManagerService、LauncherAppsService等90多个核心系统服务</p> 
-<p> <img alt="" class="has" height="230" src="https://img-blog.csdnimg.cn/20191215164838266.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" width="360" /></p> 
+<p> <img alt="" class="has" height="230" src="https://img-blog.csdnimg.cn/fb78b52cb2834ac2ac85d9752a036547.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_9,color_FFFFFF,t_70,g_se,x_16" width="360" /></p> 
 <h2>3.2 服务启动</h2> 
 <p> SystemServer思维导图</p> 
-<p><img alt="" class="has" height="592" src="https://img-blog.csdnimg.cn/20191215164907728.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" width="724" /></p> 
+<p><img alt="" class="has" height="592" src="https://img-blog.csdnimg.cn/b26fbec953cb40e4afebc2370ddca17c.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_18,color_FFFFFF,t_70,g_se,x_16" width="724" /></p> 
 <h1>4. 源码分析</h1> 
 <h2>4.1 SystemServer fork流程分析</h2> 
-<p> <img alt="" class="has" height="1177" src="https://img-blog.csdnimg.cn/20191215164941628.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" width="1200" /></p> 
+<p> <img alt="" class="has" height="1177" src="https://img-blog.csdnimg.cn/20191215164941628.png?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" width="1200" /></p> 
 <h3>4.1.1 [ZygoteInit.java] main()</h3> 
 <p><strong>说明&#xff1a;</strong>Zygote进程&#xff0c;通过fork()函数&#xff0c;最终孵化出system_server的进程&#xff0c;通过反射的方法启动</p> 
 <p>SystemServer.java的main()方法</p> 
@@ -545,7 +545,7 @@ virtual void onZygoteInit()
     }
 }</code></pre> 
 <p>4.2 SystemServer 启动后的流程</p> 
-<p> <img alt="" class="has" height="341" src="https://img-blog.csdnimg.cn/20191215170117255.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" width="799" /></p> 
+<p> <img alt="" class="has" height="341" src="https://img-blog.csdnimg.cn/335b4d51f1d34da599afacf94b34288b.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16 width="799" /></p> 
 <h3> </h3> 
 <h3>4.2.1[SystemServer.java] main</h3> 
 <p><strong>说明&#xff1a;</strong>main函数由Zygote进程 fork后运行&#xff0c;作用是new 一个SystemServer对象&#xff0c;再调用该对象的run()方法</p> 
@@ -963,7 +963,7 @@ TRACE_TAG_SYSTEM_SERVER);
 <p> </p> 
 <h1>5.服务启动分析</h1> 
 <p>  服务启动流程如下&#xff0c;从阶段0到阶段1000&#xff0c;一共8个阶段。</p> 
-<p> <img alt="" class="has" height="535" src="https://img-blog.csdnimg.cn/20191215170638875.jpg?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" width="859" /></p> 
+<p> <img alt="" class="has" height="535" src="https://img-blog.csdnimg.cn/20191215170638875.jpg?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" width="859" /></p> 
 <p>其中PHASE_BOOT_COMPLETED&#61;1000&#xff0c;该阶段是发生在Boot完成和home应用启动完毕。系统服务更倾向于监听该阶段&#xff0c;而不是注册广播ACTION_BOOT_COMPLETED&#xff0c;从而降低系统延迟。</p> 
 <p> </p> 
 <h2>5.1 PHASE 0:</h2> 
@@ -1079,7 +1079,7 @@ TRACE_TAG_SYSTEM_SERVER);
 <p><strong>核心服务 Core Service(9个)&#xff1a;</strong></p> 
 <p> <img alt="" class="has" height="100" src="https://img-blog.csdnimg.cn/20191215171249723.jpg" width="882" /></p> 
 <p><strong>其他服务 Other Service(70个&#43;)&#xff1a;</strong></p> 
-<p> <img alt="" class="has" height="661" src="https://img-blog.csdnimg.cn/20191215171313873.jpg?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" width="885" /></p> 
+<p> <img alt="" class="has" height="661" src="https://img-blog.csdnimg.cn/20191215171313873.jpg?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" width="885" /></p> 
 <p>7.总结</p> 
 <ul><li>Zygote启动后fork的第一个进程为SystemServer,在手机中的进程别名为&#34;system_server&#34;&#xff0c;主要用来启动系统中的服务</li><li>.Zygote fork后&#xff0c;进入SystemServer的main()</li><li>SystemServer在启动过程中&#xff0c;先初始化一些系统变量&#xff0c;加载类库&#xff0c;创建Context对象&#xff0c;创建SystemServiceManager对象等候再启动服务</li><li>启动的服务分为 引导服务(Boot Service)、核心服务(Core Service)和其他服务(Other Service)三大类&#xff0c;共90多个服务</li><li>SystemServer在启动服务前&#xff0c;会尝试与Zygote建立Socket通信&#xff0c;通信成功后才去启动服务</li><li>启动的服务都单独运行在SystemServer的各自线程中&#xff0c;同属于SystemServer进程</li></ul>
 <p> </p>
