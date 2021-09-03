@@ -545,7 +545,7 @@ virtual void onZygoteInit()
     }
 }</code></pre> 
 <p>4.2 SystemServer 启动后的流程</p> 
-<p> <img alt="" class="has" height="341" src="https://img-blog.csdnimg.cn/335b4d51f1d34da599afacf94b34288b.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16 width="799" /></p> 
+<p> <img alt="" class="has" height="341" src="https://img-blog.csdnimg.cn/335b4d51f1d34da599afacf94b34288b.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_1" width="799" /></p> 
 <h3> </h3> 
 <h3>4.2.1[SystemServer.java] main</h3> 
 <p><strong>说明&#xff1a;</strong>main函数由Zygote进程 fork后运行&#xff0c;作用是new 一个SystemServer对象&#xff0c;再调用该对象的run()方法</p> 
