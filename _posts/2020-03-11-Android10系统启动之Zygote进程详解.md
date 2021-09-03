@@ -36,7 +36,7 @@ tags:
 <h1>3.架构</h1> 
 <h2>3.1 架构图</h2> 
 <p> </p> 
-<p><img alt="" class="has" height="293" src="https://img-blog.csdnimg.cn/20191215161738755.png?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" width="644" /></p> 
+<p><img alt="" class="has" height="293" src="https://img-blog.csdnimg.cn/1b37953c0fe648cfa1b128044293043f.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_16,color_FFFFFF,t_70,g_se,x_16" width="644" /></p> 
 <h2>3.2 Zygote 是如何被启动的</h2> 
 <p><strong>rc解析和进程调用</strong></p> 
 <p>Init进程启动后&#xff0c;会解析init.rc文件&#xff0c;然后创建和加载service字段指定的进程。zygote进程就是以这种方式&#xff0c;被init进程加载的。</p> 
@@ -96,7 +96,7 @@ tags:
 <h2>3.3 Zygote 启动后做了什么</h2> 
 <p> </p> 
 <p> Zygote启动时序图&#xff1a;</p> 
-<p><img alt="" class="has" height="408" src="https://img-blog.csdnimg.cn/2019121516215969.png?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" width="667" /></p> 
+<p><img alt="" class="has" height="408" src="https://img-blog.csdnimg.cn/f7cbd81aa7e54476a2fc38986fadddc6.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_17,color_FFFFFF,t_70,g_se,x_16" width="667" /></p> 
 <p> </p> 
 <ol><li>init进程通过init.zygote64_32.rc来调用/system/bin/app_process64 来启动zygote进程&#xff0c;入口app_main.cpp</li><li>调用AndroidRuntime的startVM()方法创建虚拟机&#xff0c;再调用startReg()注册JNI函数&#xff1b;</li><li>通过JNI方式调用ZygoteInit.main()&#xff0c;第一次进入Java世界&#xff1b;</li><li>registerZygoteSocket()建立socket通道&#xff0c;zygote作为通信的服务端&#xff0c;用于响应客户端请求&#xff1b;</li><li>preload()预加载通用类、drawable和color资源、openGL以及共享库以及WebView&#xff0c;用于提高app启动效率&#xff1b;</li><li>zygote完毕大部分工作&#xff0c;接下来再通过startSystemServer()&#xff0c;fork得力帮手system_server进程&#xff0c;也是上层framework的运行载体。</li><li>zygote任务完成&#xff0c;调用runSelectLoop()&#xff0c;随时待命&#xff0c;当接收到请求创建新进程请求时立即唤醒并执行相应工作。</li></ol>
 <p> </p> 
@@ -122,7 +122,7 @@ tags:
 <p>我们主要是分析Android Q(10.0) 的Zygote启动的源码。</p> 
 <p> </p> 
 <h2>4.1 Nativate-C世界的Zygote启动要代码调用流程&#xff1a;</h2> 
-<p> <img alt="" class="has" height="454" src="https://img-blog.csdnimg.cn/20191215162441836.PNG?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" width="936" /></p> 
+<p> <img alt="" class="has" height="454" src="https://img-blog.csdnimg.cn/e1c13e19c0cb4fa3ae0768d953f5a9a5.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" width="936" /></p> 
 <h3>4.1.1 [app_main.cpp] main()</h3> 
 <p> </p> 
 <pre class="has"><code>int main(int argc, char* const argv[])
@@ -442,7 +442,7 @@ int register_com_android_internal_os_RuntimeInit(JNIEnv* env)
 }</code></pre> 
 <h2>4.2 Java世界的Zygote启动主要代码调用流程&#xff1a;</h2> 
 <p>上节我们通过JNI调用ZygoteInit的main函数后&#xff0c;Zygote便进入了Java框架层&#xff0c;此前没有任何代码进入过Java框架层&#xff0c;换句换说Zygote开创了Java框架层。</p> 
-<p> <img alt="" class="has" height="664" src="https://img-blog.csdnimg.cn/20191215162957869.PNG?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lpcmFuZmVuZw&#61;&#61;,size_16,color_FFFFFF,t_70" width="995" /></p> 
+<p> <img alt="" class="has" height="664" src="https://img-blog.csdnimg.cn/0119fa4079264e4d863cf3422bb4befe.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" width="995" /></p> 
 <p> </p> 
 <h3>4.2.1 [ZygoteInit.java]main.cpp</h3> 
 <p><strong>代码路径:</strong>frameworks\base\core\java\com\android\internal\os\ZygoteInit.java</p> 
