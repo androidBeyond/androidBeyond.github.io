@@ -1,17 +1,18 @@
- ---
+
+---
 layout:     post
-title:      Android10 lowmemorykiller机制学习
+title:      Android10lowmemorykiller机制学习
 subtitle:   Android底层还是基于Linux，在Linux中低内存是会有oom killer去杀掉一些进程去释放内存
 date:       2020-05-07
 author:     duguma
 header-img: img/article-bg.jpg
-top: true
+top: false
 catalog: true
 tags:
     - Android10
     - Android
     - LMKD
- --- 
+--- 
 
 
 <h2 id="1概述">1.概述</h2>
