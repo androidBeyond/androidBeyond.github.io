@@ -1,18 +1,17 @@
 ---
 layout:     post
-title:      Android10 StartActivity启动过程分析
-subtitle:   startActivity的整体流程和startService相近，启动后都是通过AMS来完成的。但相比service启动更加复杂
-date:       2020-06-17
+title:      Android10应用启动与进程创建关系分析
+subtitle:   android中弱化了进程的概念，取而代之的是四大组件，本篇文章我们就来学习一下应用和进程的关系
+date:       2020-05-16
 author:     duguma
 header-img: img/article-bg.jpg
-top: true
+top: false
 catalog: true
 tags:
     - Android10
-    - android
+    - Android
     - framework
-    - 组件学习
- ---
+---
  
 <blockquote>
 <p>基于Android10.0，分析startActivity的启动过程</p>
