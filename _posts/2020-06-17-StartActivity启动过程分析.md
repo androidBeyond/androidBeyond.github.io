@@ -14,9 +14,7 @@ tags:
     - 组件学习
 ---
  
-<blockquote> 
- <p>基于Android10.0&#xff0c;分析startActivity的启动过程</p> 
-</blockquote> 
+
 <h2><a id="_4"></a>一、概述</h2> 
 <p>startActivity的整体流程和startService相近&#xff0c;启动后都是通过AMS来完成的。但相比service启动更加复杂&#xff0c;多了任务栈、UI、生命周期。其启动流程如下&#xff1a;<br /> <img src="https://img-blog.csdnimg.cn/20200105191423838.jpg?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Nhbzg2MTU0NDMyNQ&#61;&#61;,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" /></p> 
 <h2><a id="_9"></a>二、启动流程</h2> 
