@@ -23,7 +23,48 @@ tags:
 <p>PathClassLoader：用于Android应用程序类加载器，可以加载指定的dex，以及jar、zip、apk中的dex。</p>
 <p>DexClassLoader：用于加载指定的dex，以及jar、zip、apk中的dex。</p>
 <h4 id="1-1-PathClassLoader"><a href="#1-1-PathClassLoader" class="headerlink" title="1.1 PathClassLoader"></a>1.1 PathClassLoader</h4><p>[-&gt;libcore\dalvik\src\main\java\dalvik\system\PathClassLoader.java]</p>
-<pre><code>public class PathClassLoader extends BaseDexClassLoader &#123;   /**    * Creates a &#123;@code PathClassLoader&#125; that operates on a given list of files    * and directories. This method is equivalent to calling    * &#123;@link #PathClassLoader(String, String, ClassLoader)&#125; with a    * &#123;@code null&#125; value for the second argument (see description there).    *    * @param dexPath the list of jar/apk files containing classes and    * resources, delimited by &#123;@code File.pathSeparator&#125;, which    * defaults to &#123;@code &quot;:&quot;&#125; on Android    * @param parent the parent class loader    */   public PathClassLoader(String dexPath, ClassLoader parent) &#123;       super(dexPath, null, null, parent);   &#125;   /**    * Creates a &#123;@code PathClassLoader&#125; that operates on two given    * lists of files and directories. The entries of the first list    * should be one of the following:    *    * &lt;ul&gt;    * &lt;li&gt;JAR/ZIP/APK files, possibly containing a &quot;classes.dex&quot; file as    * well as arbitrary resources.    * &lt;li&gt;Raw &quot;.dex&quot; files (not inside a zip file).    * &lt;/ul&gt;    *    * The entries of the second list should be directories containing    * native library files.    *    * @param dexPath the list of jar/apk files containing classes and    * resources, delimited by &#123;@code File.pathSeparator&#125;, which    * defaults to &#123;@code &quot;:&quot;&#125; on Android    * @param librarySearchPath the list of directories containing native    * libraries, delimited by &#123;@code File.pathSeparator&#125;; may be    * &#123;@code null&#125;    * @param parent the parent class loader    */   public PathClassLoader(String dexPath, String librarySearchPath, ClassLoader parent) &#123;       super(dexPath, null, librarySearchPath, parent);   &#125;&#125;</code></pre> 
+<pre><code>public class PathClassLoader extends BaseDexClassLoader {
+    /**
+     * Creates a {@code PathClassLoader} that operates on a given list of files
+     * and directories. This method is equivalent to calling
+     * {@link #PathClassLoader(String, String, ClassLoader)} with a
+     * {@code null} value for the second argument (see description there).
+     *
+     * @param dexPath the list of jar/apk files containing classes and
+     * resources, delimited by {@code File.pathSeparator}, which
+     * defaults to {@code ":"} on Android
+     * @param parent the parent class loader
+     */
+    public PathClassLoader(String dexPath, ClassLoader parent) {
+        super(dexPath, null, null, parent);
+    }
+
+    /**
+     * Creates a {@code PathClassLoader} that operates on two given
+     * lists of files and directories. The entries of the first list
+     * should be one of the following:
+     *
+     * <ul>
+     * <li>JAR/ZIP/APK files, possibly containing a "classes.dex" file as
+     * well as arbitrary resources.
+     * <li>Raw ".dex" files (not inside a zip file).
+     * </ul>
+     *
+     * The entries of the second list should be directories containing
+     * native library files.
+     *
+     * @param dexPath the list of jar/apk files containing classes and
+     * resources, delimited by {@code File.pathSeparator}, which
+     * defaults to {@code ":"} on Android
+     * @param librarySearchPath the list of directories containing native
+     * libraries, delimited by {@code File.pathSeparator}; may be
+     * {@code null}
+     * @param parent the parent class loader
+     */
+    public PathClassLoader(String dexPath, String librarySearchPath, ClassLoader parent) {
+        super(dexPath, null, librarySearchPath, parent);
+    }
+}</code></pre> 
 <p>BaseDexClassLoader</p>
 <p>[-&gt;libcore\dalvik\src\main\java\dalvik\system\BaseDexClassLoader.java]</p>
 <pre><code>123456789101112131415161718public class BaseDexClassLoader extends ClassLoader &#123;   /**    * Hook for customizing how dex files loads are reported.    *    * This enables the framework to monitor the use of dex files. The    * goal is to simplify the mechanism for optimizing foreign dex files and    * enable further optimizations of secondary dex files.    *    * The reporting happens only when new instances of BaseDexClassLoader    * are constructed and will be active only after this field is set with    * &#123;@link BaseDexClassLoader#setReporter&#125;.    */   /* @NonNull */ private static volatile Reporter reporter = null;   private final DexPathList pathList;   .....&#125;</code></pre> 
