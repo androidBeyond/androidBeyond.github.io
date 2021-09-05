@@ -41,6 +41,11 @@ pre code {
   background: #ffffff;
   padding: 0;
 }
+.line {
+  border: none;
+  background: #ffffff;
+  padding: 0;
+}
 
 </style>
         
