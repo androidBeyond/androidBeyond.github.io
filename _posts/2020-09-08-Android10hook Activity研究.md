@@ -52,6 +52,12 @@ pre code {
   background: #ffffff;
   border: none;
 }
+ .table {
+  margin: 0;
+  width: auto;
+  background: #ffffff;
+  border: none;
+}
 </style>
         
 <p>在插件化中，hook Activity作为最基本的技术，用来在宿主app中新增Activity，而通常情况下，Activity必须在Manifest中注册在才可以使用，下面将就Android10.0来分析hook Activity的详细过程。</p>
