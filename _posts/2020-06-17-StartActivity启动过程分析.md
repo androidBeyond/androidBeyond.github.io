@@ -2,7 +2,7 @@
 layout:     post
 title:      Android10 StartActivity启动过程分析
 subtitle:   startActivity的整体流程和startService相近，启动后都是通过AMS来完成的。但相比service启动更加复杂
-date:       2020-06-17
+date:       2020-07-01
 author:     duguma
 header-img: img/article-bg.jpg
 top: false
