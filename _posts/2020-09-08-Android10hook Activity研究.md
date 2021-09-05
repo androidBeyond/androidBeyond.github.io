@@ -16,7 +16,7 @@ tags:
 <style type="text/css">
 pre code {
   padding: 0;
-  color: #cccccc;
+  color: #ffffff;
   background: none;
   text-shadow: none;
 }
@@ -36,7 +36,11 @@ pre code {
   background: #ffffff;
   padding: 0;
 }
-
+.figure {
+  border: none;
+  background: #ffffff;
+  padding: 0;
+}
 
 </style>
         
