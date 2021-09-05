@@ -16,7 +16,7 @@ tags:
 <style type="text/css">
 pre code {
   padding: 0;
-  color: #4d4d4c;
+  color: #cccccc;
   background: none;
   text-shadow: none;
 }
@@ -36,7 +36,7 @@ pre code {
 }
 .highlight figcaption {
   font-size: 1em;
-  color: #4d4d4c;
+  color: #cccccc;
   line-height: 1em;
   margin-bottom: 1em;
 }
@@ -50,7 +50,7 @@ pre code {
 }
 .highlight figcaption a {
   float: right;
-  color: #4d4d4c;
+  color: #cccccc;
 }
 .highlight figcaption a:hover {
   border-bottom-color: #4d4d4c;
@@ -70,7 +70,7 @@ pre code {
   border: none;
 }
 pre .comment {
-  color: #8e908c;
+  color: #cccccc;
 }
 pre .variable,
 pre .attribute,
@@ -93,7 +93,7 @@ pre .literal,
 pre .params,
 pre .constant,
 pre .command {
-  color: #f5871f;
+  color: #cccccc;
 }
 pre .ruby .class .title,
 pre .css .rules .attribute,
@@ -120,11 +120,11 @@ pre .ruby .title .keyword,
 pre .perl .sub,
 pre .javascript .title,
 pre .coffeescript .title {
-  color: #4271ae;
+  color: #cccccc;
 }
 pre .keyword,
 pre .javascript .function {
-  color: #8959a8;
+  color: #cccccc;
 }
 
 </style>
