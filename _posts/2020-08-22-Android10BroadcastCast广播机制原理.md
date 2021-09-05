@@ -1,17 +1,17 @@
- ---
+---
 layout:     post
 title:      Android10 BroadcastCast广播机制原理
 subtitle:   广播（BroadcastCast）用于进程/线程间的通信，广播有发送广播和接收广播两部分组成
 date:       2020-08-22
 author:     duguma
 header-img: img/article-bg.jpg
-top: true
+top: false
 catalog: true
 tags:
     - Android10
     - Android
-	- 组件学习
- ---
+    - 组件学习
+---
 
 <h2><a id="_3"></a>一、概述</h2> 
 <p>广播&#xff08;BroadcastCast&#xff09;用于进程/线程间的通信&#xff0c;广播有发送广播和接收广播两部分组成&#xff0c;其中广播接收者BroadcastReceiver是四大组件之一。</p> 
