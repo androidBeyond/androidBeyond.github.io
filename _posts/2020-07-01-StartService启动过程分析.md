@@ -1,17 +1,18 @@
- ---
+---
 layout:     post
 title:      Android10 StartService启动过程分析
 subtitle:   这篇文章分析一下StartService 的整体启动流程
 date:       2020-07-01
 author:     duguma
 header-img: img/article-bg.jpg
-top: true
+top: false
 catalog: true
 tags:
     - Android10
-    - android
-	- 组件学习
- ---
+    - Android
+    - framework
+    - 组件学习
+---
 
 <h2><a id="_3"></a>一、概述</h2> 
 <p>前面已经介绍了详细介绍了管理Android四大剑客Activity、Service、Broadcast、ContentProvider的ActivityManagerService启动的详细流程&#xff0c;这里讲从应用startService的启动过程来分析AMS。</p> 
