@@ -28,104 +28,15 @@ pre code {
 .highlight table {
   margin: 0;
   width: auto;
+  background: #ffffff;
   border: none;
 }
 .highlight td {
   border: none;
+  background: #ffffff;
   padding: 0;
 }
-.highlight figcaption {
-  font-size: 1em;
-  color: #cccccc;
-  line-height: 1em;
-  margin-bottom: 1em;
-}
-.highlight figcaption:before,
-.highlight figcaption:after {
-  content: " ";
-  display: table;
-}
-.highlight figcaption:after {
-  clear: both;
-}
-.highlight figcaption a {
-  float: right;
-  color: #cccccc;
-}
-.highlight figcaption a:hover {
-  border-bottom-color: #4d4d4c;
-}
-.highlight .gutter pre {
-  color: #666;
-  text-align: right;
-  padding-right: 20px;
-}
-.highlight .line {
-  height: 20px;
-}
-.gist table {
-  width: auto;
-}
-.gist table td {
-  border: none;
-}
-pre .comment {
-  color: #cccccc;
-}
-pre .variable,
-pre .attribute,
-pre .tag,
-pre .regexp,
-pre .ruby .constant,
-pre .xml .tag .title,
-pre .xml .pi,
-pre .xml .doctype,
-pre .html .doctype,
-pre .css .id,
-pre .css .class,
-pre .css .pseudo {
-  color: #c82829;
-}
-pre .number,
-pre .preprocessor,
-pre .built_in,
-pre .literal,
-pre .params,
-pre .constant,
-pre .command {
-  color: #cccccc;
-}
-pre .ruby .class .title,
-pre .css .rules .attribute,
-pre .string,
-pre .value,
-pre .inheritance,
-pre .header,
-pre .ruby .symbol,
-pre .xml .cdata,
-pre .special,
-pre .number,
-pre .formula {
-  color: #718c00;
-}
-pre .title,
-pre .css .hexcolor {
-  color: #3e999f;
-}
-pre .function,
-pre .python .decorator,
-pre .python .title,
-pre .ruby .function .title,
-pre .ruby .title .keyword,
-pre .perl .sub,
-pre .javascript .title,
-pre .coffeescript .title {
-  color: #cccccc;
-}
-pre .keyword,
-pre .javascript .function {
-  color: #cccccc;
-}
+
 
 </style>
         
