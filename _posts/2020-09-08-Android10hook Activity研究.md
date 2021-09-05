@@ -1,17 +1,18 @@
- ---
+---
 layout:     post
 title:      Android10 hook Activity研究
 subtitle:   在插件化中，hook Activity作为最基本的技术，用来在宿主app中新增Activity
 date:       2020-09-08
 author:     duguma
 header-img: img/article-bg.jpg
-top: true
+top: false
 catalog: true
 tags:
-    - Android10
+    - 系统架构
     - Android
-	- 组件学习
- ---
+    - Android10
+    - framework
+---
    
    <div class="post-body" itemprop="articleBody">
   
