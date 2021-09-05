@@ -1,21 +1,21 @@
- ---
+---
 layout:     post
 title:      Android10 屏幕VIEW刷新机制分析
 subtitle:   本文将从startActivity开始讲解Android屏幕刷新机制
 date:       2020-10-14
 author:     duguma
 header-img: img/article-bg.jpg
-top: true
+top: false
 catalog: true
 tags:
     - Android10
     - Android
-	- 组件学习
- ---
+    - 组件学习
+---
 
 <h2><a id="_4"></a>一、概述</h2> 
-<p>本文将从startActivity开始讲解Android屏幕刷新机制&#xff0c;前面的文章有分析过<a href="https://skytoby.github.io/2019/startActivity%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B/">startActivity的启动过程</a>&#xff0c;这里将重点分析WMS相关的过程&#xff0c;从而了解Android屏幕刷新机制原理。前面介绍的startActivity启动过程的流程图如下&#xff1a;</p> 
-<p><img src="https://img-blog.csdnimg.cn/20200729172401558.jpg?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Nhbzg2MTU0NDMyNQ&#61;&#61;,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" /></p> 
+<p>本文将从startActivity开始讲解Android屏幕刷新机制&#xff0c;前面的文章有分析过startActivity的启动过程&#xff0c;这里将重点分析WMS相关的过程&#xff0c;从而了解Android屏幕刷新机制原理。前面介绍的startActivity启动过程的流程图如下&#xff1a;</p> 
+<p><img src="https://img-blog.csdnimg.cn/20200729172401558.jpg?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Nhbzg2MTU0NDMyNQ&#61;&#61;,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" /></p> 
 <h2><a id="View_11"></a>二、View的绘制过程</h2> 
 <p>从启动过程中的performLaunchActivity开始分析&#xff0c;View真正的绘制是在Activity中的onResume方法中。</p> 
 <h3><a id="21_ATperformLaunchActivity_15"></a>2.1 AT.performLaunchActivity</h3> 
@@ -119,7 +119,7 @@ tags:
 
 </code></pre> 
 <p>mWindow为上面创建的PhoneWindow对象&#xff0c;其类结构如下图所示</p> 
-<p><img src="https://img-blog.csdnimg.cn/20200729172440564.jpg?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Nhbzg2MTU0NDMyNQ&#61;&#61;,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" /></p> 
+<p><img src="https://img-blog.csdnimg.cn/20200729172440564.jpg?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Nhbzg2MTU0NDMyNQ&#61;&#61;,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" /></p> 
 <p>[-&gt;PhoneWindow.java]</p> 
 <pre><code> public void setContentView(int layoutResID) {
         // Note: FEATURE_CONTENT_TRANSITIONS may be set in the process of installing the window
