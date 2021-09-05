@@ -17,7 +17,7 @@ tags:
 <h2><a id="_3"></a>一、概述</h2> 
 <p>前面已经介绍了详细介绍了管理Android四大剑客Activity、Service、Broadcast、ContentProvider的ActivityManagerService启动的详细流程&#xff0c;这里讲从应用startService的启动过程来分析AMS。</p> 
 <p>ActivityManagerService相关的类图如下&#xff1a;</p> 
-<p><img src="https://img-blog.csdnimg.cn/20200105192643489.jpg?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Nhbzg2MTU0NDMyNQ&#61;&#61;,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" /></p> 
+<p><img src="https://img-blog.csdnimg.cn/20200105192643489.jpg?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Nhbzg2MTU0NDMyNQ&#61;&#61;,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" /></p> 
 <p>启动服务通过startServie或者bindService即可&#xff0c;该过程如下&#xff1a;</p> 
 <p>当应用调用Andorid API方法startServie或者bindService来启动服务的过程&#xff0c;主要是AMS来完成的。</p> 
 <p>1.AMS通过socket通信方式向zygote进程请求创建用于承载服务进程的ActivityThread。如果启动服务运行在本地服务则不需要再次创建进程。</p> 
@@ -25,7 +25,7 @@ tags:
 <p>3.AMS向新生成的ActivityThread进程&#xff0c;通过Binder方式发送创建服务的请求</p> 
 <p>4.ActivityThread启动本地运行服务。</p> 
 <p>启动服务的流程如下&#xff1a;</p> 
-<p><img src="https://img-blog.csdnimg.cn/20200105192657238.jpg?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Nhbzg2MTU0NDMyNQ&#61;&#61;,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" /></p> 
+<p><img src="https://img-blog.csdnimg.cn/20200105192657238.jpg?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Nhbzg2MTU0NDMyNQ&#61;&#61;,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" /></p> 
 <h2><a id="_26"></a>二、启动服务进程端</h2> 
 <p>在app中调用startService&#xff0c;调用的是ContextWrapper中的startService</p> 
 <h3><a id="1_CWstartService_30"></a>1. CW.startService</h3> 
