@@ -13,7 +13,157 @@ tags:
     - Android10
     - framework
 ---
-   
+<style> 
+pre,
+.highlight {
+  margin: 10px 0;
+}
+pre {
+  overflow: auto;
+}
+code,
+kbd,
+pre,
+samp {
+  font-family: monospace, monospace;
+  font-size: 1em;
+}
+pre,
+.highlight {
+  overflow: auto;
+  margin: 20px 0;
+  padding: 15px;
+  font-size: 13px;
+  color: #4d4d4c;
+  background: #f7f7f7;
+  line-height: 1.6;
+}
+pre,
+code {
+  font-family: 'consolas', consolas, Menlo, "PingFang SC", "Microsoft YaHei", monospace;
+}
+code {
+  padding: 2px 4px;
+  word-break: break-all;
+  color: #444;
+  background: #eee;
+  border-radius: 4px;
+  font-size: 13px;
+}
+pre code {
+  padding: 0;
+  color: #4d4d4c;
+  background: none;
+  text-shadow: none;
+}
+.highlight pre {
+  border: none;
+  margin: 0;
+  padding: 1px;
+}
+.highlight table {
+  margin: 0;
+  width: auto;
+  border: none;
+}
+.highlight td {
+  border: none;
+  padding: 0;
+}
+.highlight figcaption {
+  font-size: 1em;
+  color: #4d4d4c;
+  line-height: 1em;
+  margin-bottom: 1em;
+}
+.highlight figcaption:before,
+.highlight figcaption:after {
+  content: " ";
+  display: table;
+}
+.highlight figcaption:after {
+  clear: both;
+}
+.highlight figcaption a {
+  float: right;
+  color: #4d4d4c;
+}
+.highlight figcaption a:hover {
+  border-bottom-color: #4d4d4c;
+}
+.highlight .gutter pre {
+  color: #666;
+  text-align: right;
+  padding-right: 20px;
+}
+.highlight .line {
+  height: 20px;
+}
+.gist table {
+  width: auto;
+}
+.gist table td {
+  border: none;
+}
+pre .comment {
+  color: #8e908c;
+}
+pre .variable,
+pre .attribute,
+pre .tag,
+pre .regexp,
+pre .ruby .constant,
+pre .xml .tag .title,
+pre .xml .pi,
+pre .xml .doctype,
+pre .html .doctype,
+pre .css .id,
+pre .css .class,
+pre .css .pseudo {
+  color: #c82829;
+}
+pre .number,
+pre .preprocessor,
+pre .built_in,
+pre .literal,
+pre .params,
+pre .constant,
+pre .command {
+  color: #f5871f;
+}
+pre .ruby .class .title,
+pre .css .rules .attribute,
+pre .string,
+pre .value,
+pre .inheritance,
+pre .header,
+pre .ruby .symbol,
+pre .xml .cdata,
+pre .special,
+pre .number,
+pre .formula {
+  color: #718c00;
+}
+pre .title,
+pre .css .hexcolor {
+  color: #3e999f;
+}
+pre .function,
+pre .python .decorator,
+pre .python .title,
+pre .ruby .function .title,
+pre .ruby .title .keyword,
+pre .perl .sub,
+pre .javascript .title,
+pre .coffeescript .title {
+  color: #4271ae;
+}
+pre .keyword,
+pre .javascript .function {
+  color: #8959a8;
+}
+
+</style>
         
         <p>在插件化中，hook Activity作为最基本的技术，用来在宿主app中新增Activity，而通常情况下，Activity必须在Manifest中注册在才可以使用，下面将就Android10.0来分析hook Activity的详细过程。</p>
 <p>要hook Activity之前，必须知道Activity的启动过程，才能够选择合适的点进行hook，在前面的文章中有分析<a href="https://skytoby.github.io/2019/startActivity%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B/" target="_blank" rel="noopener">Activity详细的启动过程</a>，hook主要是两个点：一是在Activity给AMS之前替换代理的Activity，二是在handler中发送启动Activity时替换为插件的Activity。</p>
