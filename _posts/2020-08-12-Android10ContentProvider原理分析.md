@@ -36,14 +36,14 @@ Cursor cursor &#61; cr.query(uri, null, null, null, null);  //执行查询操作
 cursor.close(); //关闭
 </code></pre> 
 <h3><a id="13___41"></a>1.3 类图</h3> 
-<p><img src="https://img-blog.csdnimg.cn/20200105192951555.jpg?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Nhbzg2MTU0NDMyNQ&#61;&#61;,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" /></p> 
+<p><img src="https://img-blog.csdnimg.cn/20200105192951555.jpg?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Nhbzg2MTU0NDMyNQ&#61;&#61;,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" /></p> 
 <p>CPP和CPN是Binder通信的C/S两端</p> 
 <p>ACR&#xff08;ApplicationContentResolver&#xff09;继承于ContentResolver&#xff0c;是ContextImpl的内部类&#xff0c;ACR的实现通过调用其成员变量mMainThread来实现。</p> 
 <h3><a id="14__48"></a>1.4 重要成员变量</h3> 
 <table><thead><tr><th align="left">类名</th><th align="left">成员变量</th><th align="left">含义</th></tr></thead><tbody><tr><td align="left">AMS</td><td align="left">CONTENT_PROVIDER_PUBLISH_TIMEOUT</td><td align="left">默认值为10s</td></tr><tr><td align="left">AMS</td><td align="left">mProviderMap</td><td align="left">记录所有contentProvider</td></tr><tr><td align="left">AMS</td><td align="left">mLaunchingProviders</td><td align="left">记录存在客户端等待publish的ContentProviderRecord</td></tr><tr><td align="left">PR</td><td align="left">pubProviders</td><td align="left">该进程创建的ContentProviderRecord</td></tr><tr><td align="left">PR</td><td align="left">conProviders</td><td align="left">该进程使用的ContentProviderConnection</td></tr><tr><td align="left">AT</td><td align="left">mLocalProviders</td><td align="left">记录所有本地的ContentProvider&#xff0c;以IBinder以key</td></tr><tr><td align="left">AT</td><td align="left">mLocalProvidersByName</td><td align="left">记录所有本地的ContentProvider&#xff0c;以组件名为key</td></tr><tr><td align="left">AT</td><td align="left">mProviderMap</td><td align="left">记录该进程的contentProvider</td></tr><tr><td align="left">AT</td><td align="left">mProviderRefCountMap</td><td align="left">记录所有对其他进程中的ContentProvider的引用计数</td></tr></tbody></table>
 <ul><li><code>CONTENT_PROVIDER_PUBLISH_TIMEOUT</code>(10s): provider所在进程发布其ContentProvider的超时时长为10s&#xff0c;超过10s则会系统所杀;</li><li><code>mProviderMap</code>&#xff1a; AMS和AT都有一个同名的成员变量, AMS的数据类型为ProviderMap,而AT则是以ProviderKey为key的ArrayMap类型;</li><li><code>mLaunchingProviders</code>&#xff1a;记录的每一项是一个ContentProviderRecord对象, 所有的存在client等待其发布完成的contentProvider列表&#xff0c;一旦发布完成则相应的contentProvider便会从该列表移除&#xff1b;</li><li>PR:ProcessRecord, AT: ActivityThread&#xff1b;</li><li><code>mLocalProviders</code>和<code>mLocalProvidersByName</code>&#xff1a;都是用于记录所有本地的ContentProvider,不同的只是key。</li></ul> 
 <h3><a id="15_query_68"></a>1.5 query流程图</h3> 
-<p><img src="https://img-blog.csdnimg.cn/20200105193016177.jpg?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Nhbzg2MTU0NDMyNQ&#61;&#61;,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" /></p> 
+<p><img src="https://img-blog.csdnimg.cn/20200105193016177.jpg?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Nhbzg2MTU0NDMyNQ&#61;&#61;,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" /></p> 
 <h2><a id="ContentProvider_72"></a>二、发布ContentProvider</h2> 
 <p>通过ContentProvider共享数据时&#xff0c;需要编写一个类继承ContentProvier&#xff0c;创建数据库&#xff0c;并在AndroidManifest声明该Provider&#xff0c;这样其他的进行就可以通过ContentResolver去查询共享的信息。先来看一下应用时如何发布ContentProvider&#xff0c;提供给其他应用使用。ContentProvider一般是在应用进程启动的时候启动&#xff0c;是四大组件中最早启动的。进程的启动在四大组件与进程启动那里有详细的分析。</p> 
 <p>发布ContentProvider分两种情况&#xff1a;Provider进程未启动&#xff0c;Provider进程已经启动但未发布。</p> 
@@ -1739,7 +1739,7 @@ Cursor cursor &#61; contentResolver.query(uri, null, null, null, null);
 <p>本文通过分析了发布ContentProvider的过程&#xff0c;并分析query过程&#xff0c;先获取provider在安装provider信息&#xff0c;最后才查询。而查询操作主要分为两种情况&#xff1a;</p> 
 <h3><a id="41__1948"></a>4.1 进程未启动</h3> 
 <p>provider进程不存在&#xff0c;需要创建进程并发布相关的provider</p> 
-<p><img src="https://img-blog.csdnimg.cn/20200105193155938.jpg?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Nhbzg2MTU0NDMyNQ&#61;&#61;,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" /></p> 
+<p><img src="https://img-blog.csdnimg.cn/20200105193155938.jpg?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Nhbzg2MTU0NDMyNQ&#61;&#61;,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" /></p> 
 <p>1.client进程&#xff1a;通过Binder向systemserver进程请求相应的provider</p> 
 <p>2.systemserver进程&#xff1a;如果目标进程未启动&#xff0c;则调用startProcessLocked启动进程&#xff0c;当启动完成&#xff0c;当cpr.provider &#61;&#61;null&#xff0c;则systemserver进入wait阶段&#xff0c;等待目标provider发布&#xff1b;</p> 
 <p>3.provider进程&#xff1a;进程启动后执行attach到systemserver&#xff0c;而后bindApplication&#xff0c;在这个过程会installProvider和PublishContentProviders,再binder到systemserver进程&#xff1b;</p> 
@@ -1748,7 +1748,7 @@ Cursor cursor &#61; contentResolver.query(uri, null, null, null, null);
 <p>关于<code>CONTENT_PROVIDER_PUBLISH_TIMEOUT</code>超时机制所统计的时机区间是指在startProcessLocked之后会调用AMS.attachApplicationLocked为起点&#xff0c;一直到AMS.publishContentProviders的过程。</p> 
 <h3><a id="42__1966"></a>4.2 进程已启动</h3> 
 <p>provider进程已启动但未发布&#xff0c;需要发布相关的provider</p> 
-<p><img src="https://img-blog.csdnimg.cn/20200105193449997.jpg?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Nhbzg2MTU0NDMyNQ&#61;&#61;,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" /><br /> Client进程&#xff1a;获取provider发现cpr为空&#xff0c;则调用scheduleInstallProvider来向provider所在的进程发出一个oneway的binder请求&#xff0c;进入wait状态&#xff1b;</p> 
+<p><img src="https://img-blog.csdnimg.cn/20200105193449997.jpg?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Nhbzg2MTU0NDMyNQ&#61;&#61;,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" /><br /> Client进程&#xff1a;获取provider发现cpr为空&#xff0c;则调用scheduleInstallProvider来向provider所在的进程发出一个oneway的binder请求&#xff0c;进入wait状态&#xff1b;</p> 
 <p>provider进程&#xff1a;安装完成provider信息后&#xff0c;通过notify机制唤醒当前处于wait状态的binder线程。</p> 
 <p>如果provider在publish之后&#xff0c;这是在请求provider则没用最右边的过程&#xff0c;直接AMS.getContentProvierImpl之后便进入AT.installProvider的过程&#xff0c;而不会再进入wait过程。</p> 
 <h3><a id="43__1977"></a>4.3 引用计数</h3> 
