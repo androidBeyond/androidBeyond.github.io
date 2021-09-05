@@ -46,7 +46,7 @@ pre code {
   background: #ffffff;
   padding: 0;
 }
- pre {
+ .pre {
   margin: 0;
   width: auto;
   background: #ffffff;
