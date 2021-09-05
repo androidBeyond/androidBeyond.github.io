@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      Android10 BroadcastCast广播机制原理
+title:      Android10 BroadcastCast广播原理分析
 subtitle:   广播（BroadcastCast）用于进程/线程间的通信，广播有发送广播和接收广播两部分组成
 date:       2020-08-22
 author:     duguma
@@ -2606,7 +2606,7 @@ public void enqueueOrderedBroadcastLocked(BroadcastRecord r) {
 <p>3.最后回调receiver.onReceive的方法&#xff0c;对于串行广播还需要通知AMS已经处理完该条广播&#xff0c;并进行下个广播的处理。</p> 
 <h2><a id="_2873"></a>五、总结</h2> 
 <p>发送广播过程的流程如下&#xff1a;</p> 
-<p><img src="https://img-blog.csdnimg.cn/20200105193923486.jpg?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Nhbzg2MTU0NDMyNQ&#61;&#61;,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" /><br /> <strong>广播机制</strong></p> 
+<p><img src="https://img-blog.csdnimg.cn/20200105193923486.jpg?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Nhbzg2MTU0NDMyNQ&#61;&#61;,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" /><br /> <strong>广播机制</strong></p> 
 <p>1.当发送串行广播&#xff08;order&#61; true&#xff09;时</p> 
 <ul><li> <p>静态注册的广播接收者&#xff08;receivers&#xff09;&#xff0c;采用串行处理</p> </li><li> <p>动态注册的广播接收者&#xff08;registeredReceivers&#xff09;&#xff0c;采用串行处理</p> </li></ul> 
 <p>2.当发送并行广播&#xff08;order&#61; false&#xff09;时</p> 
