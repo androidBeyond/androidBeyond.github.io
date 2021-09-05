@@ -36,7 +36,7 @@ Cursor cursor &#61; cr.query(uri, null, null, null, null);  //执行查询操作
 cursor.close(); //关闭
 </code></pre> 
 <h3><a id="13___41"></a>1.3 类图</h3> 
-<p><img src="https://img-blog.csdnimg.cn/20200105192951555.jpg?x-oss-process&#61,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Nhbzg2MTU0NDMyNQ&#61;&#61;,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" /></p> 
+<p><img src="https://img-blog.csdnimg.cn/36a9576f4b89456e9120d9d693482dbb.jpg?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="在这里插入图片描述" /></p> 
 <p>CPP和CPN是Binder通信的C/S两端</p> 
 <p>ACR&#xff08;ApplicationContentResolver&#xff09;继承于ContentResolver&#xff0c;是ContextImpl的内部类&#xff0c;ACR的实现通过调用其成员变量mMainThread来实现。</p> 
 <h3><a id="14__48"></a>1.4 重要成员变量</h3> 
