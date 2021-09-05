@@ -13,7 +13,7 @@ tags:
     - Android10
     - framework
 ---
-<style> 
+<style type="text/css">
 pre,
 .highlight {
   margin: 10px 0;
