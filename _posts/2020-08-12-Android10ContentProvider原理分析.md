@@ -1,17 +1,17 @@
- ---
+---
 layout:     post
 title:      Android10 ContentProvider原理分析
 subtitle:   ContentProvider用于提供数据的统一访问格式，封装具体的实现。对于数据的使用无需知道是数据库、文件、网络
 date:       2020-08-12
 author:     duguma
 header-img: img/article-bg.jpg
-top: true
+top: false
 catalog: true
 tags:
     - Android10
-    - android
-	- 组件学习
- ---
+    - Android
+    - 组件学习
+---
 
 <h2><a id="_3"></a>一、概述</h2> 
 <p>ContentProvider用于提供数据的统一访问格式&#xff0c;封装具体的实现。对于数据的使用无需知道是数据库、文件、网络&#xff0c;只需要使用ContentProvider的数据操作接口&#xff0c;即增&#xff08;insert&#xff09;删&#xff08;delete&#xff09;改&#xff08;update&#xff09;查&#xff08;query&#xff09;。</p> 
