@@ -15,7 +15,7 @@ tags:
 
 <h2 id="一-inputdispatcher起点">一. InputDispatcher起点</h2>
 
-<p>上篇文章<a href="http://gityuan.com/2016/12/11/input-reader/">输入系统之InputReader线程</a>，介绍InputReader利用EventHub获取数据后生成EventEntry事件，加入到InputDispatcher的mInboundQueue队列，再唤醒InputDispatcher线程。本文将介绍InputDispatcher，同样从threadLoop为起点开始分析。</p>
+<p>上篇文章我们介绍InputReader利用EventHub获取数据后生成EventEntry事件，加入到InputDispatcher的mInboundQueue队列，再唤醒InputDispatcher线程。本文将介绍InputDispatcher，同样从threadLoop为起点开始分析。</p>
 
 <h4 id="11-threadloop">1.1 threadLoop</h4>
 <p>先来回顾一下InputDispatcher对象的初始化过程:</p>
