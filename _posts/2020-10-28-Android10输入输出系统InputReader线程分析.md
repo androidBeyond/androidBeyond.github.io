@@ -968,13 +968,12 @@ struct RawEvent {
 
 <h3 id="52-流程图">5.2 流程图</h3>
 
-<p>点击查看<a href="http://www.gityuan.com/images/input/input_reader_seq.jpg">大图</a>:</p>
 
-<p><img src="/images/input/input_reader_seq.jpg" alt="input_reader_seq" /></p>
+<p><img src="https://img-blog.csdnimg.cn/5013c6aff19c472596212664b732ba80.jpg?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="input_reader_seq" /></p>
 
 <p>InputReader的核心工作就是从EventHub获取数据后生成EventEntry事件，加入到InputDispatcher的mInboundQueue队列，再唤醒InputDispatcher线程。</p>
 
-<p><img src="/images/input/input_reader.jpg" alt="input_reader" /></p>
+<p><img src="https://img-blog.csdnimg.cn/a4acb4626d0543f29197b4a57a64deb6.jpg?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="input_reader" /></p>
 
 <p>说明:</p>
 
