@@ -16,7 +16,7 @@ tags:
 
 <h2 id="一-inputreader起点">一. InputReader起点</h2>
 
-<p>上一篇文章<a href="http://gityuan.com/2016/12/10/input-manager/">Input系统—启动篇</a>，介绍IMS服务的启动过程会创建两个native线程，分别是InputReader,InputDispatcher.
+<p>上一篇文章我们介绍过IMS服务的启动过程会创建两个native线程，分别是InputReader,InputDispatcher.
 接下来从InputReader线程的执行过程从threadLoop为起点开始分析。</p>
 
 <h4 id="11-threadloop">1.1 threadLoop</h4>
