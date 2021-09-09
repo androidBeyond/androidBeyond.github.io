@@ -389,7 +389,7 @@ Unresponsive:
 }
 </code></pre></div></div>
 
-<p>此处mFocusedWindowHandle是何处赋值呢？是在InputDispatcher.setInputWindows()方法，具体见下一篇文章<a href="">Input系统—UI线程</a>.</p>
+<p>此处mFocusedWindowHandle是何处赋值呢？是在InputDispatcher.setInputWindows()方法.</p>
 
 <p>寻找聚焦窗口失败的情况：</p>
 
@@ -834,8 +834,7 @@ Unresponsive:
 </code></pre></div></div>
 
 <p>InputChannel通过socket向远端的socket发送消息。socket通道是如何建立的呢？
-InputDispatcher又是如何与前台的window通信的呢？ 见下一篇文章<a href="http://gityuan.com/2016/12/31/input-ipc/">Input系统—进程交互</a>,
-从文章的小节2.1开始继续往下说.</p>
+InputDispatcher又是如何与前台的window通信的呢？ 我后边会另写一篇文章详细分析，这里暂且不做讨论.</p>
 
 <h3 id="210-releasependingeventlocked">2.10 releasePendingEventLocked</h3>
 
@@ -963,15 +962,13 @@ private void userActivityInternal(long eventTime, int event, int flags, int uid)
 
 <h3 id="41-流程图">4.1 流程图</h3>
 
-<p>点击查看<a href="http://www.gityuan.com/images/input/input_dispatcher_seq.jpg">大图</a>:</p>
-
-<p><img src="/images/input/input_dispatcher_seq.jpg" alt="input_dispatcher_seq" /></p>
+<p><img src="https://img-blog.csdnimg.cn/3be11bdf4be34546bee4be935a066aae.jpg?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="input_dispatcher_seq" /></p>
 
 <h3 id="42-核心方法">4.2 核心方法</h3>
 
 <p>用一张图来整体概况InputDispatcher线程的主要工作：</p>
 
-<p><img src="/images/input/input_dispatcher.jpg" alt="input_dispatcher" /></p>
+<p><img src="https://img-blog.csdnimg.cn/5df1e4c7f4f64ff3954d52a0f5002cdf.jpg?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="input_dispatcher" /></p>
 
 <p>图解:</p>
 
