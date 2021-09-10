@@ -265,17 +265,17 @@ drwxr-xr-x 26 root root  4096 2018-08-08 00:01:00.000000000 +0800 ..
  * Parser for package files (APKs) on disk. This supports apps packaged either
  * as a single "monolithic" APK, or apps packaged as a "cluster" of multiple
  * APKs in a single directory.
- * <p>
+ * 
  * Apps packaged as multiple APKs always consist of a single "base" APK (with a
  * {@code null} split name) and zero or more "split" APKs (with unique split
  * names). Any subset of those split APKs are a valid install, as long as the
  * following constraints are met:
- * <ul>
- * <li>All APKs must have the exact same package name, version code, and signing
+ * 
+ * All APKs must have the exact same package name, version code, and signing
  * certificates.
- * <li>All APKs must have unique split names.
- * <li>All installations must contain a single base APK.
- * </ul>
+ * All APKs must have unique split names.
+ * All installations must contain a single base APK.
+ * 
  *
  * @hide
  */
@@ -307,7 +307,8 @@ drwxr-xr-x 26 root root  4096 2018-08-08 00:01:00.000000000 +0800 ..
            this.sdkVersion = sdkVersion;
            this.fileVersion = fileVersion;
        }
-   }</code></pre>
+   }
+</code></pre>
 <h4 id="3-1-2-SplitPermissionInfo"><a href="#3-1-2-SplitPermissionInfo" class="headerlink" title="3.1.2  SplitPermissionInfo"></a>3.1.2  SplitPermissionInfo</h4><p>主要记录一个权限拆分为颗粒度更小的权限</p>
 <pre><code>
 /** @hide */
@@ -324,7 +325,8 @@ drwxr-xr-x 26 root root  4096 2018-08-08 00:01:00.000000000 +0800 ..
            this.newPerms = newPerms;
            this.targetSdk = targetSdk;
        }
-   }</code></pre>
+   }
+</code></pre>
 <h4 id="3-1-3-ParsePackageItemArgs"><a href="#3-1-3-ParsePackageItemArgs" class="headerlink" title="3.1.3  ParsePackageItemArgs"></a>3.1.3  ParsePackageItemArgs</h4><p>主要为解析包单个item的参数</p>
 <pre><code>
 static class ParsePackageItemArgs {
@@ -360,7 +362,8 @@ static class ParsePackageItemArgs {
             bannerRes = _bannerRes;
             roundIconRes = _roundIconRes;
         }
-    }</code></pre>
+    }
+</code></pre>
 <h4 id="3-1-4-ParseComponentArgs"><a href="#3-1-4-ParseComponentArgs" class="headerlink" title="3.1.4  ParseComponentArgs"></a>3.1.4  ParseComponentArgs</h4><p>主要为解析包中单个组件的参数</p>
 <pre><code>
 /** @hide */
@@ -389,7 +392,8 @@ static class ParsePackageItemArgs {
            descriptionRes = _descriptionRes;
            enabledRes = _enabledRes;
        }
-   }</code></pre>
+   }
+</code></pre>
 <h4 id="3-1-5-PackageLite"><a href="#3-1-5-PackageLite" class="headerlink" title="3.1.5  PackageLite"></a>3.1.5  PackageLite</h4><p>表示在解析过程中的一个轻量级的独立的安装包</p>
 <pre><code>
 /**
