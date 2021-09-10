@@ -627,82 +627,82 @@ static class ParsePackageItemArgs {
         //表示是否支持硬件加速
         public boolean baseHardwareAccelerated;
 
-        //对应application对象，对应AndroidManifest里面的<Application>
+        //对应application对象，对应AndroidManifest里面的&lt;Application&gt;
         // For now we only support one application per package.
         @UnsupportedAppUsage
         public ApplicationInfo applicationInfo = new ApplicationInfo();
         
-        //apk安装包中，对应AndroidManifest里面的<Permission>
+        //apk安装包中，对应AndroidManifest里面的&lt;Permission&gt;
         @UnsupportedAppUsage
-        public final ArrayList<Permission> permissions = new ArrayList<Permission>(0);
-        //apk安装包中，对应AndroidManifest里面的<PermissionGroup>
+        public final ArrayList&lt;Permission&gt; permissions = new ArrayList&lt;Permission&gt;(0);
+        //apk安装包中，对应AndroidManifest里面的&lt;PermissionGroup&gt;
         @UnsupportedAppUsage
-        public final ArrayList<PermissionGroup> permissionGroups = new ArrayList<PermissionGroup>(0);
-        //apk安装包中，对应AndroidManifest里面的<Activity>
+        public final ArrayList&lt;PermissionGroup&gt; permissionGroups = new ArrayList&lt;PermissionGroup&gt;(0);
+        //apk安装包中，对应AndroidManifest里面的&lt;Activity&gt;
         //不是通常说的Activity，而是PackageParse的内部类Activity
         @UnsupportedAppUsage
-        public final ArrayList<Activity> activities = new ArrayList<Activity>(0);
+        public final ArrayList&lt;Activity&gt; activities = new ArrayList&lt;Activity&gt;(0);
         
-        //apk安装包中，对应AndroidManifest里面的<Receiver>
+        //apk安装包中，对应AndroidManifest里面的&lt;Receiver&gt;
         //不是通常说的Activity，而是PackageParse的内部类Activity
         @UnsupportedAppUsage
-        public final ArrayList<Activity> receivers = new ArrayList<Activity>(0);
+        public final ArrayList&lt;Activity&gt; receivers = new ArrayList&lt;Activity&gt;(0);
         
-        //apk安装包中，对应AndroidManifest里面的<Provider>
+        //apk安装包中，对应AndroidManifest里面的&lt;Provider&gt;
         //不是通常说的Provider，而是PackageParse的内部类Provider
         @UnsupportedAppUsage
-        public final ArrayList<Provider> providers = new ArrayList<Provider>(0);
+        public final ArrayList&lt;Provider&gt; providers = new ArrayList&lt;Provider&gt;(0);
         
-        //apk安装包中，对应AndroidManifest里面的<Service>
+        //apk安装包中，对应AndroidManifest里面的&lt;Service&gt;
         //不是通常说的Service，而是PackageParse的内部类Service
         @UnsupportedAppUsage
-        public final ArrayList<Service> services = new ArrayList<Service>(0);
+        public final ArrayList&lt;Service&gt; services = new ArrayList&lt;Service&gt;(0);
         
-        //apk安装包中，对应AndroidManifest里面的<Instrumentation>
+        //apk安装包中，对应AndroidManifest里面的&lt;Instrumentation&gt;
         //不是通常说的Instrumentation，而是内部类Instrumentation
         @UnsupportedAppUsage
-        public final ArrayList<Instrumentation> instrumentation = new ArrayList<Instrumentation>(0);
+        public final ArrayList&lt;Instrumentation&gt; instrumentation = new ArrayList&lt;Instrumentation&gt;(0);
         //apk安装包中请求的权限
         @UnsupportedAppUsage
-        public final ArrayList<String> requestedPermissions = new ArrayList<String>();
+        public final ArrayList&lt;String&gt; requestedPermissions = new ArrayList&lt;String&gt;();
         
         //apk安装包中保内广播的action
         @UnsupportedAppUsage
-        public ArrayList<String> protectedBroadcasts;
+        public ArrayList&lt;String&gt; protectedBroadcasts;
         //父包
         public Package parentPackage;
         //子包
-        public ArrayList<Package> childPackages;
+        public ArrayList&lt;Package&gt; childPackages;
         //共享库名称
         public String staticSharedLibName = null;
         //共享库版本
         public long staticSharedLibVersion = 0;
         //依赖库名称
-        public ArrayList<String> libraryNames = null;
+        public ArrayList&lt;String&gt; libraryNames = null;
         @UnsupportedAppUsage
         //使用库名称
-        public ArrayList<String> usesLibraries = null;
+        public ArrayList&lt;String&gt; usesLibraries = null;
         //使用静态库名称
-        public ArrayList<String> usesStaticLibraries = null;
+        public ArrayList&lt;String&gt; usesStaticLibraries = null;
         //使用静态库版本
         public long[] usesStaticLibrariesVersions = null;
         public String[][] usesStaticLibrariesCertDigests = null;
          //使用其它的库
         @UnsupportedAppUsage
-        public ArrayList<String> usesOptionalLibraries = null;
+        public ArrayList&lt;String&gt; usesOptionalLibraries = null;
          //使用静态库文件
         @UnsupportedAppUsage
         public String[] usesLibraryFiles = null;
          //使用共享库信息
-        public ArrayList<SharedLibraryInfo> usesLibraryInfos = null;
-         //安装包中某个Activity信息的集合 在AndroidManifest里面对应<preferred>标签
-        public ArrayList<ActivityIntentInfo> preferredActivityFilters = null;
+        public ArrayList&lt;SharedLibraryInfo&gt; usesLibraryInfos = null;
+         //安装包中某个Activity信息的集合 在AndroidManifest里面对应&lt;preferred&gt;标签
+        public ArrayList&lt;ActivityIntentInfo&gt; preferredActivityFilters = null;
          //安装包中 AndroidManifest中对应original-package的集合
-        public ArrayList<String> mOriginalPackages = null;
+        public ArrayList&lt;String&gt; mOriginalPackages = null;
          //真实包名，通常和mOriginalPackages一起使用
         public String mRealPackage = null;
         //APK安装包 AndroidManifest中对应adopt-permissions的集合
-        public ArrayList<String> mAdoptPermissions = null;
+        public ArrayList&lt;String&gt; mAdoptPermissions = null;
        //独立的存储应用程序元数据，避免多个不需要的引用
         // We store the application meta-data independently to avoid multiple unwanted references
         @UnsupportedAppUsage
@@ -756,17 +756,17 @@ static class ParsePackageItemArgs {
         @UnsupportedAppUsage
         public Object mExtras;
          
-        //硬件配置信息，对应AndroidManifest里面的<users-configuration>标签
+        //硬件配置信息，对应AndroidManifest里面的&lt;users-configuration&gt;标签
         // Applications hardware preferences
         @UnsupportedAppUsage
-        public ArrayList<ConfigurationInfo> configPreferences = null;
-        //特性组信息，对应AndroidManifest里面的<uses-feature>标签 
+        public ArrayList&lt;ConfigurationInfo&gt; configPreferences = null;
+        //特性组信息，对应AndroidManifest里面的&lt;uses-feature&gt;标签 
         // Applications requested features
         @UnsupportedAppUsage
-        public ArrayList<FeatureInfo> reqFeatures = null;
-         //特性组信息，对应AndroidManifest里面的<feature-group>标签 
+        public ArrayList&lt;FeatureInfo&gt; reqFeatures = null;
+         //特性组信息，对应AndroidManifest里面的&lt;feature-group&gt;标签 
         // Applications requested feature groups
-        public ArrayList<FeatureGroupInfo> featureGroups = null;
+        public ArrayList&lt;FeatureGroupInfo&gt; featureGroups = null;
         
         //安装的属性
         @UnsupportedAppUsage
