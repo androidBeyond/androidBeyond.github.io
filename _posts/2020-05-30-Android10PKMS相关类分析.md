@@ -547,8 +547,8 @@ static class ParsePackageItemArgs {
            this.extractNativeLibs = extractNativeLibs;
            this.isolatedSplits = isolatedSplits;
        }
-
 </code></pre>
+
 <p><strong>备注</strong>：PackageLite和ApkLite代表不同的含义，前者是包，后者是指apk，一个包中可能包含多个apk</p>
 <h4 id="3-1-7-SplitNameComparator"><a href="#3-1-7-SplitNameComparator" class="headerlink" title="3.1.7  SplitNameComparator"></a>3.1.7  SplitNameComparator</h4><p>表示类比较器，在拆包中排序用到</p>
 <pre><code>
