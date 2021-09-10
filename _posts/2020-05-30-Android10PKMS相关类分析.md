@@ -995,8 +995,8 @@ public final static class Activity extends Component&lt;ActivityIntentInfo&gt; i
 
 </code></pre>
 
-&lt;h4 id="3-2-2-parseActivity"&gt;&lt;a href="#3-2-2-parseActivity" class="headerlink" title="3.2.2 parseActivity"&gt;&lt;/a&gt;3.2.2 parseActivity&lt;/h4&gt;&lt;p&gt;这个方法主要是解析AndroidManifest中activity标签的内容，并将其保存到PackageParser.Activity对象中。&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;
+<h4 id="3-2-2-parseActivity"><a href="#3-2-2-parseActivity" class="headerlink" title="3.2.2 parseActivity"></a>3.2.2 parseActivity</h4><p>这个方法主要是解析AndroidManifest中activity标签的内容，并将其保存到PackageParser.Activity对象中。</p>
+<pre><code>
 private Activity parseActivity(Package owner, Resources res,
             XmlResourceParser parser, int flags, String[] outError, CachedComponentArgs cachedArgs,
             boolean receiver, boolean hardwareAccelerated)
