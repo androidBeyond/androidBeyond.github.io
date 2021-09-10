@@ -804,9 +804,9 @@ static class ParsePackageItemArgs {
          * Data used to feed the KeySetManagerService
          */
         @UnsupportedAppUsage
-        public ArraySet<String> mUpgradeKeySets; //升级
+        public ArraySet&lt;String&gt; mUpgradeKeySets; //升级
         @UnsupportedAppUsage
-        public ArrayMap<String, ArraySet<PublicKey>> mKeySetMapping; //公钥
+        public ArrayMap&lt;String, ArraySet&lt;PublicKey&gt;&gt; mKeySetMapping; //公钥
 
         //有abi的话覆盖
         /**
