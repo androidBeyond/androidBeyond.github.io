@@ -525,7 +525,7 @@ static class ParsePackageItemArgs {
        public ApkLite(String codePath, String packageName, String splitName,
                boolean isFeatureSplit,
                String configForSplit, String usesSplitName, int versionCode, int versionCodeMajor,
-               int revisionCode, int installLocation, List<VerifierInfo> verifiers,
+               int revisionCode, int installLocation, List&lt;VerifierInfo&gt; verifiers,
                SigningDetails signingDetails, boolean coreApp,
                boolean debuggable, boolean multiArch, boolean use32bitAbi,
                boolean extractNativeLibs, boolean isolatedSplits) {
