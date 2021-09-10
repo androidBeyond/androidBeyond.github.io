@@ -11,6 +11,7 @@ tags:
     - Android10
     - Android
     - PKMS
+    - 系统服务
 ---
 <h2 id="1-Settings类"><a href="#1-Settings类" class="headerlink" title="1.Settings类"></a>1.Settings类</h2>
 <pre><code>
@@ -30,10 +31,11 @@ final ArrayMap<String, PackageSetting> mPackages = new ArrayMap<>();
 
 /*key是类似“android.ui.system”这样的字段，在Android中每个应用都有一个UID，两个相同的UID的应用可以运行在/一个进程中，为了让两个应用运行在一个进程中，需要在manifest中设置sharedUserId这个属性，这个属性是字符串，但是在linux系统中uid是一个整型，因此就有了SharedUserSetting类型，这个类型除了name还有uid(对应linux中的uid),还有一个列表字段，用于记录系统中相同shardUserId的应用。*/
 final ArrayMap<String, SharedUserSetting> mSharedUsers =
-            new ArrayMap<String, SharedUserSetting>();
+      new ArrayMap<String, SharedUserSetting>();
    
 /*主要保存的是/system/etc/permissions/platform.xml中的permission标签内容，因为Android系统是基于linux的系统，有用户组的概念，platform定义了一些权限，并且定制了哪些用户组具有哪些权限，一旦应用属于某个用户组，那么它就有这个用户组的所有权限*/
-final PermissionSettings mPermissions;</code></pre>
+final PermissionSettings mPermissions;
+</code></pre>
 <h3 id="1-1-Setting构造函数"><a href="#1-1-Setting构造函数" class="headerlink" title="1.1 Setting构造函数"></a>1.1 Setting构造函数</h3>
 <pre><code>
 Settings(File dataDir, PermissionSettings permission, Object lock) {
@@ -61,7 +63,8 @@ Settings(File dataDir, PermissionSettings permission, Object lock) {
        // Deprecated: Needed for migration
        mStoppedPackagesFilename = new File(mSystemDir, "packages-stopped.xml");
        mBackupStoppedPackagesFilename = new File(mSystemDir, "packages-stopped-backup.xml");
-   }</code></pre>
+   }
+</code></pre>
 <p>Setting构造函数主要工作是创建系统文件夹，一些包管理的文件</p>
 <p>packages.xml、packages-backup.xml是一组，用于描述系统所安装的Package信息，其中packages-backup.xml是packages.xml的备份</p>
 <p>packages.list用于描述系统中存在的所有非系统自带的apk信息以及UID大于10000的apk。当APK有变化时，PKMS就会更新该文件。</p>
@@ -86,7 +89,8 @@ SharedUserSetting addSharedUserLPw(String name, int uid, int pkgFlags, int pkgPr
           return s;
       }
       return null;
-  }</code></pre>
+  }
+</code></pre>
 <pre><code>
 /**
  * Defines the root UID.
@@ -135,14 +139,16 @@ public static final int FIRST_APPLICATION_UID = 10000;
  * Last of application-specific UIDs starting at
  * {@link #FIRST_APPLICATION_UID}.
  */
-public static final int LAST_APPLICATION_UID = 19999;</code></pre>
+public static final int LAST_APPLICATION_UID = 19999;
+</code></pre>
 <p>Setting模块的AndroidManifest.xml里面，如下所示：</p>
 <pre><code>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
         package="com.android.settings"
         coreApp="true"
-        android:sharedUserId="android.uid.system"></code></pre>
+        android:sharedUserId="android.uid.system"&gt;
+</code></pre>
 <p> 在xml里面android:sharedUserId属性设置为”android.uid.system”。sharedUserId这个属性主要有两个作用：</p>
 <p>1.两个或者多个声明了同一种sharedUserId的应用可以共享彼此的数据</p>
 <p>2.通过声明特定sharedUserId，该应用所在进程将赋予指定的UID。如Setting声明了system的uid，则就可以共享system用户所对应的权限。</p>
