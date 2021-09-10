@@ -557,7 +557,7 @@ static class ParsePackageItemArgs {
     * Used to sort a set of APKs based on their split names, always placing the
     * base APK (with {@code null} split name) first.
     */
-   private static class SplitNameComparator implements Comparator<String> {
+   private static class SplitNameComparator implements Comparator&lt;String&gt; {
        @Override
        public int compare(String lhs, String rhs) {
            if (lhs == null) {
