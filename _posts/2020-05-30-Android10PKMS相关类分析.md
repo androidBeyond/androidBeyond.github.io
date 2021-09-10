@@ -949,12 +949,12 @@ public final static class Activity extends Component&lt;ActivityIntentInfo&gt; i
     * Parse the package at the given location. Automatically detects if the
     * package is a monolithic style (single APK file) or cluster style
     * (directory of APKs).
-    * <p>
+    * &lt;p&gt;
     * This performs sanity checking on cluster style packages, such as
     * requiring identical package name and version codes, a single base APK,
     * and unique split names.
-    * <p>
-    * Note that this <em>does not</em> perform signature verification; that
+    * &lt;p&gt;
+    * Note that this &lt;em&gt;does not&lt;/em&gt; perform signature verification; that
     * must be done separately in {@link #collectCertificates(Package, int)}.
     *
     * If {@code useCaches} is true, the package parser might return a cached
@@ -985,7 +985,7 @@ public final static class Activity extends Component&lt;ActivityIntentInfo&gt; i
        if (LOG_PARSE_TIMINGS) {
            parseTime = cacheTime - parseTime;
            cacheTime = SystemClock.uptimeMillis() - cacheTime;
-           if (parseTime + cacheTime > LOG_PARSE_TIMINGS_THRESHOLD_MS) {
+           if (parseTime + cacheTime &gt; LOG_PARSE_TIMINGS_THRESHOLD_MS) {
                Slog.i(TAG, "Parse times for '" + packageFile + "': parse=" + parseTime
                        + "ms, update_cache=" + cacheTime + " ms");
            }
