@@ -11,10 +11,11 @@ tags:
     - Android10
     - Android
     - PKMS
-	- 系统服务
+    - 系统服务
 ---
-        <h2 id="1-Settings类"><a href="#1-Settings类" class="headerlink" title="1.Settings类"></a>1.Settings类</h2>
-<pre><code>// Settins文件 data/system/packages.xml
+<h2 id="1-Settings类"><a href="#1-Settings类" class="headerlink" title="1.Settings类"></a>1.Settings类</h2>
+<pre><code>
+// Settins文件 data/system/packages.xml
 private final File mSettingsFilename;
 
 //这个文件不一定存在，是备份文件，如果存在则说明更新packages.xml出错
@@ -35,7 +36,8 @@ final ArrayMap<String, SharedUserSetting> mSharedUsers =
 /*主要保存的是/system/etc/permissions/platform.xml中的permission标签内容，因为Android系统是基于linux的系统，有用户组的概念，platform定义了一些权限，并且定制了哪些用户组具有哪些权限，一旦应用属于某个用户组，那么它就有这个用户组的所有权限*/
 final PermissionSettings mPermissions;</code></pre>
 <h3 id="1-1-Setting构造函数"><a href="#1-1-Setting构造函数" class="headerlink" title="1.1 Setting构造函数"></a>1.1 Setting构造函数</h3>
-<pre><code>Settings(File dataDir, PermissionSettings permission, Object lock) {
+<pre><code>
+Settings(File dataDir, PermissionSettings permission, Object lock) {
        mLock = lock;
        mPermissions = permission;
        //创建mRuntimePermissionsPersistence，是Setting内部类
@@ -65,7 +67,8 @@ final PermissionSettings mPermissions;</code></pre>
 <p>packages.xml、packages-backup.xml是一组，用于描述系统所安装的Package信息，其中packages-backup.xml是packages.xml的备份</p>
 <p>packages.list用于描述系统中存在的所有非系统自带的apk信息以及UID大于10000的apk。当APK有变化时，PKMS就会更新该文件。</p>
 <h3 id="1-2-addSharedUserLPw方法"><a href="#1-2-addSharedUserLPw方法" class="headerlink" title="1.2 addSharedUserLPw方法"></a>1.2 addSharedUserLPw方法</h3><p>该方法将shareUserId name和一个int类型的UID对应起来。UID的定义在Process.java中。</p>
-<pre><code>SharedUserSetting addSharedUserLPw(String name, int uid, int pkgFlags, int pkgPrivateFlags) {
+<pre><code>
+SharedUserSetting addSharedUserLPw(String name, int uid, int pkgFlags, int pkgPrivateFlags) {
       //获取SharedUserSetting对象
       SharedUserSetting s = mSharedUsers.get(name);
       if (s != null) {
@@ -85,7 +88,8 @@ final PermissionSettings mPermissions;</code></pre>
       }
       return null;
   }</code></pre>
-<pre><code>/**
+<pre><code>
+/**
  * Defines the root UID.
  */
 public static final int ROOT_UID = 0;
@@ -134,7 +138,8 @@ public static final int FIRST_APPLICATION_UID = 10000;
  */
 public static final int LAST_APPLICATION_UID = 19999;</code></pre>
 <p>Setting模块的AndroidManifest.xml里面，如下所示：</p>
-<pre><code><manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<pre><code>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
         package="com.android.settings"
         coreApp="true"
@@ -154,7 +159,8 @@ public static final int LAST_APPLICATION_UID = 19999;</code></pre>
 <p><img src="/2019/PKMS相关类分析/SharedUserId.png" alt=""></p>
 <h2 id="2-SystemConfig类"><a href="#2-SystemConfig类" class="headerlink" title="2.SystemConfig类"></a>2.SystemConfig类</h2><h3 id="2-1-SystemConfig构造函数"><a href="#2-1-SystemConfig构造函数" class="headerlink" title="2.1 SystemConfig构造函数"></a>2.1 SystemConfig构造函数</h3><p>主要读取下面路径的配置</p>
 <p>/system/etc/、/system/etc/、/vendor/etc、/odm/etc、/oem/etc、/product/etc 目录下sysconfig和permissions</p>
-<pre><code>SystemConfig() {
+<pre><code>
+SystemConfig() {
        // Read configuration from system
        readPermissions(Environment.buildPath(
                Environment.getRootDirectory(), "etc", "sysconfig"), ALLOW_ALL);
@@ -208,7 +214,8 @@ public static final int LAST_APPLICATION_UID = 19999;</code></pre>
    }
 </code></pre>
 <p>SystemConfig构造函数中主要通过readPermissions函数将对应目录下的xml文件中定义的各个节点读取出来保存到SystemConfig成员变量中。在终端的/system/etc/permissions目录下可以看到很多xml配置文件，如下：</p>
-<pre><code>HWSTF:/system/etc/permissions $ ls -all
+<pre><code>
+HWSTF:/system/etc/permissions $ ls -all
 total 300
 drwxr-xr-x  2 root root  4096 2018-08-08 00:01:00.000000000 +0800 .
 drwxr-xr-x 26 root root  4096 2018-08-08 00:01:00.000000000 +0800 ..
@@ -226,7 +233,8 @@ drwxr-xr-x 26 root root  4096 2018-08-08 00:01:00.000000000 +0800 ..
 ...
 </code></pre>
 <p>这些配置文件都是编译时从framework指定位置拷贝过来的（framework/native/data/etc）,下面是platform.xml里面的部分</p>
-<pre><code><permissions>
+<pre><code>
+<permissions>
 
     <permission name="android.permission.BLUETOOTH_ADMIN" >
         <group gid="net_bt_admin" />
@@ -247,7 +255,8 @@ drwxr-xr-x 26 root root  4096 2018-08-08 00:01:00.000000000 +0800 ..
 <p>总结下SystemConfig初始化时解析xml文件节点以及对应的全局变量。</p>
 <p><img src="/2019/PKMS相关类分析/systemconfig.png" alt=""></p>
 <h2 id="3-PackageParser"><a href="#3-PackageParser" class="headerlink" title="3. PackageParser"></a>3. PackageParser</h2><p>这个类作用是解析APK，在其类中注释如下：</p>
-<pre><code>/**
+<pre><code>
+/**
  * Parser for package files (APKs) on disk. This supports apps packaged either
  * as a single "monolithic" APK, or apps packaged as a "cluster" of multiple
  * APKs in a single directory.
@@ -275,7 +284,8 @@ drwxr-xr-x 26 root root  4096 2018-08-08 00:01:00.000000000 +0800 ..
 <p>类结构</p>
 <p>里面有很多内部类和方法，下面讲介绍里面的主要内部类以及部分解析的方法</p>
 <h3 id="3-1-内部类"><a href="#3-1-内部类" class="headerlink" title="3.1 内部类"></a>3.1 内部类</h3><h4 id="3-1-1-NewPermissionInfo"><a href="#3-1-1-NewPermissionInfo" class="headerlink" title="3.1.1 NewPermissionInfo"></a>3.1.1 NewPermissionInfo</h4><p>记录新的权限</p>
-<pre><code>/** @hide */
+<pre><code>
+/** @hide */
    public static class NewPermissionInfo {
        //权限名称
        @UnsupportedAppUsage
@@ -293,7 +303,8 @@ drwxr-xr-x 26 root root  4096 2018-08-08 00:01:00.000000000 +0800 ..
        }
    }</code></pre>
 <h4 id="3-1-2-SplitPermissionInfo"><a href="#3-1-2-SplitPermissionInfo" class="headerlink" title="3.1.2  SplitPermissionInfo"></a>3.1.2  SplitPermissionInfo</h4><p>主要记录一个权限拆分为颗粒度更小的权限</p>
-<pre><code>/** @hide */
+<pre><code>
+/** @hide */
    public static class SplitPermissionInfo {
        //表示旧的权限
        public final String rootPerm;
@@ -309,7 +320,8 @@ drwxr-xr-x 26 root root  4096 2018-08-08 00:01:00.000000000 +0800 ..
        }
    }</code></pre>
 <h4 id="3-1-3-ParsePackageItemArgs"><a href="#3-1-3-ParsePackageItemArgs" class="headerlink" title="3.1.3  ParsePackageItemArgs"></a>3.1.3  ParsePackageItemArgs</h4><p>主要为解析包单个item的参数</p>
-<pre><code>static class ParsePackageItemArgs {
+<pre><code>
+static class ParsePackageItemArgs {
         //表示安装包的包对象package
         final Package owner;
         //表示错误信息
@@ -344,7 +356,8 @@ drwxr-xr-x 26 root root  4096 2018-08-08 00:01:00.000000000 +0800 ..
         }
     }</code></pre>
 <h4 id="3-1-4-ParseComponentArgs"><a href="#3-1-4-ParseComponentArgs" class="headerlink" title="3.1.4  ParseComponentArgs"></a>3.1.4  ParseComponentArgs</h4><p>主要为解析包中单个组件的参数</p>
-<pre><code>/** @hide */
+<pre><code>
+/** @hide */
    @VisibleForTesting
    public static class ParseComponentArgs extends ParsePackageItemArgs {
        //表示该组件对应的进程，如果设置独立进程则表示为独立进程的名字
@@ -372,7 +385,8 @@ drwxr-xr-x 26 root root  4096 2018-08-08 00:01:00.000000000 +0800 ..
        }
    }</code></pre>
 <h4 id="3-1-5-PackageLite"><a href="#3-1-5-PackageLite" class="headerlink" title="3.1.5  PackageLite"></a>3.1.5  PackageLite</h4><p>表示在解析过程中的一个轻量级的独立的安装包</p>
-<pre><code>/**
+<pre><code>
+/**
     * Lightweight parsed details about a single package.
     */
    public static class PackageLite {
@@ -459,7 +473,8 @@ drwxr-xr-x 26 root root  4096 2018-08-08 00:01:00.000000000 +0800 ..
            this.isolatedSplits = baseApk.isolatedSplits;
        }</code></pre>
 <h4 id="3-1-6-ApkLite"><a href="#3-1-6-ApkLite" class="headerlink" title="3.1.6  ApkLite"></a>3.1.6  ApkLite</h4><p>表示解析过程中的一个轻量级独立的apk</p>
-<pre><code>/**
+<pre><code>
+/**
     * Lightweight parsed details about a single APK file.
     */
    public static class ApkLite {
@@ -528,7 +543,8 @@ drwxr-xr-x 26 root root  4096 2018-08-08 00:01:00.000000000 +0800 ..
        }</code></pre>
 <p><strong>备注</strong>：PackageLite和ApkLite代表不同的含义，前者是包，后者是指apk，一个包中可能包含多个apk</p>
 <h4 id="3-1-7-SplitNameComparator"><a href="#3-1-7-SplitNameComparator" class="headerlink" title="3.1.7  SplitNameComparator"></a>3.1.7  SplitNameComparator</h4><p>表示类比较器，在拆包中排序用到</p>
-<pre><code>/**
+<pre><code>
+/**
     * Used to sort a set of APKs based on their split names, always placing the
     * base APK (with {@code null} split name) first.
     */
@@ -545,7 +561,8 @@ drwxr-xr-x 26 root root  4096 2018-08-08 00:01:00.000000000 +0800 ..
        }
    }</code></pre>
 <h4 id="3-1-8-Package"><a href="#3-1-8-Package" class="headerlink" title="3.1.8  Package"></a>3.1.8  Package</h4><p>表示从磁盘上的apk文件解析出来的完整包，一个包由一个基础的apk和多个拆分的apk构成。</p>
-<pre><code> /**
+<pre><code>
+ /**
      * Representation of a full package parsed from APK files on disk. A package
      * consists of a single base APK, and zero or more split APKs.
      */
@@ -817,7 +834,8 @@ drwxr-xr-x 26 root root  4096 2018-08-08 00:01:00.000000000 +0800 ..
         ...
 }</code></pre>
 <h4 id="3-1-9-Component"><a href="#3-1-9-Component" class="headerlink" title="3.1.9  Component"></a>3.1.9  Component</h4>
-<pre><code>public static abstract class IntentInfo extends IntentFilter {
+<pre><code>
+public static abstract class IntentInfo extends IntentFilter {
         //是否有默认
         @UnsupportedAppUsage
         public boolean hasDefault;
@@ -864,7 +882,8 @@ drwxr-xr-x 26 root root  4096 2018-08-08 00:01:00.000000000 +0800 ..
         ...
 }</code></pre>
 <h4 id="3-1-10-Permission"><a href="#3-1-10-Permission" class="headerlink" title="3.1.10  Permission"></a>3.1.10  Permission</h4><p>继承于Component，对应AndroidManifest里面的<permission>标签</permission></p>
-<pre><code>public final static class Permission extends Component<IntentInfo> implements Parcelable {
+<pre><code>
+public final static class Permission extends Component<IntentInfo> implements Parcelable {
         //权限信息
         @UnsupportedAppUsage
         public final PermissionInfo info;
@@ -882,7 +901,8 @@ drwxr-xr-x 26 root root  4096 2018-08-08 00:01:00.000000000 +0800 ..
         ...
 }</code></pre>
 <p>继承于Component，对应AndroidManifest里面的<activity>标签</activity></p>
-<pre><code>public final static class Activity extends Component<ActivityIntentInfo> implements Parcelable {
+<pre><code>
+public final static class Activity extends Component<ActivityIntentInfo> implements Parcelable {
         @UnsupportedAppUsage
         public final ActivityInfo info;
         private boolean mHasMaxAspectRatio;
@@ -906,7 +926,8 @@ drwxr-xr-x 26 root root  4096 2018-08-08 00:01:00.000000000 +0800 ..
 <p>一些其他的基本类似类在这里就不再详细的介绍，下面看下类里面的一些方法：</p>
 <h3 id="3-2-内部方法"><a href="#3-2-内部方法" class="headerlink" title="3.2 内部方法"></a>3.2 内部方法</h3><p>里面的方法基本上是和解析相关的方法，这里以parseActivity为例说明，其他的解析大同小异。</p>
 <h4 id="3-2-1-parsePackage"><a href="#3-2-1-parsePackage" class="headerlink" title="3.2.1 parsePackage"></a>3.2.1 parsePackage</h4><p>这个类是解析package最开始的方法，其他的解析方法都是从这个入口进入的，这里分为两种解析，一种是single APK ，另一种是cluster APKs。</p>
-<pre><code>/**
+<pre><code>
+/**
     * Parse the package at the given location. Automatically detects if the
     * package is a monolithic style (single APK file) or cluster style
     * (directory of APKs).
@@ -954,7 +975,8 @@ drwxr-xr-x 26 root root  4096 2018-08-08 00:01:00.000000000 +0800 ..
        return parsed;
    }</code></pre>
 <h4 id="3-2-2-parseActivity"><a href="#3-2-2-parseActivity" class="headerlink" title="3.2.2 parseActivity"></a>3.2.2 parseActivity</h4><p>这个方法主要是解析AndroidManifest中activity标签的内容，并将其保存到PackageParser.Activity对象中。</p>
-<pre><code>private Activity parseActivity(Package owner, Resources res,
+<pre><code>
+private Activity parseActivity(Package owner, Resources res,
             XmlResourceParser parser, int flags, String[] outError, CachedComponentArgs cachedArgs,
             boolean receiver, boolean hardwareAccelerated)
             throws XmlPullParserException, IOException {
@@ -1361,7 +1383,8 @@ drwxr-xr-x 26 root root  4096 2018-08-08 00:01:00.000000000 +0800 ..
 <p>​       Package中基本上涵盖了AndroidManifest中涉及的所有信息。</p>
 <p>注意：在上述的解析过程中，PackageParser利用AssetManager存储了Package中资源文件的地址。</p>
 <h3 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h3><p>源码路径</p>
-<pre><code>/frameworks/base/services/core/java/com/android/server/pm/Settings.java
+<pre><code>
+/frameworks/base/services/core/java/com/android/server/pm/Settings.java
 /frameworks/base/core/java/com/android/server/SystemConfig.java
 /frameworks/base/core/java/android/content/pm/PackageParser.java
 </code></pre>
