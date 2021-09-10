@@ -897,7 +897,7 @@ public static abstract class IntentInfo extends IntentFilter {
 </code></pre>
 <h4 id="3-1-10-Permission"><a href="#3-1-10-Permission" class="headerlink" title="3.1.10  Permission"></a>3.1.10  Permission</h4><p>继承于Component，对应AndroidManifest里面的<permission>标签</permission></p>
 <pre><code>
-public final static class Permission extends Component<IntentInfo> implements Parcelable {
+public final static class Permission extends Component&lt;IntentInfo&gt; implements Parcelable {
         //权限信息
         @UnsupportedAppUsage
         public final PermissionInfo info;
@@ -918,7 +918,7 @@ public final static class Permission extends Component<IntentInfo> implements Pa
 </code></pre>
 <p>继承于Component，对应AndroidManifest里面的<activity>标签</activity></p>
 <pre><code>
-public final static class Activity extends Component<ActivityIntentInfo> implements Parcelable {
+public final static class Activity extends Component&lt;ActivityIntentInfo&gt; implements Parcelable {
         @UnsupportedAppUsage
         public final ActivityInfo info;
         private boolean mHasMaxAspectRatio;
