@@ -478,9 +478,10 @@ static class ParsePackageItemArgs {
            this.isolatedSplits = baseApk.isolatedSplits;
        }
 </code></pre>
-<h4 id="3-1-6-ApkLite"><a href="#3-1-6-ApkLite" class="headerlink" title="3.1.6  ApkLite"></a>3.1.6  ApkLite</h4><p>表示解析过程中的一个轻量级独立的apk</p>
+<h4 id="3-1-6-ApkLite"><a href="#3-1-6-ApkLite" class="headerlink" title="3.1.6  ApkLite"></a>3.1.6  ApkLite</h4>
+<p>表示解析过程中的一个轻量级独立的apk</p>
 <pre><code>
-   /**
+/**
     * Lightweight parsed details about a single APK file.
     */
    public static class ApkLite {
