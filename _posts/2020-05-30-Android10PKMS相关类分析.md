@@ -871,7 +871,7 @@ public static abstract class IntentInfo extends IntentFilter {
         ...
    }
  
- public static abstract class Component<II extends IntentInfo> {
+ public static abstract class Component&lt;II extends IntentInfo&gt; {
         //该组件所包含的IntentFilter
         @UnsupportedAppUsage
         public final ArrayList&lt;II&gt; intents; 
