@@ -237,24 +237,7 @@ drwxr-xr-x 26 root root  4096 2018-08-08 00:01:00.000000000 +0800 ..
 -rw-r--r--  1 root root   824 2018-08-08 00:01:00.000000000 +0800 
 ...
 </code></pre>
-<p>这些配置文件都是编译时从framework指定位置拷贝过来的（framework/native/data/etc）,下面是platform.xml里面的部分</p>
-<pre><code>
-<permissions>
-
-    <permission name="android.permission.BLUETOOTH_ADMIN" >
-        <group gid="net_bt_admin" />
-    </permission>
-    <permission name="android.permission.READ_EXTERNAL_STORAGE" />
-    <assign-permission name="android.permission.MODIFY_AUDIO_SETTINGS" uid="media" />
-    <library name="org.apache.http.legacy"
-            file="/system/framework/org.apache.http.legacy.boot.jar" />
-    <allow-in-power-save package="com.android.providers.downloads" />
-    <!-- These are the packages that shouldn't run as system user -->
-    <system-user-blacklisted-app package="com.android.wallpaper.livepicker" />
-    <allow-in-data-usage-save package="com.dti.att" />
-    <feature name="android.hardware.vulkan.level" version="0" />
-    ...
- </permissions></code></pre>
+<p>这些配置文件都是编译时从framework指定位置拷贝过来的（framework/native/data/etc）</p>
 <p>readPermissions方法内部调用readPermissionsFromXml方法来解析xml里面的各个节点，其中xml涉及到的标签内容有permission、assign-permission、library、feature等，这些标签的内容解析出来保存到SystemConfig的对应数据结构的全局变量中，以便管理查询。</p>
 <p>feature用来描述设备是否支持硬件特性；  library用于指定系统库，当应用程序运行时，系统会为进城加载一些必须的库； assign-permission将system中描述的permission与uid关联； permission将permission和gid关联。</p>
 <p>总结下SystemConfig初始化时解析xml文件节点以及对应的全局变量。</p>
@@ -484,7 +467,7 @@ static class ParsePackageItemArgs {
        }</code></pre>
 <h4 id="3-1-6-ApkLite"><a href="#3-1-6-ApkLite" class="headerlink" title="3.1.6  ApkLite"></a>3.1.6  ApkLite</h4><p>表示解析过程中的一个轻量级独立的apk</p>
 <pre><code>
-/**
+   /**
     * Lightweight parsed details about a single APK file.
     */
    public static class ApkLite {
@@ -550,7 +533,8 @@ static class ParsePackageItemArgs {
            this.use32bitAbi = use32bitAbi;
            this.extractNativeLibs = extractNativeLibs;
            this.isolatedSplits = isolatedSplits;
-       }</code></pre>
+       }
+</code></pre>
 <p><strong>备注</strong>：PackageLite和ApkLite代表不同的含义，前者是包，后者是指apk，一个包中可能包含多个apk</p>
 <h4 id="3-1-7-SplitNameComparator"><a href="#3-1-7-SplitNameComparator" class="headerlink" title="3.1.7  SplitNameComparator"></a>3.1.7  SplitNameComparator</h4><p>表示类比较器，在拆包中排序用到</p>
 <pre><code>
@@ -842,7 +826,8 @@ static class ParsePackageItemArgs {
             applicationInfo.uid = -1;
         }
         ...
-}</code></pre>
+}
+</code></pre>
 <h4 id="3-1-9-Component"><a href="#3-1-9-Component" class="headerlink" title="3.1.9  Component"></a>3.1.9  Component</h4>
 <pre><code>
 public static abstract class IntentInfo extends IntentFilter {
@@ -890,7 +875,8 @@ public static abstract class IntentInfo extends IntentFilter {
          //组件短名
         String componentShortName;
         ...
-}</code></pre>
+}
+</code></pre>
 <h4 id="3-1-10-Permission"><a href="#3-1-10-Permission" class="headerlink" title="3.1.10  Permission"></a>3.1.10  Permission</h4><p>继承于Component，对应AndroidManifest里面的<permission>标签</permission></p>
 <pre><code>
 public final static class Permission extends Component<IntentInfo> implements Parcelable {
@@ -909,7 +895,8 @@ public final static class Permission extends Component<IntentInfo> implements Pa
             info = new PermissionInfo();
         }
         ...
-}</code></pre>
+}
+</code></pre>
 <p>继承于Component，对应AndroidManifest里面的<activity>标签</activity></p>
 <pre><code>
 public final static class Activity extends Component<ActivityIntentInfo> implements Parcelable {
@@ -932,7 +919,8 @@ public final static class Activity extends Component<ActivityIntentInfo> impleme
             info.packageName = packageName;
         }
         ...
-}</code></pre>
+}
+</code></pre>
 <p>一些其他的基本类似类在这里就不再详细的介绍，下面看下类里面的一些方法：</p>
 <h3 id="3-2-内部方法"><a href="#3-2-内部方法" class="headerlink" title="3.2 内部方法"></a>3.2 内部方法</h3><p>里面的方法基本上是和解析相关的方法，这里以parseActivity为例说明，其他的解析大同小异。</p>
 <h4 id="3-2-1-parsePackage"><a href="#3-2-1-parsePackage" class="headerlink" title="3.2.1 parsePackage"></a>3.2.1 parsePackage</h4><p>这个类是解析package最开始的方法，其他的解析方法都是从这个入口进入的，这里分为两种解析，一种是single APK ，另一种是cluster APKs。</p>
@@ -983,7 +971,8 @@ public final static class Activity extends Component<ActivityIntentInfo> impleme
            }
        }
        return parsed;
-   }</code></pre>
+   }
+</code></pre>
 <h4 id="3-2-2-parseActivity"><a href="#3-2-2-parseActivity" class="headerlink" title="3.2.2 parseActivity"></a>3.2.2 parseActivity</h4><p>这个方法主要是解析AndroidManifest中activity标签的内容，并将其保存到PackageParser.Activity对象中。</p>
 <pre><code>
 private Activity parseActivity(Package owner, Resources res,
