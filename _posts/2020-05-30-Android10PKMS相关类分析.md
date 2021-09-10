@@ -786,7 +786,7 @@ static class ParsePackageItemArgs {
         /* The required account type without which this application will not function */
         public String mRequiredAccountType;
         
-        //对应AndroidManifest里面的<overlay>标签 
+        //对应AndroidManifest里面的&lt;overlay&gt;标签 
         public String mOverlayTarget;
         //overlay类别
         public String mOverlayCategory;
