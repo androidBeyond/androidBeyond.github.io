@@ -480,73 +480,7 @@ static class ParsePackageItemArgs {
 </code></pre>
 <h4 id="3-1-6-ApkLite"><a href="#3-1-6-ApkLite" class="headerlink" title="3.1.6  ApkLite"></a>3.1.6  ApkLite</h4><p>表示解析过程中的一个轻量级独立的apk</p>
 <pre><code>
-   /**
-    * Lightweight parsed details about a single APK file.
-    */
-   public static class ApkLite {
-       //表示代码的路径
-       public final String codePath;
-       //表示包名
-       public final String packageName;
-       //表示拆分的包名
-       public final String splitName;
-        //表示拆包是否有Feature
-       public boolean isFeatureSplit;
-        //表示拆包的配置
-       public final String configForSplit;
-        //表示拆包名字的uses
-       public final String usesSplitName;
-        //表示版本号
-       public final int versionCode;
-        //表示主版本号
-       public final int versionCodeMajor;
-       //表示调整的版本号
-       public final int revisionCode;
-       //表示安装位置的属性，可以有几个常量的选择，比如PackageInfo.INSTALL_LOACTION_AUTO
-       public final int installLocation;
-       //表示验证对象
-       public final VerifierInfo[] verifiers;
-       //表示签名对象
-       public final SigningDetails signingDetails;
-       //是不是核心app
-       public final boolean coreApp;
-        //是不是debug
-       public final boolean debuggable;
-        //是不是支持多平台，主要是指cpu平台
-       public final boolean multiArch;
-        //是不是用32位的so库
-       public final boolean use32bitAbi;
-        //是否需要提取so库
-       public final boolean extractNativeLibs;
-        //拆分包是否是独立
-       public final boolean isolatedSplits;
-
-       public ApkLite(String codePath, String packageName, String splitName,
-               boolean isFeatureSplit,
-               String configForSplit, String usesSplitName, int versionCode, int versionCodeMajor,
-               int revisionCode, int installLocation, List<VerifierInfo> verifiers,
-               SigningDetails signingDetails, boolean coreApp,
-               boolean debuggable, boolean multiArch, boolean use32bitAbi,
-               boolean extractNativeLibs, boolean isolatedSplits) {
-           this.codePath = codePath;
-           this.packageName = packageName;
-           this.splitName = splitName;
-           this.isFeatureSplit = isFeatureSplit;
-           this.configForSplit = configForSplit;
-           this.usesSplitName = usesSplitName;
-           this.versionCode = versionCode;
-           this.versionCodeMajor = versionCodeMajor;
-           this.revisionCode = revisionCode;
-           this.installLocation = installLocation;
-           this.signingDetails = signingDetails;
-           this.verifiers = verifiers.toArray(new VerifierInfo[verifiers.size()]);
-           this.coreApp = coreApp;
-           this.debuggable = debuggable;
-           this.multiArch = multiArch;
-           this.use32bitAbi = use32bitAbi;
-           this.extractNativeLibs = extractNativeLibs;
-           this.isolatedSplits = isolatedSplits;
-       }
+  
 </code></pre>
 
 <p><strong>备注</strong>：PackageLite和ApkLite代表不同的含义，前者是包，后者是指apk，一个包中可能包含多个apk</p>
