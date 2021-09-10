@@ -994,8 +994,9 @@ public final static class Activity extends Component&lt;ActivityIntentInfo&gt; i
    }
 
 </code></pre>
-<h4 id="3-2-2-parseActivity"><a href="#3-2-2-parseActivity" class="headerlink" title="3.2.2 parseActivity"></a>3.2.2 parseActivity</h4><p>这个方法主要是解析AndroidManifest中activity标签的内容，并将其保存到PackageParser.Activity对象中。</p>
-<pre><code>
+
+&lt;h4 id="3-2-2-parseActivity"&gt;&lt;a href="#3-2-2-parseActivity" class="headerlink" title="3.2.2 parseActivity"&gt;&lt;/a&gt;3.2.2 parseActivity&lt;/h4&gt;&lt;p&gt;这个方法主要是解析AndroidManifest中activity标签的内容，并将其保存到PackageParser.Activity对象中。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;
 private Activity parseActivity(Package owner, Resources res,
             XmlResourceParser parser, int flags, String[] outError, CachedComponentArgs cachedArgs,
             boolean receiver, boolean hardwareAccelerated)
@@ -1017,7 +1018,7 @@ private Activity parseActivity(Package owner, Resources res,
                     R.styleable.AndroidManifestActivity_enabled);
         }
         //判断是receiver还是activity
-        cachedArgs.mActivityArgs.tag = receiver ? "<receiver>" : "<activity>";
+        cachedArgs.mActivityArgs.tag = receiver ? "&lt;receiver&gt;" : "&lt;activity&gt;";
         cachedArgs.mActivityArgs.sa = sa;
         cachedArgs.mActivityArgs.flags = flags;
         //创建Activity类，是ParserPackage内部类
@@ -1058,7 +1059,7 @@ private Activity parseActivity(Package owner, Resources res,
         if (str == null) {
             a.info.permission = owner.applicationInfo.permission;
         } else {
-            a.info.permission = str.length() > 0 ? str.toString().intern() : null;
+            a.info.permission = str.length() &gt; 0 ? str.toString().intern() : null;
         }
 
         //获取AndroidManifest里面对应的taskAffinity的值
@@ -1269,10 +1270,10 @@ private Activity parseActivity(Package owner, Resources res,
 
         int outerDepth = parser.getDepth();
         int type;
-        //开始解析<activity>内部标签
+        //开始解析&lt;activity&gt;内部标签
         while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
                && (type != XmlPullParser.END_TAG
-                       || parser.getDepth() > outerDepth)) {
+                       || parser.getDepth() &gt; outerDepth)) {
             if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
                 continue;
             }
@@ -1305,8 +1306,8 @@ private Activity parseActivity(Package owner, Resources res,
                     a.info.flags |= ActivityInfo.FLAG_IMPLICITLY_VISIBLE_TO_INSTANT_APP;
                 }
                 if (LOG_UNSAFE_BROADCASTS && receiver
-                        && (owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.O)) {
-                    for (int i = 0; i < intent.countActions(); i++) {
+                        && (owner.applicationInfo.targetSdkVersion &gt;= Build.VERSION_CODES.O)) {
+                    for (int i = 0; i &lt; intent.countActions(); i++) {
                         final String action = intent.getAction(i);
                         if (action == null || !action.startsWith("android.")) continue;
                         if (!SAFE_BROADCASTS.contains(action)) {
@@ -1328,7 +1329,7 @@ private Activity parseActivity(Package owner, Resources res,
                             + parser.getPositionDescription());
                 } else {
                     if (owner.preferredActivityFilters == null) {
-                        owner.preferredActivityFilters = new ArrayList<ActivityIntentInfo>();
+                        owner.preferredActivityFilters = new ArrayList&lt;ActivityIntentInfo&gt;();
                     }
                     owner.preferredActivityFilters.add(intent);
                 }
@@ -1356,11 +1357,11 @@ private Activity parseActivity(Package owner, Resources res,
                 if (!RIGID_PARSER) {
                     Slog.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
                     if (receiver) {
-                        Slog.w(TAG, "Unknown element under <receiver>: " + parser.getName()
+                        Slog.w(TAG, "Unknown element under &lt;receiver&gt;: " + parser.getName()
                                 + " at " + mArchiveSourcePath + " "
                                 + parser.getPositionDescription());
                     } else {
-                        Slog.w(TAG, "Unknown element under <activity>: " + parser.getName()
+                        Slog.w(TAG, "Unknown element under &lt;activity&gt;: " + parser.getName()
                                 + " at " + mArchiveSourcePath + " "
                                 + parser.getPositionDescription());
                     }
@@ -1368,9 +1369,9 @@ private Activity parseActivity(Package owner, Resources res,
                     continue;
                 } else {
                     if (receiver) {
-                        outError[0] = "Bad element under <receiver>: " + parser.getName();
+                        outError[0] = "Bad element under &lt;receiver&gt;: " + parser.getName();
                     } else {
-                        outError[0] = "Bad element under <activity>: " + parser.getName();
+                        outError[0] = "Bad element under &lt;activity&gt;: " + parser.getName();
                     }
                     return null;
                 }
@@ -1378,12 +1379,11 @@ private Activity parseActivity(Package owner, Resources res,
         }
 
         if (!setExported) {
-            a.info.exported = a.intents.size() > 0;
+            a.info.exported = a.intents.size() &gt; 0;
         }
 
         return a;
     }
-
 </code></pre>
 <h3 id="3-3-PackageParser总结"><a href="#3-3-PackageParser总结" class="headerlink" title="3.3 PackageParser总结"></a>3.3 PackageParser总结</h3><p><img src="/2019/PKMS相关类分析/PackageParser.png" alt=""></p>
 <p>上图画出了PackageParser解析Apk文件，得到的主要的数据结构，实际的内容远多于这些，我们仅保留了四大组件和权限相关的内容。</p>
