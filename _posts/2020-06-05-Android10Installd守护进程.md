@@ -17,24 +17,183 @@ tags:
 <p>PackageManagerService真正干活的是installd，通过Native Binder调用。</p>
 <p>为什么需要installd守护进程？因为权限问题，PKMS只有system权限，installd却具有root权限。</p>
 <p>在SystemServer中installd服务启动</p>
-<h4 id="1、客服端实现"><a href="#1、客服端实现" class="headerlink" title="1、客服端实现"></a>1、客服端实现</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">//启动installer服务，PKMS相关任务的执行者</span><br><span class="line">// Wait for installd to finish starting up so that it has a chance to</span><br><span class="line">// create critical directories such as /data/user with the appropriate</span><br><span class="line">// permissions.  We need this to complete before we initialize other services.</span><br><span class="line">Installer installer = mSystemServiceManager.startService(Installer.class);</span><br></pre></td></tr></table></figure>
+<h4 id="1、客服端实现"><a href="#1、客服端实现" class="headerlink" title="1、客服端实现"></a>1、客服端实现</h4>
+<figure >
+//启动installer服务，PKMS相关任务的执行者
+// Wait for installd to finish starting up so that it has a chance to
+// create critical directories such as /data/user with the appropriate
+// permissions.  We need this to complete before we initialize other services.
+Installer installer = mSystemServiceManager.startService(Installer.class);
+
+ </figure>
 <p>Installer代码比较简洁，主要为一些创建、删除文件等操作。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line"> public void onStart() &#123;</span><br><span class="line">     if (mIsolated) &#123;</span><br><span class="line">         mInstalld = null;</span><br><span class="line">     &#125; else &#123;</span><br><span class="line">         connect();</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> private void connect() &#123;</span><br><span class="line">     IBinder binder = ServiceManager.getService(&quot;installd&quot;);</span><br><span class="line">     if (binder != null) &#123;</span><br><span class="line">         try &#123;</span><br><span class="line">             //断开连接则重新连接</span><br><span class="line">             binder.linkToDeath(new DeathRecipient() &#123;</span><br><span class="line">                 @Override</span><br><span class="line">                 public void binderDied() &#123;</span><br><span class="line">                     Slog.w(TAG, &quot;installd died; reconnecting&quot;);</span><br><span class="line">                     connect();</span><br><span class="line">                 &#125;</span><br><span class="line">             &#125;, 0);</span><br><span class="line">         &#125; catch (RemoteException e) &#123;</span><br><span class="line">             binder = null;</span><br><span class="line">         &#125;</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     if (binder != null) &#123;</span><br><span class="line">         mInstalld = IInstalld.Stub.asInterface(binder);</span><br><span class="line">         try &#123;</span><br><span class="line">             invalidateMounts();</span><br><span class="line">         &#125; catch (InstallerException ignored) &#123;</span><br><span class="line">         &#125;</span><br><span class="line">     &#125; else &#123;</span><br><span class="line">         Slog.w(TAG, &quot;installd not found; trying again&quot;);</span><br><span class="line">         BackgroundThread.getHandler().postDelayed(() -&gt; &#123;</span><br><span class="line">             connect();</span><br><span class="line">         &#125;, DateUtils.SECOND_IN_MILLIS);</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<figure >
+@Override
+ public void onStart() {
+     if (mIsolated) {
+         mInstalld = null;
+     } else {
+         connect();
+     }
+ }
+
+ private void connect() {
+     IBinder binder = ServiceManager.getService("installd");
+     if (binder != null) {
+         try {
+             //断开连接则重新连接
+             binder.linkToDeath(new DeathRecipient() {
+                 @Override
+                 public void binderDied() {
+                     Slog.w(TAG, "installd died; reconnecting");
+                     connect();
+                 }
+             }, 0);
+         } catch (RemoteException e) {
+             binder = null;
+         }
+     }
+
+     if (binder != null) {
+         mInstalld = IInstalld.Stub.asInterface(binder);
+         try {
+             invalidateMounts();
+         } catch (InstallerException ignored) {
+         }
+     } else {
+         Slog.w(TAG, "installd not found; trying again");
+         BackgroundThread.getHandler().postDelayed(() -&gt; {
+             connect();
+         }, DateUtils.SECOND_IN_MILLIS);
+     }
+ }
+ </figure>
 <h4 id="2、服务端实现"><a href="#2、服务端实现" class="headerlink" title="2、服务端实现"></a>2、服务端实现</h4><p>Android7.0后单一的init.rc文件被拆分，放在对应分区的etc/init目录中，每个服务一个rc文件，与该服务相关的触发器，操作等也定义在同一rc文件中。</p>
 <p>frameworks/native/cmds/installd/Android.bp编译文件中</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">cc_binary &#123;</span><br><span class="line">    name: &quot;installd&quot;,</span><br><span class="line">    defaults: [&quot;installd_defaults&quot;],</span><br><span class="line">    srcs: [&quot;installd.cpp&quot;],</span><br><span class="line"></span><br><span class="line">    static_libs: [&quot;libdiskusage&quot;],</span><br><span class="line"></span><br><span class="line">    init_rc: [&quot;installd.rc&quot;],</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure >
+cc_binary {
+    name: "installd",
+    defaults: ["installd_defaults"],
+    srcs: ["installd.cpp"],
+
+    static_libs: ["libdiskusage"],
+
+    init_rc: ["installd.rc"],
+}
+
+ </figure>
 <p>frameworks/native/cmds/installd/installd.rc中启动installd进程</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">service installd /system/bin/installd</span><br><span class="line">    class main</span><br></pre></td></tr></table></figure>
+<figure >
+service installd /system/bin/installd
+    class main
+ </figure>
 <p>installd.cpp主函数如下</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">static int installd_main(const int argc ATTRIBUTE_UNUSED, char *argv[]) &#123;</span><br><span class="line">    int ret;</span><br><span class="line">    int selinux_enabled = (is_selinux_enabled() &gt; 0);</span><br><span class="line"></span><br><span class="line">    setenv(&quot;ANDROID_LOG_TAGS&quot;, &quot;*:v&quot;, 1);</span><br><span class="line">    android::base::InitLogging(argv);</span><br><span class="line"></span><br><span class="line">    SLOGI(&quot;installd firing up&quot;);</span><br><span class="line"></span><br><span class="line">    union selinux_callback cb;</span><br><span class="line">    cb.func_log = log_callback;</span><br><span class="line">    selinux_set_callback(SELINUX_CB_LOG, cb);</span><br><span class="line"></span><br><span class="line">    if (!initialize_globals()) &#123;</span><br><span class="line">        SLOGE(&quot;Could not initialize globals; exiting./n&quot;);</span><br><span class="line">        exit(1);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if (initialize_directories() &lt; 0) &#123;</span><br><span class="line">        SLOGE(&quot;Could not create directories; exiting./n&quot;);</span><br><span class="line">        exit(1);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if (selinux_enabled &amp;&amp; selinux_status_open(true) &lt; 0) &#123;</span><br><span class="line">        SLOGE(&quot;Could not open selinux status; exiting./n&quot;);</span><br><span class="line">        exit(1);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if ((ret = InstalldNativeService::start()) != android::OK) &#123;</span><br><span class="line">        SLOGE(&quot;Unable to start InstalldNativeService: %d&quot;, ret);</span><br><span class="line">        exit(1);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    IPCThreadState::self()-&gt;joinThreadPool();</span><br><span class="line"></span><br><span class="line">    LOG(INFO) &lt;&lt; &quot;installd shutting down&quot;;</span><br><span class="line"></span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure >
+static int installd_main(const int argc ATTRIBUTE_UNUSED, char *argv[]) {
+    int ret;
+    int selinux_enabled = (is_selinux_enabled() &gt; 0);
+
+    setenv("ANDROID_LOG_TAGS", "*:v", 1);
+    android::base::InitLogging(argv);
+
+    SLOGI("installd firing up");
+
+    union selinux_callback cb;
+    cb.func_log = log_callback;
+    selinux_set_callback(SELINUX_CB_LOG, cb);
+
+    if (!initialize_globals()) {
+        SLOGE("Could not initialize globals; exiting./n");
+        exit(1);
+    }
+
+    if (initialize_directories() &lt; 0) {
+        SLOGE("Could not create directories; exiting./n");
+        exit(1);
+    }
+
+    if (selinux_enabled && selinux_status_open(true) &lt; 0) {
+        SLOGE("Could not open selinux status; exiting./n");
+        exit(1);
+    }
+
+    if ((ret = InstalldNativeService::start()) != android::OK) {
+        SLOGE("Unable to start InstalldNativeService: %d", ret);
+        exit(1);
+    }
+
+    IPCThreadState::self()-&gt;joinThreadPool();
+
+    LOG(INFO) &lt;&lt; "installd shutting down";
+
+    return 0;
+}
+ </figure>
 <p>InstalldNativeService::start()将该服务发布到native层的servicemanager中</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">status_t InstalldNativeService::start() &#123;</span><br><span class="line">    IPCThreadState::self()-&gt;disableBackgroundScheduling(true);</span><br><span class="line">    status_t ret = BinderService&lt;InstalldNativeService&gt;::publish();</span><br><span class="line">    if (ret != android::OK) &#123;</span><br><span class="line">        return ret;</span><br><span class="line">    &#125;</span><br><span class="line">    sp&lt;ProcessState&gt; ps(ProcessState::self());</span><br><span class="line">    ps-&gt;startThreadPool();</span><br><span class="line">    ps-&gt;giveThreadPoolName();</span><br><span class="line">    return android::OK;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure >
+status_t InstalldNativeService::start() {
+    IPCThreadState::self()-&gt;disableBackgroundScheduling(true);
+    status_t ret = BinderService&lt;InstalldNativeService&gt;::publish();
+    if (ret != android::OK) {
+        return ret;
+    }
+    sp&lt;ProcessState&gt; ps(ProcessState::self());
+    ps-&gt;startThreadPool();
+    ps-&gt;giveThreadPoolName();
+    return android::OK;
+}
+ </figure>
 <p>BinderService<installdnativeservice>::publish()将服务添加到ServiceManager中</installdnativeservice></p>
 <p>/framework/native/libs/binder/include/binder/BinderService.h</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">static status_t publish(bool allowIsolated = false) &#123;</span><br><span class="line">        sp&lt;IServiceManager&gt; sm(defaultServiceManager());</span><br><span class="line">        将服务加入到ServiceManager中</span><br><span class="line">        return sm-&gt;addService(</span><br><span class="line">                String16(SERVICE::getServiceName()),</span><br><span class="line">                new SERVICE(), allowIsolated);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<figure >
+static status_t publish(bool allowIsolated = false) {
+        sp&lt;IServiceManager&gt; sm(defaultServiceManager());
+        将服务加入到ServiceManager中
+        return sm-&gt;addService(
+                String16(SERVICE::getServiceName()),
+                new SERVICE(), allowIsolated);
+    }
+ </figure>
 <p>所有的install.java中定义的功能都是通过binder调用native层的InstalldNativeService来实现</p>
 <p>install.java中dexopt方法，最后是执行Native层的dexopt方法。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">binder::Status InstalldNativeService::dexopt(const std::string&amp; apkPath, int32_t uid,</span><br><span class="line">        const std::unique_ptr&lt;std::string&gt;&amp; packageName, const std::string&amp; instructionSet,</span><br><span class="line">        int32_t dexoptNeeded, const std::unique_ptr&lt;std::string&gt;&amp; outputPath, int32_t dexFlags,</span><br><span class="line">        const std::string&amp; compilerFilter, const std::unique_ptr&lt;std::string&gt;&amp; uuid,</span><br><span class="line">        const std::unique_ptr&lt;std::string&gt;&amp; classLoaderContext,</span><br><span class="line">        const std::unique_ptr&lt;std::string&gt;&amp; seInfo, bool downgrade, int32_t targetSdkVersion,</span><br><span class="line">        const std::unique_ptr&lt;std::string&gt;&amp; profileName,</span><br><span class="line">        const std::unique_ptr&lt;std::string&gt;&amp; dexMetadataPath,</span><br><span class="line">        const std::unique_ptr&lt;std::string&gt;&amp; compilationReason) &#123;</span><br><span class="line">    ENFORCE_UID(AID_SYSTEM);</span><br><span class="line">    CHECK_ARGUMENT_UUID(uuid);</span><br><span class="line">    CHECK_ARGUMENT_PATH(apkPath);</span><br><span class="line">    if (packageName &amp;&amp; *packageName != &quot;*&quot;) &#123;</span><br><span class="line">        CHECK_ARGUMENT_PACKAGE_NAME(*packageName);</span><br><span class="line">    &#125;</span><br><span class="line">    CHECK_ARGUMENT_PATH(outputPath);</span><br><span class="line">    CHECK_ARGUMENT_PATH(dexMetadataPath);</span><br><span class="line">    std::lock_guard&lt;std::recursive_mutex&gt; lock(mLock);</span><br><span class="line"></span><br><span class="line">    const char* apk_path = apkPath.c_str();</span><br><span class="line">    const char* pkgname = getCStr(packageName, &quot;*&quot;);</span><br><span class="line">    const char* instruction_set = instructionSet.c_str();</span><br><span class="line">    const char* oat_dir = getCStr(outputPath);</span><br><span class="line">    const char* compiler_filter = compilerFilter.c_str();</span><br><span class="line">    const char* volume_uuid = getCStr(uuid);</span><br><span class="line">    const char* class_loader_context = getCStr(classLoaderContext);</span><br><span class="line">    const char* se_info = getCStr(seInfo);</span><br><span class="line">    const char* profile_name = getCStr(profileName);</span><br><span class="line">    const char* dm_path = getCStr(dexMetadataPath);</span><br><span class="line">    const char* compilation_reason = getCStr(compilationReason);</span><br><span class="line">    std::string error_msg;</span><br><span class="line">    int res = android::installd::dexopt(apk_path, uid, pkgname, instruction_set, dexoptNeeded,</span><br><span class="line">            oat_dir, dexFlags, compiler_filter, volume_uuid, class_loader_context, se_info,</span><br><span class="line">            downgrade, targetSdkVersion, profile_name, dm_path, compilation_reason, &amp;error_msg);</span><br><span class="line">    return res ? error(res, error_msg) : ok();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure >
+binder::Status InstalldNativeService::dexopt(const std::string& apkPath, int32_t uid,
+        const std::unique_ptr&lt;std::string&gt;& packageName, const std::string& instructionSet,
+        int32_t dexoptNeeded, const std::unique_ptr&lt;std::string&gt;& outputPath, int32_t dexFlags,
+        const std::string& compilerFilter, const std::unique_ptr&lt;std::string&gt;& uuid,
+        const std::unique_ptr&lt;std::string&gt;& classLoaderContext,
+        const std::unique_ptr&lt;std::string&gt;& seInfo, bool downgrade, int32_t targetSdkVersion,
+        const std::unique_ptr&lt;std::string&gt;& profileName,
+        const std::unique_ptr&lt;std::string&gt;& dexMetadataPath,
+        const std::unique_ptr&lt;std::string&gt;& compilationReason) {
+    ENFORCE_UID(AID_SYSTEM);
+    CHECK_ARGUMENT_UUID(uuid);
+    CHECK_ARGUMENT_PATH(apkPath);
+    if (packageName && *packageName != "*") {
+        CHECK_ARGUMENT_PACKAGE_NAME(*packageName);
+    }
+    CHECK_ARGUMENT_PATH(outputPath);
+    CHECK_ARGUMENT_PATH(dexMetadataPath);
+    std::lock_guard&lt;std::recursive_mutex&gt; lock(mLock);
+
+    const char* apk_path = apkPath.c_str();
+    const char* pkgname = getCStr(packageName, "*");
+    const char* instruction_set = instructionSet.c_str();
+    const char* oat_dir = getCStr(outputPath);
+    const char* compiler_filter = compilerFilter.c_str();
+    const char* volume_uuid = getCStr(uuid);
+    const char* class_loader_context = getCStr(classLoaderContext);
+    const char* se_info = getCStr(seInfo);
+    const char* profile_name = getCStr(profileName);
+    const char* dm_path = getCStr(dexMetadataPath);
+    const char* compilation_reason = getCStr(compilationReason);
+    std::string error_msg;
+    int res = android::installd::dexopt(apk_path, uid, pkgname, instruction_set, dexoptNeeded,
+            oat_dir, dexFlags, compiler_filter, volume_uuid, class_loader_context, se_info,
+            downgrade, targetSdkVersion, profile_name, dm_path, compilation_reason, &error_msg);
+    return res ? error(res, error_msg) : ok();
+}
+ </figure>
 <p>android::installd::dexopt操作在dexopt.cpp文件中</p>
 <pre><code>int dexopt(const char* dex_path, uid_t uid, const char* pkgname, const char* instruction_set,
         int dexopt_needed, const char* oat_dir, int dexopt_flags, const char* compiler_filter,
@@ -222,12 +381,28 @@ return 0;
 <p>如果当前运行于Art模式下， Art同样会在首次进入系统的时候调用/system/bin/dexopt工具来将dex字节码翻译成本地机器码，保存在data/dalvik-cache下。 那么这里需要注意的是，无论是对dex字节码进行优化，还是将dex字节码翻译成本地机器码，最终得到的结果都是保存在相同名称的一个odex文件里面的，但是前者对应的是一个dey文件（表示这是一个优化过的dex），后者对应的是一个oat文件（实际上是一个自定义的elf文件，里面包含的都是本地机器指令）。通过这种方式，原来任何通过绝对路径引用了该odex文件的代码就都不需要修改了。</p>
 <p>由于在系统首次启动时会对应用进行安装，那么在预置APK比较多的情况下，将会大大增加系统首次启动的时间。从前面的描述可知，既然无论是DVM还是ART，对DEX的优化结果都是保存在一个相同名称的odex文件，那么如果我们把这两个过程在ROM编译的时候预处理提取Odex文件将会大大优化系统首次启动的时间。</p>
 <h4 id="3、预编译提取Odex"><a href="#3、预编译提取Odex" class="headerlink" title="3、预编译提取Odex"></a>3、预编译提取Odex</h4><p>在目录/build/core/dex_preopt_odex_install.mk中的代码：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ifeq ($(LOCAL_MODULE),helloworld)</span><br><span class="line">LOCAL_DEX_PREOPT:=</span><br><span class="line">endif</span><br><span class="line">build_odex:=</span><br><span class="line">installed_odex:=</span><br></pre></td></tr></table></figure>
+<figure >
+ifeq ($(LOCAL_MODULE),helloworld)
+LOCAL_DEX_PREOPT:=
+endif
+build_odex:=
+installed_odex:=
+ </figure>
 <p>helloworld可替换为需要跳过提取odex的apk的LOCAL_MODULE名字，如Settings等。</p>
 <h3 id="odex优化的地方"><a href="#odex优化的地方" class="headerlink" title="odex优化的地方"></a>odex优化的地方</h3><h4 id="1-首次开机或者升级"><a href="#1-首次开机或者升级" class="headerlink" title="1.首次开机或者升级"></a>1.首次开机或者升级</h4><p>在SystemServer.java 中有mPackageManagerService.updatePackagesIfNeeded()</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">updatePackagesIfNeeded-&gt;performDexOptUpgrade-&gt;performDexOptTraced-&gt;performDexOptInternal-&gt;performDexOptInternalWithDependenciesLI-&gt;PackageDexOptimizer.performDexOpt-&gt;performDexOptLI-&gt;dexOptPath-&gt;Installer.dexopt-&gt;InstalldNativeService.dexopt-&gt;dexopt.dexopt</span><br></pre></td></tr></table></figure>
+<figure >
+updatePackagesIfNeeded-&gt;performDexOptUpgrade-&gt;performDexOptTraced-&gt;performDexOptInternal-&gt;performDexOptInternalWithDependenciesLI-&gt;PackageDexOptimizer.performDexOpt-&gt;performDexOptLI-&gt;dexOptPath-&gt;Installer.dexopt-&gt;InstalldNativeService.dexopt-&gt;dexopt.dexopt
+
+ </figure>
 <h4 id="2-安装应用"><a href="#2-安装应用" class="headerlink" title="2.安装应用"></a>2.安装应用</h4><p>在PKMS.installPackageLI函数中有：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mPackageDexOptimizer.performDexOpt(pkg, pkg.usesLibraryFiles,</span><br><span class="line">null /* instructionSets /, false / checkProfiles */,</span><br><span class="line">getCompilerFilterForReason(REASON_INSTALL),</span><br><span class="line">getOrCreateCompilerPackageStats(pkg),</span><br><span class="line">mDexManager.isUsedByOtherApps(pkg.packageName));</span><br></pre></td></tr></table></figure>
+<figure >
+mPackageDexOptimizer.performDexOpt(pkg, pkg.usesLibraryFiles,
+null /* instructionSets /, false / checkProfiles */,
+getCompilerFilterForReason(REASON_INSTALL),
+getOrCreateCompilerPackageStats(pkg),
+mDexManager.isUsedByOtherApps(pkg.packageName));
+
+ </figure>
 <h4 id="3-IPackageManager-aidl提供了performDexOpt方法"><a href="#3-IPackageManager-aidl提供了performDexOpt方法" class="headerlink" title="3.IPackageManager.aidl提供了performDexOpt方法"></a>3.IPackageManager.aidl提供了performDexOpt方法</h4><p>在PKMS中有实现的地方，但是没找到调用的地方</p>
 <h4 id="4-IPackageManager-aidl提供了performDexOptMode方法"><a href="#4-IPackageManager-aidl提供了performDexOptMode方法" class="headerlink" title="4.IPackageManager.aidl提供了performDexOptMode方法"></a>4.IPackageManager.aidl提供了performDexOptMode方法</h4><p>在PKMS中有实现的地方，在PackageManagerShellCommand中会被调用，应该是提供给shell命令调用</p>
 <h4 id="5-OTA升级后"><a href="#5-OTA升级后" class="headerlink" title="5.OTA升级后"></a>5.OTA升级后</h4><p>在SystemServer.java 中有OtaDexoptService.main(mSystemContext, mPackageManagerService);</p>
@@ -252,23 +427,162 @@ installer.moveAb(path, dexCodeInstructionSet, oatDir);
 </code></pre><p>moveAbArtifacts函数的逻辑：<br>1.判断是否升级<br>2.判断扫描过的package是否有code，没有则跳过<br>3.判断package的code路径是否为空，为空则跳过<br>4.如果package的code在system或者vendor目录下，跳过<br>5.满足上述条件，调用Installer.java中的moveAb方法<br>最终是调用dexopt.cpp的move_ab方法</p>
 <p>OtaDexoptService也提供给shell命令一些方法来调用</p>
 <h4 id="6-在系统空闲的时候"><a href="#6-在系统空闲的时候" class="headerlink" title="6.在系统空闲的时候"></a>6.在系统空闲的时候</h4><p>是通过BackgroundDexOptService来实现的，BackgroundDexOptService继承了JobService<br>这里启动了两个任务<br>1.开机的时候执行odex优化 JOB_POST_BOOT_UPDATE<br>执行条件：开机一分钟内<br>2.在系统休眠的时候执行优化 JOB_IDLE_OPTIMIZE<br>执行条件：设备处于空闲，插入充电器，且每隔一分钟或者一天就检查一次（根据debug开关控制）</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">private static final long IDLE_OPTIMIZATION_PERIOD = DEBUG</span><br><span class="line">          ? TimeUnit.MINUTES.toMillis(1)</span><br><span class="line">          : TimeUnit.DAYS.toMillis(1);</span><br><span class="line">          </span><br><span class="line">public static void schedule(Context context) &#123;</span><br><span class="line">      if (isBackgroundDexoptDisabled()) &#123;</span><br><span class="line">          return;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      JobScheduler js = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);</span><br><span class="line"></span><br><span class="line">      // Schedule a one-off job which scans installed packages and updates</span><br><span class="line">      // out-of-date oat files.</span><br><span class="line">      js.schedule(new JobInfo.Builder(JOB_POST_BOOT_UPDATE, sDexoptServiceName)</span><br><span class="line">                  .setMinimumLatency(TimeUnit.MINUTES.toMillis(1))</span><br><span class="line">                  .setOverrideDeadline(TimeUnit.MINUTES.toMillis(1))</span><br><span class="line">                  .build());</span><br><span class="line"></span><br><span class="line">      // Schedule a daily job which scans installed packages and compiles</span><br><span class="line">      // those with fresh profiling data.</span><br><span class="line">      js.schedule(new JobInfo.Builder(JOB_IDLE_OPTIMIZE, sDexoptServiceName)</span><br><span class="line">                  .setRequiresDeviceIdle(true)</span><br><span class="line">                  .setRequiresCharging(true)</span><br><span class="line">                  .setPeriodic(IDLE_OPTIMIZATION_PERIOD)</span><br><span class="line">                  .build());</span><br><span class="line"></span><br><span class="line">      if (DEBUG_DEXOPT) &#123;</span><br><span class="line">          Log.i(TAG, &quot;Jobs scheduled&quot;);</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
-<h3 id="判断是否需要做dex2oat的逻辑："><a href="#判断是否需要做dex2oat的逻辑：" class="headerlink" title="判断是否需要做dex2oat的逻辑："></a>判断是否需要做dex2oat的逻辑：</h3><h4 id="1）是否需要编译的类型分类："><a href="#1）是否需要编译的类型分类：" class="headerlink" title="1）是否需要编译的类型分类："></a>1）是否需要编译的类型分类：</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">class OatFileAssistant &#123;</span><br><span class="line">//是否需要编译</span><br><span class="line">enum DexOptNeeded &#123;</span><br><span class="line"> kNoDexOptNeeded = 0, //已经编译过，不需要再编译</span><br><span class="line"> kDex2OatFromScratch = 1, //有dex文件，但还没编过</span><br><span class="line"> kDex2OatForBootImage = 2,//oat文件不能匹配boot image（系统升级 boot image会变化）</span><br><span class="line"> kDex2OatForFilter = 3,//oat文件不能匹配compiler filter</span><br><span class="line"> kDex2OatForRelocation = 4, //还是oat文件与boot image不匹配，但是没有深刻理解relocation是什么场景</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> //对应的几种状态</span><br><span class="line">enum OatStatus &#123;</span><br><span class="line"> kOatCannotOpen, //oat文件不存在</span><br><span class="line"> kOatDexOutOfDate, //oat文件过期，与dex文件不匹配</span><br><span class="line"> kOatBootImageOutOfDate, //对应kDex2OatForBootImage，oat文件与boot image不匹配</span><br><span class="line"> kOatRelocationOutOfDate,//对应kDex2OatForRelocation oat文件与boot image不匹配</span><br><span class="line"> kOatUpToDate,//oat文件与dex文件和 boot image都匹配</span><br><span class="line"> &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure >
+private static final long IDLE_OPTIMIZATION_PERIOD = DEBUG
+          ? TimeUnit.MINUTES.toMillis(1)
+          : TimeUnit.DAYS.toMillis(1);
+          
+public static void schedule(Context context) {
+      if (isBackgroundDexoptDisabled()) {
+          return;
+      }
+
+      JobScheduler js = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+
+      // Schedule a one-off job which scans installed packages and updates
+      // out-of-date oat files.
+      js.schedule(new JobInfo.Builder(JOB_POST_BOOT_UPDATE, sDexoptServiceName)
+                  .setMinimumLatency(TimeUnit.MINUTES.toMillis(1))
+                  .setOverrideDeadline(TimeUnit.MINUTES.toMillis(1))
+                  .build());
+
+      // Schedule a daily job which scans installed packages and compiles
+      // those with fresh profiling data.
+      js.schedule(new JobInfo.Builder(JOB_IDLE_OPTIMIZE, sDexoptServiceName)
+                  .setRequiresDeviceIdle(true)
+                  .setRequiresCharging(true)
+                  .setPeriodic(IDLE_OPTIMIZATION_PERIOD)
+                  .build());
+
+      if (DEBUG_DEXOPT) {
+          Log.i(TAG, "Jobs scheduled");
+      }
+  } </figure>
+<h3 id="判断是否需要做dex2oat的逻辑："><a href="#判断是否需要做dex2oat的逻辑：" class="headerlink" title="判断是否需要做dex2oat的逻辑："></a>判断是否需要做dex2oat的逻辑：</h3><h4 id="1）是否需要编译的类型分类："><a href="#1）是否需要编译的类型分类：" class="headerlink" title="1）是否需要编译的类型分类："></a>1）是否需要编译的类型分类：</h4>
+<figure >
+class OatFileAssistant {
+//是否需要编译
+enum DexOptNeeded {
+ kNoDexOptNeeded = 0, //已经编译过，不需要再编译
+ kDex2OatFromScratch = 1, //有dex文件，但还没编过
+ kDex2OatForBootImage = 2,//oat文件不能匹配boot image（系统升级 boot image会变化）
+ kDex2OatForFilter = 3,//oat文件不能匹配compiler filter
+ kDex2OatForRelocation = 4, //还是oat文件与boot image不匹配，但是没有深刻理解relocation是什么场景
+ }
+
+ //对应的几种状态
+enum OatStatus {
+ kOatCannotOpen, //oat文件不存在
+ kOatDexOutOfDate, //oat文件过期，与dex文件不匹配
+ kOatBootImageOutOfDate, //对应kDex2OatForBootImage，oat文件与boot image不匹配
+ kOatRelocationOutOfDate,//对应kDex2OatForRelocation oat文件与boot image不匹配
+ kOatUpToDate,//oat文件与dex文件和 boot image都匹配
+ };
+} </figure>
 <p>核心逻辑：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">art/runtime/oat_file_assistant.cc</span><br><span class="line"> </span><br><span class="line">int OatFileAssistant::GetDexOptNeeded(CompilerFilter::Filter target,</span><br><span class="line">                                      bool profile_changed,</span><br><span class="line">                                      bool downgrade,</span><br><span class="line">                                      ClassLoaderContext* class_loader_context) &#123;</span><br><span class="line">  OatFileInfo&amp; info = GetBestInfo();//获取OatFileInfo对应实例</span><br><span class="line">  DexOptNeeded dexopt_needed = info.GetDexOptNeeded(target,</span><br><span class="line">                                                    profile_changed,</span><br><span class="line">                                                    downgrade,</span><br><span class="line">                                                    class_loader_context);</span><br><span class="line">  if (info.IsOatLocation() || dexopt_needed == kDex2OatFromScratch) &#123;</span><br><span class="line">    return dexopt_needed;</span><br><span class="line">  &#125;</span><br><span class="line">  return -dexopt_needed;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure >
+art/runtime/oat_file_assistant.cc
+ 
+int OatFileAssistant::GetDexOptNeeded(CompilerFilter::Filter target,
+                                      bool profile_changed,
+                                      bool downgrade,
+                                      ClassLoaderContext* class_loader_context) {
+  OatFileInfo& info = GetBestInfo();//获取OatFileInfo对应实例
+  DexOptNeeded dexopt_needed = info.GetDexOptNeeded(target,
+                                                    profile_changed,
+                                                    downgrade,
+                                                    class_loader_context);
+  if (info.IsOatLocation() || dexopt_needed == kDex2OatFromScratch) {
+    return dexopt_needed;
+  }
+  return -dexopt_needed;
+} </figure>
 <p>这里有两个概念需要了解：</p>
 <ul>
 <li>oat location 与odex location 分别是什么？<br>app的安装系统目录data/app和system/app，这个路径下每个应用都会生成一个类似包名+乱码的一个文件夹，里面存放主apk以及编译文件。<br>oat location对应的是oat文件夹路径<br>odex location对应的是oat/arm or arm64/odex文件路径<br> 如果有odex优先用odex。</li>
 <li>正负数是指的什么？<br> 正数对应in_odex_path ，负数对应out_oat_path</li>
 </ul>
 <h4 id="2）DexOptNeeded各类型赋值"><a href="#2）DexOptNeeded各类型赋值" class="headerlink" title="2）DexOptNeeded各类型赋值"></a>2）DexOptNeeded各类型赋值</h4><p>这里主要是看看这几个判断类型是在哪赋值的，这样就知道编译的触发条件有哪些了</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">if (!oat_file_assistant.IsUpToDate()) &#123; </span><br><span class="line"> switch (oat_file_assistant.MakeUpToDate(/*profile_changed*/false, /*out*/ &amp;error_msg)) &#123;</span><br><span class="line">...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure >
+if (!oat_file_assistant.IsUpToDate()) { 
+ switch (oat_file_assistant.MakeUpToDate(/*profile_changed*/false, /*out*/ &error_msg)) {
+...
+} </figure>
 <p>过期逻辑一般是先IsUpToDate判断是否过期，然后MakeUpToDate做过期操作，很明显这个部分还是在oat_file_assistant.cc做的</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">art/runtime/oat_file_assistant.cc</span><br><span class="line"></span><br><span class="line">bool OatFileAssistant::IsUpToDate() &#123;</span><br><span class="line">  return GetBestInfo().Status() == kOatUpToDate;//是不是已经编过了</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure >
+art/runtime/oat_file_assistant.cc
+
+bool OatFileAssistant::IsUpToDate() {
+  return GetBestInfo().Status() == kOatUpToDate;//是不是已经编过了
+} </figure>
 <p>没有编过就通过MakeUpToDate来置DexOptNeeded编译类型</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">OatFileAssistant::MakeUpToDate(bool profile_changed, std::string* error_msg) &#123;</span><br><span class="line">  CompilerFilter::Filter target;</span><br><span class="line">  if (!GetRuntimeCompilerFilterOption(&amp;target, error_msg)) &#123;</span><br><span class="line">    return kUpdateNotAttempted; //We wanted to update the code, but determined we should not make the attempt.</span><br><span class="line">  &#125;</span><br><span class="line">  OatFileInfo&amp; info = GetBestInfo();</span><br><span class="line">  switch (info.GetDexOptNeeded(target, profile_changed)) &#123; //这里有各种条件来赋值DexOptNeeded，条件跟之前的描述差不多</span><br><span class="line"></span><br><span class="line">    case kNoDexOptNeeded:</span><br><span class="line">      return kUpdateSucceeded;//We successfully made the code up to date (possibly by doing nothing).</span><br><span class="line"></span><br><span class="line">    // TODO: For now, don&apos;t bother with all the different ways we can call</span><br><span class="line"> // dex2oat to generate the oat file. Always generate the oat file as if it</span><br><span class="line"> // were kDex2OatFromScratch.</span><br><span class="line">    case kDex2OatFromScratch:</span><br><span class="line">    case kDex2OatForBootImage:</span><br><span class="line">    case kDex2OatForRelocation:</span><br><span class="line">    case kDex2OatForFilter:</span><br><span class="line">      return GenerateOatFileNoChecks(info, target, error_msg);//mark the odex file has changed and we should try to reload.</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line">  UNREACHABLE();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure >
+OatFileAssistant::MakeUpToDate(bool profile_changed, std::string* error_msg) {
+  CompilerFilter::Filter target;
+  if (!GetRuntimeCompilerFilterOption(&target, error_msg)) {
+    return kUpdateNotAttempted; //We wanted to update the code, but determined we should not make the attempt.
+  }
+  OatFileInfo& info = GetBestInfo();
+  switch (info.GetDexOptNeeded(target, profile_changed)) { //这里有各种条件来赋值DexOptNeeded，条件跟之前的描述差不多
+
+    case kNoDexOptNeeded:
+      return kUpdateSucceeded;//We successfully made the code up to date (possibly by doing nothing).
+
+    // TODO: For now, don't bother with all the different ways we can call
+ // dex2oat to generate the oat file. Always generate the oat file as if it
+ // were kDex2OatFromScratch.
+    case kDex2OatFromScratch:
+    case kDex2OatForBootImage:
+    case kDex2OatForRelocation:
+    case kDex2OatForFilter:
+      return GenerateOatFileNoChecks(info, target, error_msg);//mark the odex file has changed and we should try to reload.
+
+  }
+  UNREACHABLE();
+} </figure>
 <p>主要赋值在GetBestInfo()</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">OatFileAssistant::OatFileInfo&amp; OatFileAssistant::GetBestInfo() &#123;</span><br><span class="line">  // TODO(calin): Document the side effects of class loading when</span><br><span class="line">  // running dalvikvm command line.</span><br><span class="line">  if (dex_parent_writable_) &#123;</span><br><span class="line">    // If the parent of the dex file is writable it means that we can</span><br><span class="line">    // create the odex file. In this case we unconditionally pick the odex</span><br><span class="line">    // as the best oat file. This corresponds to the regular use case when</span><br><span class="line">    // apps gets installed or when they load private, secondary dex file.</span><br><span class="line">    // For apps on the system partition the odex location will not be</span><br><span class="line">    // writable and thus the oat location might be more up to date.</span><br><span class="line">    return odex_;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  // We cannot write to the odex location. This must be a system app.</span><br><span class="line"></span><br><span class="line">  // If the oat location is usable take it.</span><br><span class="line">  if (oat_.IsUseable()) &#123;</span><br><span class="line">    return oat_;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  // The oat file is not usable but the odex file might be up to date.</span><br><span class="line">  // This is an indication that we are dealing with an up to date prebuilt</span><br><span class="line">  // (that doesn&apos;t need relocation).</span><br><span class="line">  if (odex_.Status() == kOatUpToDate) &#123;</span><br><span class="line">    return odex_;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  // The oat file is not usable and the odex file is not up to date.</span><br><span class="line">  // However we have access to the original dex file which means we can make</span><br><span class="line">  // the oat location up to date.</span><br><span class="line">  if (HasOriginalDexFiles()) &#123;</span><br><span class="line">    return oat_;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  // We got into the worst situation here:</span><br><span class="line">  // - the oat location is not usable</span><br><span class="line">  // - the prebuild odex location is not up to date</span><br><span class="line">  // - and we don&apos;t have the original dex file anymore (stripped).</span><br><span class="line">  // Pick the odex if it exists, or the oat if not.</span><br><span class="line">  return (odex_.Status() == kOatCannotOpen) ? oat_ : odex_;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure >
+OatFileAssistant::OatFileInfo& OatFileAssistant::GetBestInfo() {
+  // TODO(calin): Document the side effects of class loading when
+  // running dalvikvm command line.
+  if (dex_parent_writable_) {
+    // If the parent of the dex file is writable it means that we can
+    // create the odex file. In this case we unconditionally pick the odex
+    // as the best oat file. This corresponds to the regular use case when
+    // apps gets installed or when they load private, secondary dex file.
+    // For apps on the system partition the odex location will not be
+    // writable and thus the oat location might be more up to date.
+    return odex_;
+  }
+
+  // We cannot write to the odex location. This must be a system app.
+
+  // If the oat location is usable take it.
+  if (oat_.IsUseable()) {
+    return oat_;
+  }
+
+  // The oat file is not usable but the odex file might be up to date.
+  // This is an indication that we are dealing with an up to date prebuilt
+  // (that doesn't need relocation).
+  if (odex_.Status() == kOatUpToDate) {
+    return odex_;
+  }
+
+  // The oat file is not usable and the odex file is not up to date.
+  // However we have access to the original dex file which means we can make
+  // the oat location up to date.
+  if (HasOriginalDexFiles()) {
+    return oat_;
+  }
+
+  // We got into the worst situation here:
+  // - the oat location is not usable
+  // - the prebuild odex location is not up to date
+  // - and we don't have the original dex file anymore (stripped).
+  // Pick the odex if it exists, or the oat if not.
+  return (odex_.Status() == kOatCannotOpen) ? oat_ : odex_;
+} </figure>
 <h3 id="ART-如何编译-DEX"><a href="#ART-如何编译-DEX" class="headerlink" title="ART 如何编译 DEX"></a>ART 如何编译 DEX</h3><p>ART 如何编译 DEX 代码还有个compile filter以参数的形式来决定：从 Android O 开始，有四个官方支持的过滤器：</p>
 <ul>
 <li><strong>verify</strong>：只运行 DEX 代码验证。</li>
@@ -279,7 +593,17 @@ installer.moveAb(path, dexCodeInstructionSet, oatDir);
 <p>verify 和quicken 他俩都没执行编译，之后代码执行需要跑解释器。而speed-profile 和 speed 都执行了编译，区别是speed-profile根据profile记录的热点函数来编译，属于部分编译，而speed属于全编。</p>
 <p>执行效率上：<br>verify &lt; quicken &lt; speed-profile &lt; speed</p>
 <p>编译速度上：<br>verify &gt; quicken &gt; speed-profile &gt; speed</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[pm.dexopt.ab-ota]: [speed-profile]</span><br><span class="line">[pm.dexopt.bg-dexopt]: [speed-profile]</span><br><span class="line">[pm.dexopt.boot]: [verify]</span><br><span class="line">[pm.dexopt.first-boot]: [quicken]</span><br><span class="line">[pm.dexopt.inactive]: [verify]</span><br><span class="line">[pm.dexopt.install]: [speed-profile]</span><br><span class="line">[pm.dexopt.priv-apps-oob]: [false]</span><br><span class="line">[pm.dexopt.priv-apps-oob-list]: [ALL]</span><br><span class="line">[pm.dexopt.shared]: [speed]</span><br></pre></td></tr></table></figure>
+<figure >
+[pm.dexopt.ab-ota]: [speed-profile]
+[pm.dexopt.bg-dexopt]: [speed-profile]
+[pm.dexopt.boot]: [verify]
+[pm.dexopt.first-boot]: [quicken]
+[pm.dexopt.inactive]: [verify]
+[pm.dexopt.install]: [speed-profile]
+[pm.dexopt.priv-apps-oob]: [false]
+[pm.dexopt.priv-apps-oob-list]: [ALL]
+[pm.dexopt.shared]: [speed]
+ </figure>
 <p>启动时间相关<br> 主要还是看执行模式</p>
 <ul>
 <li>Android大版本之间相同场景的执行模式是否有区别， dex2oat编译的时候会耗时，并且是多线程的，cpu占用率也会比较高。</li>
