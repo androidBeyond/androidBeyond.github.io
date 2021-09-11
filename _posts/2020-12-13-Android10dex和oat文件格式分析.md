@@ -13,7 +13,7 @@ tags:
     - 组件学习
 ---
 
-<p>在installd守护进程中有提到dexopt的操作，最后执行的操作是 run_dex2oat。本文将对dex和oat文件格式进行介绍分析。</p>
+<p>在之前的文章<a href="{{site.baseurl}}/2020/06/05/Android10Installd守护进程/"   target="_blank">Android10Installd守护进程</a>中有提到dexopt的操作，最后执行的操作是 run_dex2oat。本文将对dex和oat文件格式进行介绍分析。</p>
 <pre><code>
 run_dex2oat(input_fd.get(),
                  out_oat_fd.get(),
