@@ -18,16 +18,16 @@ tags:
 <p>为什么需要installd守护进程？因为权限问题，PKMS只有system权限，installd却具有root权限。</p>
 <p>在SystemServer中installd服务启动</p>
 <h4 id="1、客服端实现"><a href="#1、客服端实现" class="headerlink" title="1、客服端实现"></a>1、客服端实现</h4>
-<figure >
+<pre><code>
 //启动installer服务，PKMS相关任务的执行者
 // Wait for installd to finish starting up so that it has a chance to
 // create critical directories such as /data/user with the appropriate
 // permissions.  We need this to complete before we initialize other services.
 Installer installer = mSystemServiceManager.startService(Installer.class);
 
- </figure>
+ </code></pre>
 <p>Installer代码比较简洁，主要为一些创建、删除文件等操作。</p>
-<figure >
+<pre><code>
 @Override
  public void onStart() {
      if (mIsolated) {
@@ -67,10 +67,10 @@ Installer installer = mSystemServiceManager.startService(Installer.class);
          }, DateUtils.SECOND_IN_MILLIS);
      }
  }
- </figure>
+ </code></pre>
 <h4 id="2、服务端实现"><a href="#2、服务端实现" class="headerlink" title="2、服务端实现"></a>2、服务端实现</h4><p>Android7.0后单一的init.rc文件被拆分，放在对应分区的etc/init目录中，每个服务一个rc文件，与该服务相关的触发器，操作等也定义在同一rc文件中。</p>
 <p>frameworks/native/cmds/installd/Android.bp编译文件中</p>
-<figure >
+<pre><code>
 cc_binary {
     name: "installd",
     defaults: ["installd_defaults"],
@@ -81,14 +81,14 @@ cc_binary {
     init_rc: ["installd.rc"],
 }
 
- </figure>
+ </code></pre>
 <p>frameworks/native/cmds/installd/installd.rc中启动installd进程</p>
-<figure >
+<pre><code>
 service installd /system/bin/installd
     class main
- </figure>
+ </code></pre>
 <p>installd.cpp主函数如下</p>
-<figure >
+<pre><code>
 static int installd_main(const int argc ATTRIBUTE_UNUSED, char *argv[]) {
     int ret;
     int selinux_enabled = (is_selinux_enabled() &gt; 0);
@@ -128,9 +128,9 @@ static int installd_main(const int argc ATTRIBUTE_UNUSED, char *argv[]) {
 
     return 0;
 }
- </figure>
+ </code></pre>
 <p>InstalldNativeService::start()将该服务发布到native层的servicemanager中</p>
-<figure >
+<pre><code>
 status_t InstalldNativeService::start() {
     IPCThreadState::self()-&gt;disableBackgroundScheduling(true);
     status_t ret = BinderService&lt;InstalldNativeService&gt;::publish();
@@ -142,10 +142,10 @@ status_t InstalldNativeService::start() {
     ps-&gt;giveThreadPoolName();
     return android::OK;
 }
- </figure>
+ </code></pre>
 <p>BinderService<installdnativeservice>::publish()将服务添加到ServiceManager中</installdnativeservice></p>
 <p>/framework/native/libs/binder/include/binder/BinderService.h</p>
-<figure >
+<pre><code>
 static status_t publish(bool allowIsolated = false) {
         sp&lt;IServiceManager&gt; sm(defaultServiceManager());
         将服务加入到ServiceManager中
@@ -153,10 +153,10 @@ static status_t publish(bool allowIsolated = false) {
                 String16(SERVICE::getServiceName()),
                 new SERVICE(), allowIsolated);
     }
- </figure>
+ </code></pre>
 <p>所有的install.java中定义的功能都是通过binder调用native层的InstalldNativeService来实现</p>
 <p>install.java中dexopt方法，最后是执行Native层的dexopt方法。</p>
-<figure >
+<pre><code>
 binder::Status InstalldNativeService::dexopt(const std::string& apkPath, int32_t uid,
         const std::unique_ptr&lt;std::string&gt;& packageName, const std::string& instructionSet,
         int32_t dexoptNeeded, const std::unique_ptr&lt;std::string&gt;& outputPath, int32_t dexFlags,
@@ -193,7 +193,7 @@ binder::Status InstalldNativeService::dexopt(const std::string& apkPath, int32_t
             downgrade, targetSdkVersion, profile_name, dm_path, compilation_reason, &error_msg);
     return res ? error(res, error_msg) : ok();
 }
- </figure>
+ </code></pre>
 <p>android::installd::dexopt操作在dexopt.cpp文件中</p>
 <pre><code>int dexopt(const char* dex_path, uid_t uid, const char* pkgname, const char* instruction_set,
         int dexopt_needed, const char* oat_dir, int dexopt_flags, const char* compiler_filter,
@@ -381,28 +381,28 @@ return 0;
 <p>如果当前运行于Art模式下， Art同样会在首次进入系统的时候调用/system/bin/dexopt工具来将dex字节码翻译成本地机器码，保存在data/dalvik-cache下。 那么这里需要注意的是，无论是对dex字节码进行优化，还是将dex字节码翻译成本地机器码，最终得到的结果都是保存在相同名称的一个odex文件里面的，但是前者对应的是一个dey文件（表示这是一个优化过的dex），后者对应的是一个oat文件（实际上是一个自定义的elf文件，里面包含的都是本地机器指令）。通过这种方式，原来任何通过绝对路径引用了该odex文件的代码就都不需要修改了。</p>
 <p>由于在系统首次启动时会对应用进行安装，那么在预置APK比较多的情况下，将会大大增加系统首次启动的时间。从前面的描述可知，既然无论是DVM还是ART，对DEX的优化结果都是保存在一个相同名称的odex文件，那么如果我们把这两个过程在ROM编译的时候预处理提取Odex文件将会大大优化系统首次启动的时间。</p>
 <h4 id="3、预编译提取Odex"><a href="#3、预编译提取Odex" class="headerlink" title="3、预编译提取Odex"></a>3、预编译提取Odex</h4><p>在目录/build/core/dex_preopt_odex_install.mk中的代码：</p>
-<figure >
+<pre><code>
 ifeq ($(LOCAL_MODULE),helloworld)
 LOCAL_DEX_PREOPT:=
 endif
 build_odex:=
 installed_odex:=
- </figure>
+ </code></pre>
 <p>helloworld可替换为需要跳过提取odex的apk的LOCAL_MODULE名字，如Settings等。</p>
 <h3 id="odex优化的地方"><a href="#odex优化的地方" class="headerlink" title="odex优化的地方"></a>odex优化的地方</h3><h4 id="1-首次开机或者升级"><a href="#1-首次开机或者升级" class="headerlink" title="1.首次开机或者升级"></a>1.首次开机或者升级</h4><p>在SystemServer.java 中有mPackageManagerService.updatePackagesIfNeeded()</p>
-<figure >
+<pre><code>
 updatePackagesIfNeeded-&gt;performDexOptUpgrade-&gt;performDexOptTraced-&gt;performDexOptInternal-&gt;performDexOptInternalWithDependenciesLI-&gt;PackageDexOptimizer.performDexOpt-&gt;performDexOptLI-&gt;dexOptPath-&gt;Installer.dexopt-&gt;InstalldNativeService.dexopt-&gt;dexopt.dexopt
 
- </figure>
+ </code></pre>
 <h4 id="2-安装应用"><a href="#2-安装应用" class="headerlink" title="2.安装应用"></a>2.安装应用</h4><p>在PKMS.installPackageLI函数中有：</p>
-<figure >
+<pre><code>
 mPackageDexOptimizer.performDexOpt(pkg, pkg.usesLibraryFiles,
 null /* instructionSets /, false / checkProfiles */,
 getCompilerFilterForReason(REASON_INSTALL),
 getOrCreateCompilerPackageStats(pkg),
 mDexManager.isUsedByOtherApps(pkg.packageName));
 
- </figure>
+ </code></pre>
 <h4 id="3-IPackageManager-aidl提供了performDexOpt方法"><a href="#3-IPackageManager-aidl提供了performDexOpt方法" class="headerlink" title="3.IPackageManager.aidl提供了performDexOpt方法"></a>3.IPackageManager.aidl提供了performDexOpt方法</h4><p>在PKMS中有实现的地方，但是没找到调用的地方</p>
 <h4 id="4-IPackageManager-aidl提供了performDexOptMode方法"><a href="#4-IPackageManager-aidl提供了performDexOptMode方法" class="headerlink" title="4.IPackageManager.aidl提供了performDexOptMode方法"></a>4.IPackageManager.aidl提供了performDexOptMode方法</h4><p>在PKMS中有实现的地方，在PackageManagerShellCommand中会被调用，应该是提供给shell命令调用</p>
 <h4 id="5-OTA升级后"><a href="#5-OTA升级后" class="headerlink" title="5.OTA升级后"></a>5.OTA升级后</h4><p>在SystemServer.java 中有OtaDexoptService.main(mSystemContext, mPackageManagerService);</p>
@@ -427,7 +427,7 @@ installer.moveAb(path, dexCodeInstructionSet, oatDir);
 </code></pre><p>moveAbArtifacts函数的逻辑：<br>1.判断是否升级<br>2.判断扫描过的package是否有code，没有则跳过<br>3.判断package的code路径是否为空，为空则跳过<br>4.如果package的code在system或者vendor目录下，跳过<br>5.满足上述条件，调用Installer.java中的moveAb方法<br>最终是调用dexopt.cpp的move_ab方法</p>
 <p>OtaDexoptService也提供给shell命令一些方法来调用</p>
 <h4 id="6-在系统空闲的时候"><a href="#6-在系统空闲的时候" class="headerlink" title="6.在系统空闲的时候"></a>6.在系统空闲的时候</h4><p>是通过BackgroundDexOptService来实现的，BackgroundDexOptService继承了JobService<br>这里启动了两个任务<br>1.开机的时候执行odex优化 JOB_POST_BOOT_UPDATE<br>执行条件：开机一分钟内<br>2.在系统休眠的时候执行优化 JOB_IDLE_OPTIMIZE<br>执行条件：设备处于空闲，插入充电器，且每隔一分钟或者一天就检查一次（根据debug开关控制）</p>
-<figure >
+<pre><code>
 private static final long IDLE_OPTIMIZATION_PERIOD = DEBUG
           ? TimeUnit.MINUTES.toMillis(1)
           : TimeUnit.DAYS.toMillis(1);
@@ -457,9 +457,9 @@ public static void schedule(Context context) {
       if (DEBUG_DEXOPT) {
           Log.i(TAG, "Jobs scheduled");
       }
-  } </figure>
+  } </code></pre>
 <h3 id="判断是否需要做dex2oat的逻辑："><a href="#判断是否需要做dex2oat的逻辑：" class="headerlink" title="判断是否需要做dex2oat的逻辑："></a>判断是否需要做dex2oat的逻辑：</h3><h4 id="1）是否需要编译的类型分类："><a href="#1）是否需要编译的类型分类：" class="headerlink" title="1）是否需要编译的类型分类："></a>1）是否需要编译的类型分类：</h4>
-<figure >
+<pre><code>
 class OatFileAssistant {
 //是否需要编译
 enum DexOptNeeded {
@@ -478,9 +478,9 @@ enum OatStatus {
  kOatRelocationOutOfDate,//对应kDex2OatForRelocation oat文件与boot image不匹配
  kOatUpToDate,//oat文件与dex文件和 boot image都匹配
  };
-} </figure>
+} </code></pre>
 <p>核心逻辑：</p>
-<figure >
+<pre><code>
 art/runtime/oat_file_assistant.cc
  
 int OatFileAssistant::GetDexOptNeeded(CompilerFilter::Filter target,
@@ -496,27 +496,27 @@ int OatFileAssistant::GetDexOptNeeded(CompilerFilter::Filter target,
     return dexopt_needed;
   }
   return -dexopt_needed;
-} </figure>
+} </code></pre>
 <p>这里有两个概念需要了解：</p>
 <ul>
 <li>oat location 与odex location 分别是什么？<br>app的安装系统目录data/app和system/app，这个路径下每个应用都会生成一个类似包名+乱码的一个文件夹，里面存放主apk以及编译文件。<br>oat location对应的是oat文件夹路径<br>odex location对应的是oat/arm or arm64/odex文件路径<br> 如果有odex优先用odex。</li>
 <li>正负数是指的什么？<br> 正数对应in_odex_path ，负数对应out_oat_path</li>
 </ul>
 <h4 id="2）DexOptNeeded各类型赋值"><a href="#2）DexOptNeeded各类型赋值" class="headerlink" title="2）DexOptNeeded各类型赋值"></a>2）DexOptNeeded各类型赋值</h4><p>这里主要是看看这几个判断类型是在哪赋值的，这样就知道编译的触发条件有哪些了</p>
-<figure >
+<pre><code>
 if (!oat_file_assistant.IsUpToDate()) { 
  switch (oat_file_assistant.MakeUpToDate(/*profile_changed*/false, /*out*/ &error_msg)) {
 ...
-} </figure>
+} </code></pre>
 <p>过期逻辑一般是先IsUpToDate判断是否过期，然后MakeUpToDate做过期操作，很明显这个部分还是在oat_file_assistant.cc做的</p>
-<figure >
+<pre><code>
 art/runtime/oat_file_assistant.cc
 
 bool OatFileAssistant::IsUpToDate() {
   return GetBestInfo().Status() == kOatUpToDate;//是不是已经编过了
-} </figure>
+} </code></pre>
 <p>没有编过就通过MakeUpToDate来置DexOptNeeded编译类型</p>
-<figure >
+<pre><code>
 OatFileAssistant::MakeUpToDate(bool profile_changed, std::string* error_msg) {
   CompilerFilter::Filter target;
   if (!GetRuntimeCompilerFilterOption(&target, error_msg)) {
@@ -539,9 +539,9 @@ OatFileAssistant::MakeUpToDate(bool profile_changed, std::string* error_msg) {
 
   }
   UNREACHABLE();
-} </figure>
+} </code></pre>
 <p>主要赋值在GetBestInfo()</p>
-<figure >
+<pre><code>
 OatFileAssistant::OatFileInfo& OatFileAssistant::GetBestInfo() {
   // TODO(calin): Document the side effects of class loading when
   // running dalvikvm command line.
@@ -582,7 +582,7 @@ OatFileAssistant::OatFileInfo& OatFileAssistant::GetBestInfo() {
   // - and we don't have the original dex file anymore (stripped).
   // Pick the odex if it exists, or the oat if not.
   return (odex_.Status() == kOatCannotOpen) ? oat_ : odex_;
-} </figure>
+} </code></pre>
 <h3 id="ART-如何编译-DEX"><a href="#ART-如何编译-DEX" class="headerlink" title="ART 如何编译 DEX"></a>ART 如何编译 DEX</h3><p>ART 如何编译 DEX 代码还有个compile filter以参数的形式来决定：从 Android O 开始，有四个官方支持的过滤器：</p>
 <ul>
 <li><strong>verify</strong>：只运行 DEX 代码验证。</li>
@@ -593,7 +593,7 @@ OatFileAssistant::OatFileInfo& OatFileAssistant::GetBestInfo() {
 <p>verify 和quicken 他俩都没执行编译，之后代码执行需要跑解释器。而speed-profile 和 speed 都执行了编译，区别是speed-profile根据profile记录的热点函数来编译，属于部分编译，而speed属于全编。</p>
 <p>执行效率上：<br>verify &lt; quicken &lt; speed-profile &lt; speed</p>
 <p>编译速度上：<br>verify &gt; quicken &gt; speed-profile &gt; speed</p>
-<figure >
+<pre><code>
 [pm.dexopt.ab-ota]: [speed-profile]
 [pm.dexopt.bg-dexopt]: [speed-profile]
 [pm.dexopt.boot]: [verify]
@@ -603,7 +603,7 @@ OatFileAssistant::OatFileInfo& OatFileAssistant::GetBestInfo() {
 [pm.dexopt.priv-apps-oob]: [false]
 [pm.dexopt.priv-apps-oob-list]: [ALL]
 [pm.dexopt.shared]: [speed]
- </figure>
+ </code></pre>
 <p>启动时间相关<br> 主要还是看执行模式</p>
 <ul>
 <li>Android大版本之间相同场景的执行模式是否有区别， dex2oat编译的时候会耗时，并且是多线程的，cpu占用率也会比较高。</li>
