@@ -164,9 +164,9 @@ public static final int LAST_APPLICATION_UID = 19999;
 <p>GID时用户组ID。对于普通的应用程序来说GID等于UID，由于每个应用程序的UID和GID不相同，所以不管是native还是java层都能够达到保护私有数据的作用。</p>
 <p>adb shell cat /proc/PID号/status</p>
 <p>SharedUserSetting类架构</p>
-<p><img src="/2019/PKMS相关类分析/SharedUserSetting.png" alt=""></p>
+<p><img src="https://img-blog.csdnimg.cn/b8ffce45f07c45f3b6e5d0aeec5664d5.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt=""></p>
 <p>PKMS的构造函数创建一个Settings的实例mSettings，mSettings有三个成员变量mSharedUsers，mUserIds，mOtherUserIds。addSharedUserLPw方法都涉及这三个成员变量。SharedUserSetting的成员变量packages是一个PackageSetting类型的ArraySet。PackageSetting继承自PackageSettingBase，PackageSetting保存着package的多种信息。</p>
-<p><img src="/2019/PKMS相关类分析/SharedUserId.png" alt=""></p>
+<p><img src="https://img-blog.csdnimg.cn/76df9844c1894f2795bb7d206086c9b0.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt=""></p>
 <h2 id="2-SystemConfig类"><a href="#2-SystemConfig类" class="headerlink" title="2.SystemConfig类"></a>2.SystemConfig类</h2><h3 id="2-1-SystemConfig构造函数"><a href="#2-1-SystemConfig构造函数" class="headerlink" title="2.1 SystemConfig构造函数"></a>2.1 SystemConfig构造函数</h3><p>主要读取下面路径的配置</p>
 <p>/system/etc/、/system/etc/、/vendor/etc、/odm/etc、/oem/etc、/product/etc 目录下sysconfig和permissions</p>
 <pre><code>
@@ -248,7 +248,7 @@ drwxr-xr-x 26 root root  4096 2018-08-08 00:01:00.000000000 +0800 ..
 <p>readPermissions方法内部调用readPermissionsFromXml方法来解析xml里面的各个节点，其中xml涉及到的标签内容有permission、assign-permission、library、feature等，这些标签的内容解析出来保存到SystemConfig的对应数据结构的全局变量中，以便管理查询。</p>
 <p>feature用来描述设备是否支持硬件特性；  library用于指定系统库，当应用程序运行时，系统会为进城加载一些必须的库； assign-permission将system中描述的permission与uid关联； permission将permission和gid关联。</p>
 <p>总结下SystemConfig初始化时解析xml文件节点以及对应的全局变量。</p>
-<p><img src="/2019/PKMS相关类分析/systemconfig.png" alt=""></p>
+<p><img src="https://img-blog.csdnimg.cn/0ce841da308c4674b590ca06b4eee31a.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt=""></p>
 <h2 id="3-PackageParser"><a href="#3-PackageParser" class="headerlink" title="3. PackageParser"></a>3. PackageParser</h2><p>这个类作用是解析APK，在其类中注释如下：</p>
 <pre><code>
 /**
@@ -1385,7 +1385,8 @@ private Activity parseActivity(Package owner, Resources res,
         return a;
     }
 </code></pre>
-<h3 id="3-3-PackageParser总结"><a href="#3-3-PackageParser总结" class="headerlink" title="3.3 PackageParser总结"></a>3.3 PackageParser总结</h3><p><img src="/2019/PKMS相关类分析/PackageParser.png" alt=""></p>
+<h3 id="3-3-PackageParser总结"><a href="#3-3-PackageParser总结" class="headerlink" title="3.3 PackageParser总结"></a>3.3 PackageParser总结</h3><p>
+<img src="https://img-blog.csdnimg.cn/e633f7720fc7491aa12d3a93c5be5f9e.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt=""></p>
 <p>上图画出了PackageParser解析Apk文件，得到的主要的数据结构，实际的内容远多于这些，我们仅保留了四大组件和权限相关的内容。</p>
 <p>上面这些类，全部是定义于PackageParser中的内部类，这些内部类主要的作用就是保存AndroidManifest.xml解析出的对应信息。 以PackageParser.Activity为例，注意到该类持有ActivityInfo类，继承自 Component&lt; ActivityIntentInfo&gt;。其中，ActivityInfo用于保存Activity的信息；Component类是一个模板，对应元素类型是ActivityIntentInfo，顶层基类IntentFilter。四大组件中的其它成员，也有类似的继承结构。</p>
 <blockquote>
