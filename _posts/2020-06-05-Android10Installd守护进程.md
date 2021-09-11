@@ -1,7 +1,7 @@
 ---
 layout:     post
 title:      Android10 Installd守护进程
-subtitle:   PackageManagerService底层真正干活的是installd，通过Native Binder调用
+subtitle:   PackageManagerService底层真正干活的是installd，通过Native Binder调用，实现应用的安装
 date:       2020-06-05
 author:     duguma
 header-img: img/article-bg.jpg
