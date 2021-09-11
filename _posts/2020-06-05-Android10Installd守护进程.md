@@ -364,7 +364,8 @@ reference_profile_fd.SetCleanup(false);
 
 return 0;
 }
-</code></pre><h3 id="dexopt"><a href="#dexopt" class="headerlink" title="dexopt"></a>dexopt</h3><p><img src="/2019/installd守护进程/dexopt.png" alt=""></p>
+</code></pre><h3 id="dexopt"><a href="#dexopt" class="headerlink" title="dexopt"></a>dexopt</h3><p>
+<img src="https://img-blog.csdnimg.cn/fb7c901fc3b446ef8089b4e5c54c0bd1.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt=""></p>
 <p>dexopt 针对 Dalvik 虚拟机，dex2oat 后者针对 Art 虚拟机(Android4.4)。</p>
 <ul>
 <li>dexopt 是对 dex 文件 进行 verification 和 optimization 的操作，其对 dex 文件的优化结果变成了 odex 文件，这个文件和 dex 文件很像，只是使用了一些优化操作码（譬如优化调用虚拟指令等）。</li>
