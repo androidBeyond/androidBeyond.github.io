@@ -113,7 +113,7 @@ public class DexClassLoader extends BaseDexClassLoader {
     }
 }</code></pre> 
 <p>PathClassLoader和DexClassLoader两者都是继承于BaseDexClassLoader，并且类中只有构成方法，实现全部在BaseDexClassLoader中。从源码中可以看出DexClassLoader多个一个optimizedDirectory参数，但是实际上没什么用处，这两者最后调用的super方法一模一样。</p>
-<p><img src="/2020/Android10.0如何hook Activity/classloader.PNG" alt="classloader" style="zoom: 67%;"></p>
+<p><img src="https://img-blog.csdnimg.cn/3565281742ef44a0bd80f1bae021b21d.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_13,color_FFFFFF,t_70,g_se,x_16" alt="classloader" style="zoom: 67%;"></p>
 <h4 id="1-3-加载原理"><a href="#1-3-加载原理" class="headerlink" title="1.3 加载原理"></a>1.3 加载原理</h4><p>类加载器通过loadClass方法加载apk文件中的类。</p>
 <h5 id="1-3-1-ClassLoader-loadClass"><a href="#1-3-1-ClassLoader-loadClass" class="headerlink" title="1.3.1 ClassLoader.loadClass"></a>1.3.1 ClassLoader.loadClass</h5><p>[-&gt;libcore\ojluni\src\main\java\java\lang\ClassLoader.java]</p>
 <pre><code>
@@ -676,7 +676,7 @@ public Resources getResources() {
   } </code></pre> 
 <h3 id="三、hook-Activity"><a href="#三、hook-Activity" class="headerlink" title="三、hook Activity"></a>三、hook Activity</h3><p>首先在宿主里面创建一个ProxyActivity，并且在Manifest中注册（如果需要对应不同启动模式的Activity，可以全部把每种启动模式下的Activity都注册）。当启动插件Activity时，进入AMS之前，通过Hook将插件Activity替换成ProxyActivity，在进入AMS之后，通过handler发送消息时使用hook将ProxyActivity替换成插件的Activity。</p>
 <p>startActivity的流程如下图，可以看到这两个具体的hook点</p>
-<p><img src="/2020/Android10.0如何hook Activity/startActivity.jpg" alt="startActivity" style="zoom: 50%;"></p>
+<p><img src="https://img-blog.csdnimg.cn/71ec4198571c45c99a710b58094cde6a.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="startActivity" style="zoom: 50%;"></p>
 <h4 id="3-1-hook-AMS"><a href="#3-1-hook-AMS" class="headerlink" title="3.1 hook AMS"></a>3.1 hook AMS</h4><p>在进入到AMS之前，这个是最后一步，那么如何将intent换成插件的intent的呢？可以通过动态代理实现。</p>
 <pre><code>
 public ActivityResult execStartActivity(
