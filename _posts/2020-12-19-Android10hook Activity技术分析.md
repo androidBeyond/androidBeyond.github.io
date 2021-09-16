@@ -869,6 +869,6 @@ mCallbackField.set(mH, new Handler.Callback() {
                   } </code></pre> 
 <p>hook了handleMessage后，通过LaunchActivityItem中的mIntent完成代理intent的替换。</p>
 <h3 id="四、总结"><a href="#四、总结" class="headerlink" title="四、总结"></a>四、总结</h3><p>hook Activity涉及的技术比较多，Activity的启动流程，类加载，动态代理，资源加载，反射，binder机制等，只有在掌握了这些技术的基础上才能够完成插件化技术的开发。</p>
-<p>本文介绍了hook Activity的具体实现方法，通过该方法引申出类的加载和资源加载的原理，并分析具体插件的加载实现，后面结合之前文章分析的<a href="https://skytoby.github.io/2019/startActivity%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B/" target="_blank" rel="noopener">startActivity的启动流程</a>，引出了两个具体的hook点：</p>
+<p>本文介绍了hook Activity的具体实现方法，通过该方法引申出类的加载和资源加载的原理，并分析具体插件的加载实现，后面结合之前文章分析的<a href="{{site.baseurl}}/2020/07/01/StartActivity启动过程分析/"   target="_blank">Android10StartActivity启动过程分析</a>，引出了两个具体的hook点：</p>
 <p>1.在ActivityManager.getService().startActivity时通过反射获取IActivityManager对象，startActivity时将插件的Activity替换成代理的Activity；</p>
 <p>2.反射获取ActivityThread对象，通过获取类成员变量mH，重新设置callback，将handleMessage中的EXECUTE_TRANSACTION分支进行hook，在mActivityCallbacks中找到LaunchActivityItem，将其类成员变量mIntent替换成插件的Activity，这样就完成的插件Activity的启动过程。</p>
