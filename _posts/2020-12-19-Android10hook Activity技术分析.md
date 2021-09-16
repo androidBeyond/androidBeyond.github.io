@@ -14,7 +14,7 @@ tags:
 ---
 
 <p>在插件化中，hook Activity作为最基本的技术，用来在宿主app中新增Activity，而通常情况下，Activity必须在Manifest中注册在才可以使用，下面将就Android10.0来分析hook Activity的详细过程。</p>
-<p>要hook Activity之前，必须知道Activity的启动过程，才能够选择合适的点进行hook，在前面的文章中有分析<a href="https://skytoby.github.io/2019/startActivity%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B/" target="_blank" rel="noopener">Activity详细的启动过程</a>，hook主要是两个点：一是在Activity给AMS之前替换代理的Activity，二是在handler中发送启动Activity时替换为插件的Activity。</p>
+<p>要hook Activity之前，必须知道Activity的启动过程，才能够选择合适的点进行hook，在前面的文章中有分析<a href="{{site.baseurl}}/2020/07/01/StartActivity启动过程分析/"   target="_blank">Android10StartActivity启动过程分析</a>，hook主要是两个点：一是在Activity给AMS之前替换代理的Activity，二是在handler中发送启动Activity时替换为插件的Activity。</p>
 <p>分析完了Activity的hook点之后，还有一个重要的问题，如何加载插件的类和资源，只有加载了插件中的类和资源，后面的hook才有意义。</p>
 <h3 id="一、类加载"><a href="#一、类加载" class="headerlink" title="一、类加载"></a>一、类加载</h3><p>在Android中，将代码编译后会生成apk文件，apk文件里面有一个或多个classes.dex文件，它是所有class文件进行合并，优化后生成。在apk运行时ART虚拟机或Dalvik虚拟机会加载dex文件，加载都是通过ClassLoader实现。</p>
 <p>ClassLoader是一个抽象类，实现分为系统类加载器和自定义类加载器。</p>
@@ -95,23 +95,23 @@ public class DexClassLoader extends BaseDexClassLoader {
      * code.  Interpreted classes are found in a set of DEX files contained
      * in Jar or APK files.
      *
-     * <p>The path lists are separated using the character specified by the
+     * The path lists are separated using the character specified by the
      * {@code path.separator} system property, which defaults to {@code :}.
      *
      * @param dexPath the list of jar/apk files containing classes and
-     *     resources, delimited by {@code File.pathSeparator}, which
-     *     defaults to {@code ":"} on Android
+     * resources, delimited by {@code File.pathSeparator}, which
+     * defaults to {@code ":"} on Android
      * @param optimizedDirectory this parameter is deprecated and has no effect since API level 26.
      * @param librarySearchPath the list of directories containing native
-     *     libraries, delimited by {@code File.pathSeparator}; may be
-     *     {@code null}
+     * libraries, delimited by {@code File.pathSeparator}; may be
+     * {@code null}
      * @param parent the parent class loader
      */
     public DexClassLoader(String dexPath, String optimizedDirectory,
             String librarySearchPath, ClassLoader parent) {
         super(dexPath, null, librarySearchPath, parent);
     }
-} </code></pre> 
+}</code></pre> 
 <p>PathClassLoader和DexClassLoader两者都是继承于BaseDexClassLoader，并且类中只有构成方法，实现全部在BaseDexClassLoader中。从源码中可以看出DexClassLoader多个一个optimizedDirectory参数，但是实际上没什么用处，这两者最后调用的super方法一模一样。</p>
 <p><img src="/2020/Android10.0如何hook Activity/classloader.PNG" alt="classloader" style="zoom: 67%;"></p>
 <h4 id="1-3-加载原理"><a href="#1-3-加载原理" class="headerlink" title="1.3 加载原理"></a>1.3 加载原理</h4><p>类加载器通过loadClass方法加载apk文件中的类。</p>
