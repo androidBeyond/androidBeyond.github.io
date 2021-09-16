@@ -15,7 +15,9 @@ tags:
 
 
 <h3 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h3><p>Choreographer翻译成中文是编舞者的意思，在Android系统4.1开始加入这个类，主要来控制同步处理输入（input），动画（animation），绘制（draw），在UI显示的时候每一帧完成的只有这三种。在这个类的前面有一行注释，大概意思就是要协调控制三个UI操作的时序，这也和其编舞者名称相符合。</p>
-<pre><code>/**
+
+<pre><code>
+/**
  * Coordinates the timing of animations, input and drawing.
  * 
  * The choreographer receives timing pulses (such as vertical synchronization)
@@ -57,7 +59,9 @@ tags:
  */</code></pre>
 <p>在类中有四种任务队列，当收到Vsync信号时会执行这四种任务队列里面的任务</p>
 <p>  <code>private final CallbackQueue[] mCallbackQueues;</code></p>
-<pre><code>void doFrame(long frameTimeNanos, int frame) {     
+
+<pre><code>
+void doFrame(long frameTimeNanos, int frame) {     
      ....
      Trace.traceBegin(Trace.TRACE_TAG_VIEW, "Choreographer#doFrame");
      AnimationUtils.lockAnimationClock(frameTimeNanos / TimeUtils.NANOS_PER_MS);
@@ -78,7 +82,9 @@ tags:
 <p>CALLBACK_ANIMATION：动画</p>
 <p>CALLBACK_TRAVERSAL：绘制，执行measure，layout，draw</p>
 <p>CALLBACK_COMMIT：绘制完成的提交操作，用来修正动画的启动时间。这里主要是为了解决ValueAnimator问题而引入的，因为遍历时间过长导致动画时间启动过长，时间缩短，导致跳帧，这里修改动画第一个frame开始时间延后。</p>
-<pre><code>// Update the frame time if necessary when committing the frame.
+
+<pre><code>
+// Update the frame time if necessary when committing the frame.
 // We only update the frame time if we are more than 2 frames late reaching
 // the commit phase.  This ensures that the frame time which is observed by the
 // callbacks will always increase from one frame to the next and never repeat.
@@ -107,7 +113,9 @@ if (callbackType == Choreographer.CALLBACK_COMMIT) {
 </code></pre>
 <h3 id="二、Choreographer启动流程"><a href="#二、Choreographer启动流程" class="headerlink" title="二、Choreographer启动流程"></a>二、Choreographer启动流程</h3><p>在前面介绍的view绘制原理的流程中，在WMG.addView会对ViewRootImpl进行初始化操作</p>
 <h4 id="2-1-创建ViewRootImpl"><a href="#2-1-创建ViewRootImpl" class="headerlink" title="2.1 创建ViewRootImpl"></a>2.1 创建ViewRootImpl</h4><p>[-&gt;ViewRootImpl.java]</p>
-<pre><code>public ViewRootImpl(Context context, Display display) {
+
+<pre><code>
+public ViewRootImpl(Context context, Display display) {
        mContext = context;
        mWindowSession = WindowManagerGlobal.getWindowSession();
        mDisplay = display;
@@ -153,11 +161,15 @@ if (callbackType == Choreographer.CALLBACK_COMMIT) {
        loadSystemProperties();
    }</code></pre>
 <h4 id="2-2-创建Choreographer"><a href="#2-2-创建Choreographer" class="headerlink" title="2.2 创建Choreographer"></a>2.2 创建Choreographer</h4><p>[-&gt;Choreographer.java]</p>
-<pre><code>public static Choreographer getInstance() {
+
+<pre><code>
+public static Choreographer getInstance() {
        return sThreadInstance.get();
   }</code></pre>
 <p>[-&gt;Choreographer.java]</p>
-<pre><code>// Thread local storage for the choreographer.
+
+<pre><code>
+// Thread local storage for the choreographer.
   private static final ThreadLocal&lt;Choreographer&gt; sThreadInstance =
           new ThreadLocal&lt;Choreographer&gt;() {
       @Override
@@ -177,7 +189,9 @@ if (callbackType == Choreographer.CALLBACK_COMMIT) {
   };</code></pre>
 <p>当前线程所在的为主线程（UI线程），可以看到每个线程都有一个Choreographer</p>
 <p>[-&gt;Choreographer.java]</p>
-<pre><code>private Choreographer(Looper looper, int vsyncSource) {
+
+<pre><code>
+private Choreographer(Looper looper, int vsyncSource) {
        mLooper = looper;
        //初始化FrameHandler
        mHandler = new FrameHandler(looper);
@@ -199,7 +213,9 @@ if (callbackType == Choreographer.CALLBACK_COMMIT) {
 <p>mLastFrameTimeNanos：上一次帧绘制的时间点</p>
 <p>mFrameIntervalNanos,帧间时长一般等于16.7ms</p>
 <h4 id="2-3-初始化FrameHandler"><a href="#2-3-初始化FrameHandler" class="headerlink" title="2.3 初始化FrameHandler"></a>2.3 初始化FrameHandler</h4><p>[-&gt;Choreographer.java]</p>
-<pre><code>private final class FrameHandler extends Handler {
+
+<pre><code>
+private final class FrameHandler extends Handler {
        public FrameHandler(Looper looper) {
            super(looper);
        }
@@ -220,7 +236,9 @@ if (callbackType == Choreographer.CALLBACK_COMMIT) {
        }
    }</code></pre>
 <h4 id="2-4-创建FrameDisplayEventReceiver"><a href="#2-4-创建FrameDisplayEventReceiver" class="headerlink" title="2.4 创建FrameDisplayEventReceiver"></a>2.4 创建FrameDisplayEventReceiver</h4><p>[-&gt;Choreographer.java]</p>
-<pre><code>private final class FrameDisplayEventReceiver extends DisplayEventReceiver
+
+<pre><code>
+private final class FrameDisplayEventReceiver extends DisplayEventReceiver
           implements Runnable {
       ....
       public FrameDisplayEventReceiver(Looper looper, int vsyncSource) {
@@ -229,7 +247,9 @@ if (callbackType == Choreographer.CALLBACK_COMMIT) {
       ....
   }</code></pre>
 <h5 id="2-4-1-DisplayEventReceiver"><a href="#2-4-1-DisplayEventReceiver" class="headerlink" title="2.4.1 DisplayEventReceiver"></a>2.4.1 DisplayEventReceiver</h5><p>[-&gt;DisplayEventReceiver.java]</p>
-<pre><code>public DisplayEventReceiver(Looper looper) {
+
+<pre><code>
+public DisplayEventReceiver(Looper looper) {
        this(looper, VSYNC_SOURCE_APP);
    }
 
@@ -251,7 +271,9 @@ if (callbackType == Choreographer.CALLBACK_COMMIT) {
        mCloseGuard.open("dispose");
    }</code></pre>
 <h5 id="2-4-2-nativeInit"><a href="#2-4-2-nativeInit" class="headerlink" title="2.4.2 nativeInit"></a>2.4.2 nativeInit</h5><p>[-&gt;/core/jni/android_view_DisplayEventReceiver.cpp]</p>
-<pre><code>static jlong nativeInit(JNIEnv* env, jclass clazz, jobject receiverWeak,
+
+<pre><code>
+static jlong nativeInit(JNIEnv* env, jclass clazz, jobject receiverWeak,
         jobject messageQueueObj, jint vsyncSource) {
     sp&lt;MessageQueue&gt; messageQueue = android_os_MessageQueue_getMessageQueue(env, messageQueueObj);
     if (messageQueue == NULL) {
@@ -273,7 +295,9 @@ if (callbackType == Choreographer.CALLBACK_COMMIT) {
     return reinterpret_cast&lt;jlong&gt;(receiver.get());
 }</code></pre>
 <h5 id="2-4-3-NativeDisplayEventReceiver"><a href="#2-4-3-NativeDisplayEventReceiver" class="headerlink" title="2.4.3 NativeDisplayEventReceiver"></a>2.4.3 NativeDisplayEventReceiver</h5><p>[-&gt;/core/jni/android_view_DisplayEventReceiver.cpp]</p>
-<pre><code>NativeDisplayEventReceiver::NativeDisplayEventReceiver(JNIEnv* env,
+
+<pre><code>
+NativeDisplayEventReceiver::NativeDisplayEventReceiver(JNIEnv* env,
         jobject receiverWeak, const sp&lt;MessageQueue&gt;& messageQueue, jint vsyncSource) :
         DisplayEventDispatcher(messageQueue-&gt;getLooper(),
                 static_cast&lt;ISurfaceComposer::VsyncSource&gt;(vsyncSource)),
@@ -283,7 +307,9 @@ if (callbackType == Choreographer.CALLBACK_COMMIT) {
 }</code></pre>
 <p>DisplayEventDispatcher继承于LooperCallback，mReceiverWeakGlobal记录java层DisplayEventReceiver对象的全局引用。</p>
 <h5 id="2-4-4-initialize"><a href="#2-4-4-initialize" class="headerlink" title="2.4.4 initialize"></a>2.4.4 initialize</h5><p>[-&gt;libs/androidfw/DisplayEventDispatcher.cpp]</p>
-<pre><code>status_t DisplayEventDispatcher::initialize() {
+
+<pre><code>
+status_t DisplayEventDispatcher::initialize() {
     status_t result = mReceiver.initCheck();
     if (result) {
         ALOGW("Failed to initialize display event receiver, status=%d", result);
@@ -299,7 +325,9 @@ if (callbackType == Choreographer.CALLBACK_COMMIT) {
 }</code></pre>
 <p>监听mReceiver所获取文件句柄，一旦有数据到来，则回调this,所复写LooperCallback对象的handleEvent方法</p>
 <h5 id="2-4-5-addFd"><a href="#2-4-5-addFd" class="headerlink" title="2.4.5 addFd"></a>2.4.5 addFd</h5><p>[-&gt;system/core/libutils/Looper.cpp]</p>
-<pre><code>int Looper::addFd(int fd, int ident, int events, const sp&lt;LooperCallback&gt;& callback, void* data) {
+
+<pre><code>
+int Looper::addFd(int fd, int ident, int events, const sp&lt;LooperCallback&gt;& callback, void* data) {
 #if DEBUG_CALLBACKS
     ALOGD("%p ~ addFd - fd=%d, ident=%d, events=0x%x, callback=%p, data=%p", this, fd, ident,
             events, callback.get(), data);
@@ -383,7 +411,9 @@ if (callbackType == Choreographer.CALLBACK_COMMIT) {
     return 1;
 }</code></pre>
 <h5 id="2-4-6-handleEvent"><a href="#2-4-6-handleEvent" class="headerlink" title="2.4.6  handleEvent"></a>2.4.6  handleEvent</h5><p>[-&gt;system/core/libutils/Looper.cpp]</p>
-<pre><code>int Looper::pollInner(int timeoutMillis) {
+
+<pre><code>
+int Looper::pollInner(int timeoutMillis) {
     ...
      // Invoke all response callbacks.
     for (size_t i = 0; i &lt; mResponses.size(); i++) {
@@ -415,7 +445,9 @@ if (callbackType == Choreographer.CALLBACK_COMMIT) {
 }</code></pre>
 <h3 id="三、Vsync信号回调流程"><a href="#三、Vsync信号回调流程" class="headerlink" title="三、Vsync信号回调流程"></a>三、Vsync信号回调流程</h3><p>当Vsync信号来时，经过层层调用后会执行handleEvent方法，详细流程会在SurfaceFlinger中介绍。</p>
 <h4 id="3-1-handleEvent"><a href="#3-1-handleEvent" class="headerlink" title="3.1 handleEvent"></a>3.1 handleEvent</h4><p>[-&gt;libs/androidfw/DisplayEventDispatcher.cpp]</p>
-<pre><code>int DisplayEventDispatcher::handleEvent(int, int events, void*) {
+
+<pre><code>
+int DisplayEventDispatcher::handleEvent(int, int events, void*) {
     if (events & (Looper::EVENT_ERROR | Looper::EVENT_HANGUP)) {
         ALOGE("Display event receiver pipe was closed or an error occurred.  "
                 "events=0x%x", events);
@@ -444,7 +476,9 @@ if (callbackType == Choreographer.CALLBACK_COMMIT) {
     return 1; // keep the callback
 }</code></pre>
 <h5 id="3-1-1-processPendingEvents"><a href="#3-1-1-processPendingEvents" class="headerlink" title="3.1.1 processPendingEvents"></a>3.1.1 processPendingEvents</h5><p>[-&gt;libs/androidfw/DisplayEventDispatcher.cpp]</p>
-<pre><code>bool DisplayEventDispatcher::processPendingEvents(
+
+<pre><code>
+bool DisplayEventDispatcher::processPendingEvents(
         nsecs_t* outTimestamp, int32_t* outId, uint32_t* outCount) {
     bool gotVsync = false;
     DisplayEventReceiver::Event buf[EVENT_BUFFER_SIZE];
@@ -478,7 +512,9 @@ if (callbackType == Choreographer.CALLBACK_COMMIT) {
 }</code></pre>
 <p>遍历所有的事件，当有多个Vsync事件来时，则只关注最近一次的事件</p>
 <h5 id="3-1-2-dispatchVsync-C"><a href="#3-1-2-dispatchVsync-C" class="headerlink" title="3.1.2 dispatchVsync(C++)"></a>3.1.2 dispatchVsync(C++)</h5><p>[-&gt;core/jni/android_view_DisplayEventReceiver.cpp]</p>
-<pre><code>void NativeDisplayEventReceiver::dispatchVsync(nsecs_t timestamp, int32_t id, uint32_t count) {
+
+<pre><code>
+void NativeDisplayEventReceiver::dispatchVsync(nsecs_t timestamp, int32_t id, uint32_t count) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
 
     ScopedLocalRef&lt;jobject&gt; receiverObj(env, jniGetReferent(env, mReceiverWeakGlobal));
@@ -493,13 +529,15 @@ if (callbackType == Choreographer.CALLBACK_COMMIT) {
     mMessageQueue-&gt;raiseAndClearException(env, "dispatchVsync");
 }</code></pre>
 <h4 id="3-2-dispatchVsync-Java"><a href="#3-2-dispatchVsync-Java" class="headerlink" title="3.2 dispatchVsync(Java)"></a>3.2 dispatchVsync(Java)</h4><p>[-&gt;DisplayEventReceiver.java]</p>
-<pre><code>// Called from native code.
+
+<pre><code>
+// Called from native code.
    @SuppressWarnings("unused")
    @UnsupportedAppUsage
    private void dispatchVsync(long timestampNanos, int builtInDisplayId, int frame) {
        onVsync(timestampNanos, builtInDisplayId, frame);
    }</code></pre>
-<p>之后的流程参考View的绘制原理。</p>
+<p>之后的流程参考View的绘制原理。在之前写的文章中有详细分析<a href="{{site.baseurl}}/2020/10/14/Android10从WMS角度分析应用启动过程/"   target="_blank">Android10从WMS角度分析应用启动过程</a></p>
 <h3 id="四、总结"><a href="#四、总结" class="headerlink" title="四、总结"></a>四、总结</h3><p>这里主要介绍了Choreographer的启动流程以及其回调的流程。</p>
 <p>1.Choreographer主要来控制同步处理输入（input），动画（animation），绘制（draw）；</p>
 <p>2.通过监听mReceiver所获取文件句柄，来获取回调；</p>
