@@ -34,10 +34,10 @@ tags:
 
 <h4 id="12-分析起点">1.2 分析起点</h4>
 
-<p>前面通过一个<a href="http://gityuan.com/2015/10/31/binder-prepare/">Binder系列-开篇</a>来从源码讲解了Binder的各个层面, 但是Binder牵涉颇为广泛, 几乎是整个Android架构的顶梁柱, 虽说用了十几篇文章来阐述Binder的各个过程.
+<p>前面一系列文章从源码角度讲解了Binder的各个层面, 但是Binder牵涉颇为广泛, 几乎是整个Android架构的顶梁柱, 虽说用了十几篇文章来阐述Binder的各个过程.
 但依然还是没有将Binder IPC(进程间通信)的过程彻底说透.</p>
 
-<p>Binder系统如此庞大, 那么这里需要寻求一个出发点来穿针引线, 一窥视Binder全貌. 那么本文将从全新的视角,以<a href="http://gityuan.com/2016/03/06/start-service/">startService流程分析</a>为例子来说说Binder所其作用.
+<p>Binder系统如此庞大, 那么这里需要寻求一个出发点来穿针引线, 一窥视Binder全貌. 那么本文将以startService流程分析为例子来说说Binder所起的作用.
 首先在发起方进程调用AMP.startService，经过binder驱动，最终调用系统进程AMS.startService,如下图:</p>
 
 <p><img src="https://img-blog.csdnimg.cn/571c8399df8f4418b4c71d46306e1fbc.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="start_server_binder" /></p>
@@ -315,7 +315,7 @@ frameworks/native/libs/binder/Parcel.cpp
 };
 </code></pre>
 
-<p>文章<a href="http://gityuan.com/2015/11/21/binder-framework/#section-4">Binder系列7—framework层分析</a>，可知ServiceManager.getService(“activity”)返回的是指向目标服务AMS的代理对象<code class="language-plaintext highlighter-rouge">BinderProxy</code>对象，由该代理对象可以找到目标服务AMS所在进程</p>
+<p>由之前的framework层分析可知ServiceManager.getService(“activity”)返回的是指向目标服务AMS的代理对象<code class="language-plaintext highlighter-rouge">BinderProxy</code>对象，由该代理对象可以找到目标服务AMS所在进程</p>
 
 <h4 id="244-amnasinterface">2.4.4 AMN.asInterface</h4>
 <p>[-&gt; ActivityManagerNative.java]</p>
@@ -635,7 +635,7 @@ status_t IPCThreadState::talkWithDriver(bool doReceive)
 }
 </code></pre>
 
-<p><a href="http://gityuan.com/2015/11/01/binder-driver/#binderwriteread">binder_write_read结构体</a>用来与Binder设备交换数据的结构, 通过ioctl与mDriverFD通信，是真正与Binder驱动进行数据读写交互的过程。</p>
+<p>binder_write_read结构体>用来与Binder设备交换数据的结构, 通过ioctl与mDriverFD通信，是真正与Binder驱动进行数据读写交互的过程。</p>
 
 <h3 id="212--ipcexecutecommand">2.12  IPC.executeCommand</h3>
 
@@ -1255,7 +1255,7 @@ Binder线程的创建有两种方式：</p>
   <li>IPCThreadState::self()-&gt;joinThreadPool();</li>
 </ul>
 
-<p>从文章<a href="http://gityuan.com/2015/11/14/binder-add-service/">addService 小节4.1</a>，可知，调用链如下：
+<p>调用链如下：
 startThreadPool()过程会创建新Binder线程，再经过层层调用也会进入joinThreadPool()方法。
 <code class="language-plaintext highlighter-rouge">system_server</code>的binder线程从IPC.joinThreadPool –&gt;  IPC.getAndExecuteCommand() -&gt;  IPC.talkWithDriver() ,但talkWithDriver收到事务之后, 便进入IPC.executeCommand()方法。</p>
 
@@ -1627,7 +1627,7 @@ void Parcel::freeDataNoInit()
 }
 </code></pre>
 
-<p>还记得AndroidRuntime::startReg过程吗, 其中有一个过程便是register_android_os_Binder(),该过程会把gBinderOffsets.mExecTransact便是Binder.java中的execTransact()方法.详见见<a href="http://gityuan.com/2015/11/21/binder-framework/">Binder系列7—framework层分析</a>文章中的第二节初始化的过程.</p>
+<p>还记得AndroidRuntime::startReg过程吗, 其中有一个过程便是register_android_os_Binder(),该过程会把gBinderOffsets.mExecTransact便是Binder.java中的execTransact()方法.</p>
 
 <p>另外,此处mObject是在服务注册addService过程,会调用writeStrongBinder方法, 将Binder对象传入了JavaBBinder构造函数的参数, 最终赋值给mObject. 在本次通信过程中Object为ActivityManagerNative对象.</p>
 
