@@ -22,12 +22,14 @@ tags:
 <li>通过ioctl()，将IPC数据作为参数传递给Binder Driver</li>
 </ol>
 <p>用户态的程序调用Kernel层驱动是需要陷入内核态，进行系统调用（syscall），比如打开Binder驱动方法的调用链是：open()-&gt;__open()-&gt;binder_open()。open()为用户空间的方法，  _open()是系统调用中相应的处理方法，通过查找，对应调用到内核binder驱动的binder_open方法。</p>
-<p><img src="/2020/深入理解Binder机制5-binder驱动分析/systemcall.PNG" alt="systemcall" style="zoom:80%;"></p>
+<p><img src="https://img-blog.csdnimg.cn/80d4e791f3454a3abe870c858289d07c.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_9,color_FFFFFF,t_70,g_se,x_16" alt="systemcall" style="zoom:80%;"></p>
 <p>Client进程通过RPC(Remote Procedure Call Protocol)与Server通信，可以简单的分为三层，驱动层、IPC层、业务层。demo()是client和server共同协商好的统一方法，RPC数据、code、handle、协议这四项组成了IPC的层的数据，通过IPC层进行数据传输，而真正在Client和Server两端建立通信的基础设施是Binder Driver。</p>
-<p><img src="/2020/深入理解Binder机制5-binder驱动分析/binderdriver_frame.PNG" alt="binderdriver_frame" style="zoom:80%;"></p>
+<p><img src="https://img-blog.csdnimg.cn/c93441db5ede4144ad5a5ff79e423e57.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_18,color_FFFFFF,t_70,g_se,x_16" alt="binderdriver_frame" style="zoom:80%;"></p>
 <p>例如：当AMS的client向ServiceManger注册服务的过程中，IPC层的数据组成为：handle=0，RPC数据为AMS,code为ADD_SERVICE_TRANSACTION，binder协议为BC_TRANSACTION。</p>
 <h2 id="二、Binder核心方法"><a href="#二、Binder核心方法" class="headerlink" title="二、Binder核心方法"></a>二、Binder核心方法</h2><h3 id="2-1-binder-init"><a href="#2-1-binder-init" class="headerlink" title="2.1 binder_init"></a>2.1 binder_init</h3><p>[-&gt;android/binder.c]</p>
-<pre><code>static int __init binder_init(void)
+
+<pre><code>
+static int __init binder_init(void)
 {
 	int ret;
 	char *device_name, *device_names;
@@ -104,11 +106,14 @@ err_alloc_device_names_failed:
 	debugfs_remove_recursive(binder_debugfs_dir_entry_root);
 
 	return ret;
-}</code></pre>
+}</code></pre>
+
 <p>主要工作是注册misc设备。</p>
 <p>debugfs_create_file是指在debugfs文件系统中创建一个目录，返回值是指向dentry的指针。当kernel禁用debugfs的话，返回值是%ENODEV，默认是禁用的。如果需要打开，在目录kernel/arch/arm64/configs下找到defconfig文件下添加一行CONFIG_DEBUG_FS=y，即可开启debugfs。</p>
 <h4 id="2-1-1-init-binder-device"><a href="#2-1-1-init-binder-device" class="headerlink" title="2.1.1 init_binder_device"></a>2.1.1 init_binder_device</h4><p>[-&gt;android/binder.c]</p>
-<pre><code>static int __init init_binder_device(const char *name)
+
+<pre><code>
+static int __init init_binder_device(const char *name)
 {
 	int ret;
 	struct binder_device *binder_device;
@@ -136,9 +141,12 @@ err_alloc_device_names_failed:
 	hlist_add_head(&binder_device-&gt;hlist, &binder_devices);
 
 	return ret;
-}</code></pre>
+}</code></pre>
+
 <h3 id="2-2-binder-open"><a href="#2-2-binder-open" class="headerlink" title="2.2 binder_open"></a>2.2 binder_open</h3><p>[-&gt;android/binder.c]</p>
-<pre><code>static int binder_open(struct inode *nodp, struct file *filp)
+
+<pre><code>
+static int binder_open(struct inode *nodp, struct file *filp)
 {
     //binder进程
 	struct binder_proc *proc;
@@ -206,11 +214,14 @@ err_alloc_device_names_failed:
 	}
 
 	return 0;
-}</code></pre>
+}</code></pre>
+
 <p>创建binder_proc对象，并把当前进程等信息保存到binder_proc对象，该对象管理IPC所需要的各种信息并拥有其他结构体的根结构体；再把binder_proc对象保存到文件指针filp中,并且把binder_proc加入到全局链表binder_procs。</p>
 <p>Binder驱动中 HLIST_HEAD创建全局的哈希链表binder_procs，用于保存所有的binder_proc队列,每次新创建的binder_proc都会加入到binder_procs链表中。</p>
 <h3 id="2-3-binder-mmap"><a href="#2-3-binder-mmap" class="headerlink" title="2.3 binder_mmap"></a>2.3 binder_mmap</h3><p>[-&gt;android/binder.c]</p>
-<pre><code>static int binder_mmap(struct file *filp, struct vm_area_struct *vma)
+
+<pre><code>
+static int binder_mmap(struct file *filp, struct vm_area_struct *vma)
 {
 	int ret;
 	struct binder_proc *proc = filp-&gt;private_data;
@@ -249,10 +260,13 @@ err_bad_arg:
 	pr_err("binder_mmap: %d %lx-%lx %s failed %d/n",
 	       proc-&gt;pid, vma-&gt;vm_start, vma-&gt;vm_end, failure_string, ret);
 	return ret;
-}</code></pre>
+}</code></pre>
+
 <p>mmap的主要功能：首先在内核虚拟地址空间，申请一块与用户虚拟空间相同大小的内存，然后再申请一个page大小的物理内存，再将同一块物理内存分别映射到内核虚拟地址空间和用户虚拟空间，从而实现了用户空间的buffer和内核空间的buffer同步操作的功能。</p>
 <h4 id="2-3-1-binder-alloc-mmap-handler"><a href="#2-3-1-binder-alloc-mmap-handler" class="headerlink" title="2.3.1  binder_alloc_mmap_handler"></a>2.3.1  binder_alloc_mmap_handler</h4><p>[-&gt;android/binder.c]</p>
-<pre><code>int binder_alloc_mmap_handler(struct binder_alloc *alloc,
+
+<pre><code>
+int binder_alloc_mmap_handler(struct binder_alloc *alloc,
 			      struct vm_area_struct *vma)
 {
 	int ret;
@@ -340,10 +354,13 @@ err_already_mapped:
 	pr_err("%s: %d %lx-%lx %s failed %d\n", __func__,
 	       alloc-&gt;pid, vma-&gt;vm_start, vma-&gt;vm_end, failure_string, ret);
 	return ret;
-}</code></pre>
+}</code></pre>
+
 <p>binder_mmap通过加锁，保证一次只有一个进程分配内存，保证多进程间的并发访问。user_buffer_offset是虚拟进程地址与虚拟内核地址的差值，该值为负值。</p>
 <h3 id="2-4-binder-ioctl"><a href="#2-4-binder-ioctl" class="headerlink" title="2.4 binder_ioctl"></a>2.4 binder_ioctl</h3><p>[-&gt;android/binder.c]</p>
-<pre><code>static long binder_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+
+<pre><code>
+static long binder_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
 	int ret;
 	struct binder_proc *proc = filp-&gt;private_data;
@@ -452,9 +469,12 @@ err:
 err_unlocked:
 	trace_binder_ioctl_done(ret);
 	return ret;
-}</code></pre>
+}</code></pre>
+
 <h4 id="2-4-1-binder-get-thread"><a href="#2-4-1-binder-get-thread" class="headerlink" title="2.4.1 binder_get_thread"></a>2.4.1 binder_get_thread</h4><p>[-&gt;android/binder.c]</p>
-<pre><code>static struct binder_thread *binder_get_thread(struct binder_proc *proc)
+
+<pre><code>
+static struct binder_thread *binder_get_thread(struct binder_proc *proc)
 {
 	struct binder_thread *thread;
 	struct binder_thread *new_thread;
@@ -476,9 +496,12 @@ err_unlocked:
 			kfree(new_thread);
 	}
 	return thread;
-}</code></pre>
+}</code></pre>
+
 <h4 id="2-4-2-binder-ioctl-write-read"><a href="#2-4-2-binder-ioctl-write-read" class="headerlink" title="2.4.2 binder_ioctl_write_read"></a>2.4.2 binder_ioctl_write_read</h4><p>[-&gt;android/binder.c]</p>
-<pre><code>static int binder_ioctl_write_read(struct file *filp,
+
+<pre><code>
+static int binder_ioctl_write_read(struct file *filp,
 				unsigned int cmd, unsigned long arg,
 				struct binder_thread *thread)
 {
@@ -549,7 +572,8 @@ err_unlocked:
 	}
 out:
 	return ret;
-}</code></pre>
+}</code></pre>
+
 <p>binder_ioctl_write_read主要流程如下：</p>
 <p>1.把用户空间ubuf拷贝到内核空间bwr；</p>
 <p>2.当bwr写缓存有数据，则执行binder_thread_write；当写失败时则将bwr数据写回到用户空间并退出；</p>
@@ -562,7 +586,7 @@ out:
 <p>binder_ioctl：执行相应的ioctl操作，主要进行读写操作。</p>
 <p>下面看下binder通信的具体协议。</p>
 <h2 id="三、Binder通信协议"><a href="#三、Binder通信协议" class="headerlink" title="三、Binder通信协议"></a>三、Binder通信协议</h2><h3 id="3-1-通信模型"><a href="#3-1-通信模型" class="headerlink" title="3.1 通信模型"></a>3.1 通信模型</h3><p>一次完整的Binder通信过程如下(非oneway)：</p>
-<p><img src="/2020/深入理解Binder机制5-binder驱动分析/bindermodel.png" alt="bindermodel" style="zoom:80%;"></p>
+<p><img src="https://img-blog.csdnimg.cn/b9d681f869ca4b0e84b1fe14aa9e8a0c.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_18,color_FFFFFF,t_70,g_se,x_16" alt="bindermodel" style="zoom:80%;"></p>
 <p>Binder协议包含在IPC数据中，分为两类：</p>
 <p>1.BINDER_COMMAND_PROTOCOL:binder请求码，以BC_开头，简称BC码，用于从IPC层传递到Binder Driver层;</p>
 <p>2.BINDER_RETURN_PROTOCOL:binder响应码，以BR_开头，简称BR码，用于从Binder Driver层传递到IPC层。</p>
@@ -574,7 +598,9 @@ out:
 </li>
 </ul>
 <h3 id="3-2-binder-thread-write"><a href="#3-2-binder-thread-write" class="headerlink" title="3.2 binder_thread_write"></a>3.2 binder_thread_write</h3><p>请求过程是通过binder_thread_write方法，该方法用于处理Binder协议中的请求码，当binder_buffer存在数据，binder线程的写操作循环执行。</p>
-<pre><code>static int binder_thread_write(struct binder_proc *proc,
+
+<pre><code>
+static int binder_thread_write(struct binder_proc *proc,
 			struct binder_thread *thread,
 			binder_uintptr_t binder_buffer, size_t size,
 			binder_size_t *consumed)
@@ -630,9 +656,12 @@ out:
 		default:...		
 	}
 	return 0;
-}</code></pre>
+}</code></pre>
+
 <p>对于BC_TRANSACTION、BC_REPLY的请求码，回执行binder_transaction方法，这是最为频繁的操作，对于其他命令则不同。</p>
-<h4 id="3-2-1-binder-transaction"><a href="#3-2-1-binder-transaction" class="headerlink" title="3.2.1 binder_transaction"></a>3.2.1 binder_transaction</h4><pre><code>static void binder_transaction(struct binder_proc *proc,
+<h4 id="3-2-1-binder-transaction"><a href="#3-2-1-binder-transaction" class="headerlink" title="3.2.1 binder_transaction"></a>3.2.1 binder_transaction</h4>
+<pre><code>
+static void binder_transaction(struct binder_proc *proc,
 			       struct binder_thread *thread,
 			       struct binder_transaction_data *tr, int reply,
 			       binder_size_t extra_buffers_size)
@@ -682,7 +711,8 @@ out:
 	t-&gt;work.type = BINDER_WORK_TRANSACTION;
 	//后面会将这些事务添加到相应的队列
 	...	
-}</code></pre>
+}</code></pre>
+
 <h4 id="3-2-2-BC-PROTOCOL"><a href="#3-2-2-BC-PROTOCOL" class="headerlink" title="3.2.2 BC_PROTOCOL"></a>3.2.2 BC_PROTOCOL</h4><p>Binder的请求码是在binder_driver_command_protocol中定义的，用于应用程序向binder驱动设备发送请求消息，应用程序包含Client和Server端，以BC_开头，总共19条。</p>
 <table>
 <thead>
@@ -804,7 +834,9 @@ out:
 <p><strong>BC_ENTER_LOOPER</strong>：binder主线程（由应用层发起）的创建会向驱动发送该消息；joniThreadPool过程,创建binder主线程；</p>
 <p><strong>BC_EXIT_LOOPER</strong>：退出binder线程，对于binder主线程是不能退出；jointThreadPool的过程出现timeout且是非binder主线程，则会退出该binder线程。</p>
 <h3 id="3-3-binder-thread-read"><a href="#3-3-binder-thread-read" class="headerlink" title="3.3 binder_thread_read"></a>3.3 binder_thread_read</h3><p>响应处理的过程是通过binder_thread_read方法，该方法根据不同的binder_work-&gt;type已经不同的状态，生成相应的响应码。</p>
-<pre><code>static int binder_thread_read(struct binder_proc *proc,
+
+<pre><code>
+static int binder_thread_read(struct binder_proc *proc,
 			      struct binder_thread *thread,
 			      binder_uintptr_t binder_buffer, size_t size,
 			      binder_size_t *consumed, int non_block)
@@ -864,7 +896,8 @@ done:
 	} else
 		binder_inner_proc_unlock(proc);
 	return 0;
-}</code></pre>
+}</code></pre>
+
 <p>当transaction堆栈为空且线程todo链表为空，且non_block=false时，则意味着没有任何事物需要处理，会进入等待客户端请求的状态。当有事务需要处理时便会进入循环处理过程，并生成相应的响应码。在Binder驱动层，只有在进入binder_thread_read方法时，同时满足以下条件才会生成BR_SPAWN_LOOPER命令，当用户态进程收到该命令则会创建新的线程。</p>
 <p>1.binder_proc的requested_threads线程数等于0；</p>
 <p>2.binder_proc的waiting_threads的列表为空；</p>
@@ -1050,12 +1083,12 @@ done:
 <li>接收端进程：IPC.execute()过程，处理BR_TRANSACTION命令。</li>
 </ul>
 <p>注：BINDER_WORK_xxx –&gt; BW_xxx</p>
-<p><img src="/2020/深入理解Binder机制5-binder驱动分析/binder_procol1.PNG" alt="binder_procol1" style="zoom:80%;"></p>
-<p><img src="/2020/深入理解Binder机制5-binder驱动分析/binder_procol2.PNG" alt="binder_procol2" style="zoom:80%;"></p>
+<p><img src="https://img-blog.csdnimg.cn/19751b0cbbc54c82b43f19df1f91085e.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_17,color_FFFFFF,t_70,g_se,x_16" alt="binder_procol1" style="zoom:80%;"></p>
+<p><img src="https://img-blog.csdnimg.cn/b778aabc8b4542f196752fa2631baab9.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_18,color_FFFFFF,t_70,g_se,x_16" alt="binder_procol2" style="zoom:80%;"></p>
 <h2 id="四、Binder内存机制"><a href="#四、Binder内存机制" class="headerlink" title="四、Binder内存机制"></a>四、Binder内存机制</h2><p>binder_mmap是Binder进程间通信的高效的核心机制所在，其模型如下：</p>
-<p><img src="/2020/深入理解Binder机制5-binder驱动分析/内存模型.PNG" alt="内存模型" style="zoom:80%;"></p>
+<p><img src="https://img-blog.csdnimg.cn/5ac956519c494c2a9468103f92f37567.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_16,color_FFFFFF,t_70,g_se,x_16" alt="内存模型" style="zoom:80%;"></p>
 <p>虚拟进程地址空间（vm_area_struct）和虚拟内核地址空间（vm_struct）都映射到同一块物理内存空间。当client端与server端发送数据时，client作为数据发送端，先从自己的进程空间把IPC通信数据copy_from_user拷贝到内核空间，而server端作为数据接收端，与内核共享数据，不再需要拷贝数据，而是通过内存地址空间的偏移量获取内存地址，整个过程只发生一次内存拷贝。一般的做法，需要Client端进程空间拷贝到内核空间，再由内核空间拷贝到server进程空间，会发生两次拷贝。</p>
-<p><img src="/2020/深入理解Binder机制5-binder驱动分析/binder内存转换.PNG" alt="binder内存转换" style="zoom:80%;"></p>
+<p><img src="https://img-blog.csdnimg.cn/e880c1b8f618434aad1bec02ea09004a.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_17,color_FFFFFF,t_70,g_se,x_16" alt="binder内存转换" style="zoom:80%;"></p>
 <p>对于进程和内核虚拟地址映射到同一个物理内存的操作（通过地址偏移量来实现）是发生在数据接收端，而数据发送端还是需要将用户态的数据复制到内核态。为什么不直接让发送端和接收端直接映射到同一块物理空间，那样连一次复制的操作都不需要，0次复制那就和Linux标准内核的共享内存IPC没有区别了，对于共享内存虽然效率高，但是对于多进程同步的问题比较复杂，而管道/消息队列等IPC需要复制两次，效率较低。总之Android选择Binder是基于速度和安全性的考虑。</p>
 <h2 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h2><p>下面列举Binder驱动相关的一些重要结构体</p>
 <h3 id="结构体列表"><a href="#结构体列表" class="headerlink" title="结构体列表"></a>结构体列表</h3><table>
@@ -1143,7 +1176,7 @@ done:
 </table>
 <p>6~9 用于数据传输相关，其中binder_write_read，binder_transaction_data进程空间和内核空间是通用的。</p>
 <p><strong>BWR核心数据表</strong></p>
-<p><img src="/2020/深入理解Binder机制5-binder驱动分析/bwr.PNG" alt="bwr"></p>
+<p><img src="https://img-blog.csdnimg.cn/29a6137a6ad24b628884102954194612.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_17,color_FFFFFF,t_70,g_se,x_16" alt="bwr"></p>
 <p>binder_write_read是整个Binder IPC过程，最为核心的数据结构之一。</p>
 <h4 id="1-binder-proc"><a href="#1-binder-proc" class="headerlink" title="1.binder_proc"></a>1.binder_proc</h4><p>binder_proc结构体：用于管理IPC所需的各种信息，拥有其他结构体的结构体。</p>
 <table>
@@ -1382,14 +1415,17 @@ done:
 </tbody>
 </table>
 <p>looper的状态如下：</p>
-<pre><code>enum {
+
+<pre><code>
+enum {
     BINDER_LOOPER_STATE_REGISTERED  = 0x01, // 创建注册线程BC_REGISTER_LOOPER
     BINDER_LOOPER_STATE_ENTERED     = 0x02, // 创建主线程BC_ENTER_LOOPER
     BINDER_LOOPER_STATE_EXITED      = 0x04, // 已退出
     BINDER_LOOPER_STATE_INVALID     = 0x08, // 非法
     BINDER_LOOPER_STATE_WAITING     = 0x10, // 等待中
     BINDER_LOOPER_STATE_NEED_RETURN = 0x20, // 需要返回
-};</code></pre>
+};</code></pre>
+
 <p>binder_thread_write()过程:</p>
 <ul>
 <li>收到 BC_REGISTER_LOOPER,则线程状态为BINDER_LOOPER_STATE_REGISTERED;</li>
@@ -1520,10 +1556,13 @@ done:
 </tbody>
 </table>
 <p>binder_node有一个联合类型：</p>
-<pre><code>union {
+
+<pre><code>
+union {
         struct rb_node rb_node;
         struct hlist_node dead_node;
-    };</code></pre>
+    };</code></pre>
+
 <p>当Binder对象已销毁，但还存在该Binder节点引用，则采用dead_node，并加入到全局列表<code>binder_dead_nodes</code>；否则使用rb_node节点。</p>
 <p>另外：</p>
 <ul>
@@ -1597,10 +1636,13 @@ done:
 <li>desc + proc =&gt; ref (transaction, inc/dec ref)</li>
 <li>node =&gt; refs + procs (proc exit)</li>
 </ul>
-<h4 id="5-binder-ref-death"><a href="#5-binder-ref-death" class="headerlink" title="5. binder_ref_death"></a>5. binder_ref_death</h4><pre><code>struct binder_ref_death {
+<h4 id="5-binder-ref-death"><a href="#5-binder-ref-death" class="headerlink" title="5. binder_ref_death"></a>5. binder_ref_death</h4>
+<pre><code>
+struct binder_ref_death {
     struct binder_work work;
     binder_uintptr_t cookie;
-};</code></pre>
+};</code></pre>
+
 <p>cookie只是死亡通知的BpBinder代理对象的指针</p>
 <h4 id="6-binder-write-read"><a href="#6-binder-write-read" class="headerlink" title="6.binder_write_read"></a>6.binder_write_read</h4><p>用户空间程序和Binder驱动程序交互基本都是通过BINDER_WRITE_READ命令，来进行数据的读写操作。</p>
 <table>
@@ -1654,7 +1696,9 @@ done:
 <li>copy_to_user()将用内核态binder_write_read结构体数据拷贝到用户空间；</li>
 </ul>
 <h4 id="7-binder-transaction-data"><a href="#7-binder-transaction-data" class="headerlink" title="7.binder_transaction_data"></a>7.binder_transaction_data</h4><p>当BINDER_WRITE_READ命令的目标是本地Binder node时，target使用ptr，否则使用handle。只有当这是Binder node时，cookie才有意义，表示附加数据，由进程自己解释。</p>
-<pre><code>struct binder_transaction_data {
+
+<pre><code>
+struct binder_transaction_data {
     union {
         __u32    handle;       //binder_ref（即handle）
         binder_uintptr_t ptr;     //Binder_node的内存地址
@@ -1675,7 +1719,8 @@ done:
         } ptr;
         __u8    buf[8];
     } data;   //RPC数据
-};</code></pre>
+};</code></pre>
+
 <ul>
 <li><code>target</code>: 对于BpBinder则使用handle，对于BBinder则使用ptr，故使用union数据类型来表示；</li>
 <li><code>code</code>: 比如注册服务过程code为ADD_SERVICE_TRANSACTION，又比如获取服务code为CHECK_SERVICE_TRANSACTION</li>
@@ -1921,7 +1966,9 @@ done:
 </ul>
 </li>
 </ul>
-<h4 id="11-binder-work"><a href="#11-binder-work" class="headerlink" title="11.binder_work"></a>11.binder_work</h4><pre><code>struct binder_work {
+<h4 id="11-binder-work"><a href="#11-binder-work" class="headerlink" title="11.binder_work"></a>11.binder_work</h4>
+<pre><code>
+struct binder_work {
     struct list_head entry;
     enum {
         BINDER_WORK_TRANSACTION = 1, 
@@ -1931,7 +1978,8 @@ done:
         BINDER_WORK_DEAD_BINDER_AND_CLEAR, 
         BINDER_WORK_CLEAR_DEATH_NOTIFICATION,
     } type;
-};</code></pre>
+};</code></pre>
+
 <p>binder_work.type设置时机：</p>
 <ul>
 <li>binder_transaction()</li>
