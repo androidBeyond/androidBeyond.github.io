@@ -64,6 +64,6 @@ tags:
 <p>同一个进程，请求binder服务，不需要创建binder_ref，BpBinder等这些对象，但是是否需要经过binder call取决于descriptor是否设置，这里涉及到Java服务Native使用，或Native服务在Java层使用。</p>
 <p><strong>Binder路由原理</strong>：BpBinder发送端，根据handler，在当前binder_proc中，找到相应的binder_ref，由binder_ref再找到目标binder_node实体，由目标binder_node再找到目标进程binder_proc。简单的方式是直接把binder_transaction节点插入到binder_proc的todo队列中，完成传输过程。</p>
 <p>对于binder驱动尽可能的把binder_transaction节点插入到目标进程的某个线程的todo队列，效率更高。当binder驱动找到合适的线程，就会把binder_transaction节点插入到相应线程的todo队列中，如果找不到合适的线程，就把节点插入到binder_proc的todo队列。</p>
-<h3 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h3><p>整个Binder系列文章参考了gityuan的分析，作为学习Binder机制的总结，对Binder机制有了更深的理解，不再只是看到简单api的调用，其里面详细的调用逻辑才是学习的核心，对于以后的设计架构和代码有很大的帮助。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>后记</h3><p>整个Binder系列文章至此已分析完毕，作为学习Binder机制的总结，对Binder机制有了更深的理解，不再只是看到简单api的调用，其里面详细的调用逻辑才是学习的核心，对于以后的设计架构和代码有很大的帮助。</p>
 
       
