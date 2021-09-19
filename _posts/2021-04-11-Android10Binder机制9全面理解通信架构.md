@@ -16,36 +16,13 @@ tags:
 
 <h2 id="一-引言">一. 引言</h2>
 
-<h4 id="11-binder架构的思考">1.1 Binder架构的思考</h4>
+<h4 id="11-binder架构的思考">1.1 Binder架构分层/h4>
 
-<p>Android内核是基于Linux系统, 而Linux现存多种进程间IPC方式:管道, 消息队列, 共享内存, 套接字, 信号量, 信号. 为什么Android非要用Binder来进行进程间通信呢.
-从我个人的理解角度, 曾尝试着在知乎回答同样一个问题 <a href="https://www.zhihu.com/question/39440766/answer/89210950">为什么Android要采用Binder作为IPC机制？</a>.
-这是Gityuan第一次认认真真地在知乎上回答问题, 收到很多网友的点赞与回复, 让我很受鼓舞, 也决心分享更多优先地文章回报读者和粉丝, 为Android圈贡献自己的微薄之力。</p>
+<p>Android内核是基于Linux系统, 而Linux现存多种进程间IPC方式:管道, 消息队列, 共享内存, 套接字, 信号量, 信号. android选择Binder进行进程间通讯的原因，前面文章有分析过，此处不再赘述 </p>
 
-<p>在说到Binder架构之前, 先简单说说大家熟悉的TCP/IP的五层通信体系结构:</p>
+<p>Binder采用的是分层架构设计, 每一层都有其不同的功能:</p>
 
-<p><img src="/images/binder/binder_start_service/tcp_ip_arch.jpg" alt="tcp_ip_arch" /></p>
-
-<ul>
-  <li>应用层: 直接为用户提供服务;</li>
-  <li>传输层: 传输的是报文(TCP数据)或者用户数据报(UDP数据)</li>
-  <li>网络层: 传输的是包(Packet), 例如路由器</li>
-  <li>数据链路层: 传输的是帧(Frame), 例如以太网交换机</li>
-  <li>物理层: 相邻节点间传输bit, 例如集线器,双绞线等</li>
-</ul>
-
-<p>这是经典的五层TPC/IP协议体系, 这样分层设计的思想, 让每一个子问题都设计成一个独立的协议, 这协议的设计/分析/实现/测试都变得更加简单:</p>
-
-<ul>
-  <li>层与层具有独立性, 例如应用层可以使用传输层提供的功能而无需知晓其实现原理;</li>
-  <li>设计灵活, 层与层之间都定义好接口, 即便层内方法发生变化,只有接口不变, 对这个系统便毫无影响;</li>
-  <li>结构的解耦合, 让每一层可以用更适合的技术方案, 更合适的语言;</li>
-  <li>方便维护, 可分层调试和定位问题;</li>
-</ul>
-
-<p>Binder架构也是采用分层架构设计, 每一层都有其不同的功能:</p>
-
-<p><img src="/images/binder/binder_start_service/binder_ipc_arch.jpg" alt="binder_ipc_arch" /></p>
+<p><img src="https://img-blog.csdnimg.cn/b313a8fa781b4109bc0ce87260de44ef.jpg?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="binder_ipc_arch" /></p>
 
 <ul>
   <li><strong>Java应用层:</strong> 对于上层应用通过调用AMP.startService, 完全可以不用关心底层,经过层层调用,最终必然会调用到AMS.startService.</li>
@@ -62,7 +39,7 @@ tags:
 <p>Binder系统如此庞大, 那么这里需要寻求一个出发点来穿针引线, 一窥视Binder全貌. 那么本文将从全新的视角,以<a href="http://gityuan.com/2016/03/06/start-service/">startService流程分析</a>为例子来说说Binder所其作用.
 首先在发起方进程调用AMP.startService，经过binder驱动，最终调用系统进程AMS.startService,如下图:</p>
 
-<p><img src="/images/binder/binder_start_service/start_server_binder.jpg" alt="start_server_binder" /></p>
+<p><img src="https://img-blog.csdnimg.cn/571c8399df8f4418b4c71d46306e1fbc.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="start_server_binder" /></p>
 
 <p>AMP和AMN都是实现了IActivityManager接口,AMS继承于AMN.  其中AMP作为Binder的客户端,运行在各个app所在进程, AMN(或AMS)运行在系统进程system_server.</p>
 
@@ -70,7 +47,7 @@ tags:
 
 <p>Binder通信采用C/S架构，从组件视角来说，包含Client、Server、ServiceManager以及binder驱动，其中ServiceManager用于管理系统中的各种服务。下面说说startService过程所涉及的Binder对象的架构图：</p>
 
-<p><img src="/images/binder/binder_start_service/ams_ipc.jpg" alt="ams_ipc" /></p>
+<p><img src="https://img-blog.csdnimg.cn/fbcc99baaeb3476a918d4bee73f69574.jpg?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="ams_ipc" /></p>
 
 <p>可以看出无论是注册服务和获取服务的过程都需要ServiceManager，需要注意的是此处的Service Manager是指Native层的ServiceManager（C++），并非指framework层的ServiceManager(Java)。ServiceManager是整个Binder通信机制的大管家，是Android进程间通信机制Binder的守护进程，Client端和Server端通信时都需要先获取Service Manager接口，才能开始通信服务, 当然查找到目标信息可以缓存起来则不需要每次都向ServiceManager请求。</p>
 
@@ -2060,7 +2037,7 @@ static void binder_transaction(struct binder_proc *proc,
 <h3 id="61-通信流程">6.1 通信流程</h3>
 
 <p>从通信流程角度来看整个过程:
-<img src="/images/binder/binder_start_service/binder_ipc_process.jpg" alt="binder_ipc_process" /></p>
+<img src="https://img-blog.csdnimg.cn/8c6689d795314c38a2ba8dd97fc1b3c2.jpg?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="binder_ipc_process" /></p>
 
 <p>图解:</p>
 
@@ -2082,7 +2059,7 @@ static void binder_transaction(struct binder_proc *proc,
 
 <p>从通信协议的角度来看这个过程:</p>
 
-<p><img src="/images/binder/binder_start_service/binder_transaction.jpg" alt="binder_transaction" /></p>
+<p><img src="https://img-blog.csdnimg.cn/4e6fb58ffff24b669787247d7d3b76a2.jpg?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16)" alt="binder_transaction" /></p>
 
 <ul>
   <li>Binder客户端或者服务端向Binder Driver发送的命令都是以BC_开头,例如本文的<code class="language-plaintext highlighter-rouge">BC_TRANSACTION</code>和<code class="language-plaintext highlighter-rouge">BC_REPLY</code>, 所有Binder Driver向Binder客户端或者服务端发送的命令则都是以BR_开头, 例如本文中的<code class="language-plaintext highlighter-rouge">BR_TRANSACTION</code>和<code class="language-plaintext highlighter-rouge">BR_REPLY</code>.</li>
@@ -2094,7 +2071,7 @@ static void binder_transaction(struct binder_proc *proc,
 
 <p>上图是非oneway通信过程的协议图, 下图则是对于oneway场景下的通信协议图:</p>
 
-<p><img src="/images/binder/binder_start_service/binder_transaction_oneway.jpg" alt="binder_transaction_oneway" /></p>
+<p><img src="https://img-blog.csdnimg.cn/d5efdcec6bb94bf8b2194c4e006892fb.jpg?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="binder_transaction_oneway" /></p>
 
 <p>当收到BR_TRANSACTION_COMPLETE则程序返回,有人可能觉得好奇,为何oneway怎么还要等待回应消息? 我举个例子,你就明白了.</p>
 
@@ -2137,7 +2114,7 @@ static void binder_transaction(struct binder_proc *proc,
 
 <h3 id="65-数据流">6.5 数据流</h3>
 
-<p><img src="/images/binder/binder_transaction_data.jpg" alt="binder_transaction_data" /></p>
+<p><img src="https://img-blog.csdnimg.cn/c47873eed18f42d89c3dd7b8af7b454e.jpg?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="binder_transaction_data" /></p>
 
 <ul>
   <li>[2.1]AMP.startService：组装flat_binder_object对象等组成的Parcel data；</li>
