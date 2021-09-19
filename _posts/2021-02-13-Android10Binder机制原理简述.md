@@ -10,7 +10,8 @@ catalog: true
 tags:
     - Android10
     - Android
-    - framework
+    - Binder
+    - 进程间通信
 ---
 
 <h2 id="一概述">一、概述</h2>
