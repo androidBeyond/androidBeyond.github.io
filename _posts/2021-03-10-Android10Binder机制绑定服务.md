@@ -16,7 +16,7 @@ tags:
 
 
 <h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2>
-<h3 id="1-2-Binder-IPC原理"><a href="#1-2-Binder-IPC原理" class="headerlink" title="1.2 Binder IPC原理"></a>1.2 Binder IPC原理</h3><p>Binder通信采用C/S架构，包含Client，Server，ServiceManager以及binder驱动，其中ServiceManager用于管理系统中的各种服务，下面是以AMS服务为例的架构图：</p>
+<h3 id="1-1-Binder-IPC原理"><a href="#1-1-Binder-IPC原理" class="headerlink" title="1.1 Binder IPC原理"></a>1.1 Binder IPC原理</h3><p>Binder通信采用C/S架构，包含Client，Server，ServiceManager以及binder驱动，其中ServiceManager用于管理系统中的各种服务，下面是以AMS服务为例的架构图：</p>
 <p><img src="https://img-blog.csdnimg.cn/82fd1ecd1c4140a88badb932049bd961.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_17,color_FFFFFF,t_70,g_se,x_16" alt="bindservice_binder_frame" style="zoom:67%;"></p>
 <p>无论是注册服务还是获取服务的过程都需要ServiceManager，此处的ServiceManager是指Native层的ServiceManager(C++)，并非指framework层的ServiceManager（Java）。ServiceManager是整个Binder通信机制的大管家，是Android进程间通信机制Binder的守护进程。Client端和Server端通信时都需要先获取ServiceManager接口，才能开始通信服务，查找到目标信息可以缓存起来则不需要每次都向ServiceManager请求。</p>
 <p>图中Client/Server/ServiceManager之间的相互通信都是基于Binder机制，其主要分为三个过程：</p>
@@ -25,7 +25,7 @@ tags:
 <p>3.使用服务：app进程根据得到的代理类，便可以直接与AMS所在进程交互。这个过程：代理类所在进程是客户端，AMS所在进程(system_server)是服务端。</p>
 <p>Client,Server，ServiceManager之间不是直接交互的，都是通过与Binder Driver进行交互的，从而实现IPC通信方式。Binder驱动位于内核层，Client,Server,ServiceManager位于用户空间。Binder驱动和ServiceManager可以看做是Android平台的基础架构，而Client和Server是Android应用层。</p>
 <p>前面已经分析过第一第二个过程注册服务和获取服务，本文主要介绍第三个过程使用服务，以bindService过程为例。</p>
-<h3 id="1-3-bindService流程"><a href="#1-3-bindService流程" class="headerlink" title="1.3 bindService流程"></a>1.3 bindService流程</h3><p>bindService流程如下图，从客户端调用bindService到服务器端通过ServiceConnected对象返回代理类给客户端，下面将从源码的角度分析这个过程。</p>
+<h3 id="1-2-bindService流程"><a href="#1-2-bindService流程" class="headerlink" title="1.2 bindService流程"></a>1.2 bindService流程</h3><p>bindService流程如下图，从客户端调用bindService到服务器端通过ServiceConnected对象返回代理类给客户端，下面将从源码的角度分析这个过程。</p>
 <p><img src="https://img-blog.csdnimg.cn/6bbbd8465bc04156a5efe18ba274d36f.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="bindservice" style="zoom: 67%;"></p>
 <h2 id="二、客户端进程"><a href="#二、客户端进程" class="headerlink" title="二、客户端进程"></a>二、客户端进程</h2><h3 id="2-1-CL-bindService"><a href="#2-1-CL-bindService" class="headerlink" title="2.1 CL.bindService"></a>2.1 CL.bindService</h3><p>[-&gt;ContextImpl.java]</p>
 
