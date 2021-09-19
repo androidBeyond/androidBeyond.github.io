@@ -14,17 +14,207 @@ tags:
     - 进程间通信
 ---
 
-<p>Binder作为Android系统中重要的进程间通信方式，了解其基本的原理，对于分析问题具有重要的作用。由于Binder架构涉及的内容比较多，后面将会从应用层、框架层、Native层、内核层四个层次来说明Binder的原理。首先将从应用层的AIDL开始逐渐深入到内核层。</p>
+<p>Binder作为Android系统中重要的进程间通信方式，了解其基本的原理，对于分析问题具有重要的作用。由于Binder架构涉及的内容比较多，后面将会从应用层、框架层、Native层、内核层四个层次来说明Binder的原理。首先将从应用层的AIDL开始逐渐深入到内核层。整个系列的文章如下：</p>
+<p><a href="https://skytoby.github.io/2019/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Binder%E6%9C%BA%E5%88%B61-AIDL%E5%8E%9F%E7%90%86/" target="_blank" rel="noopener">深入理解Binder机制1-AIDL原理</a><br><a href="https://skytoby.github.io/2020/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Binder%E6%9C%BA%E5%88%B62-%E6%B3%A8%E5%86%8C%E6%9C%8D%E5%8A%A1addService/" target="_blank" rel="noopener">深入理解Binder机制2-注册服务addService</a><br><a href="https://skytoby.github.io/2020/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Binder%E6%9C%BA%E5%88%B63-%E8%8E%B7%E5%8F%96%E6%9C%8D%E5%8A%A1getService/" target="_blank" rel="noopener">深入理解Binder机制3-获取服务getService</a><br><a href="https://skytoby.github.io/2020/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Binder%E6%9C%BA%E5%88%B64-bindService%E8%BF%87%E7%A8%8B%E5%88%86%E6%9E%90/" target="_blank" rel="noopener">深入理解Binder机制4-bindService过程分析</a><br><a href="https://skytoby.github.io/2020/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Binder%E6%9C%BA%E5%88%B65-binder%E9%A9%B1%E5%8A%A8%E5%88%86%E6%9E%90/" target="_blank" rel="noopener">深入理解Binder机制5-binder驱动分析</a><br><a href="https://skytoby.github.io/2020/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Binder%E6%9C%BA%E5%88%B66-%E6%80%BB%E7%BB%93%E7%AF%87/" target="_blank" rel="noopener">深入理解Binder机制6-总结篇</a></p>
 <h2 id="一、AIDL"><a href="#一、AIDL" class="headerlink" title="一、AIDL"></a>一、AIDL</h2><p>在进行进程间通信时，需要将接口定义好，定义好之后创建aidl文件,将接口方法放在文件中。客户端和服务端，aidl文件要保持一致，包括包名。在build之后，会在客户端和服务端生成接口类。</p>
 <h3 id="1-aidl文件"><a href="#1-aidl文件" class="headerlink" title="1.aidl文件"></a>1.aidl文件</h3><p>[-&gt;IRemoteService.aidl]</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">// IRemoteService.aidl</span><br><span class="line">package com.skytoby.server;</span><br><span class="line"></span><br><span class="line">interface IRemoteService &#123;</span><br><span class="line">    void addPhone(String name);</span><br><span class="line">    boolean getPhone(String name);</span><br><span class="line">    int getPid();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<pre><code>
+// IRemoteService.aidl
+package com.zhh.server;
+
+interface IRemoteService {
+    void addPhone(String name);
+    boolean getPhone(String name);
+    int getPid();
+}</code></pre>
 <h3 id="2-服务端"><a href="#2-服务端" class="headerlink" title="2.服务端"></a>2.服务端</h3><p>[-&gt;PhoneService.java]</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line">package com.skytoby.server;</span><br><span class="line"></span><br><span class="line">import android.app.Service;</span><br><span class="line">import android.content.Intent;</span><br><span class="line">import android.os.IBinder;</span><br><span class="line">import android.os.RemoteException;</span><br><span class="line">import android.util.Log;</span><br><span class="line">import java.util.ArrayList;</span><br><span class="line">import java.util.List;</span><br><span class="line"></span><br><span class="line">public class PhoneService extends Service &#123;</span><br><span class="line"></span><br><span class="line">    List&lt;String&gt; phones = new ArrayList&lt;&gt;();</span><br><span class="line">    </span><br><span class="line">    //实现binder接口</span><br><span class="line">    private IRemoteService.Stub mBinder = new IRemoteService.Stub() &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public void addPhone(String name) throws RemoteException &#123;</span><br><span class="line">            Log.d(&quot;phone binder&quot;,&quot;server add phone:&quot;+name);</span><br><span class="line">            phones.add(name);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public boolean getPhone(String name) throws RemoteException &#123;</span><br><span class="line">            Log.d(&quot;phone binder&quot;,&quot;server get phone:&quot;+name);</span><br><span class="line">            if(phones.contains(name))&#123;</span><br><span class="line">                return true;</span><br><span class="line">            &#125;</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public int getPid() throws RemoteException &#123;</span><br><span class="line">            Log.d(&quot;phone binder&quot;,&quot;server getPid &quot;+android.os.Process.myPid());</span><br><span class="line">            return android.os.Process.myPid();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public void linkToDeath(IBinder.DeathRecipient recipient, int flags) &#123;</span><br><span class="line">            super.linkToDeath(recipient, flags);</span><br><span class="line">            Log.d(&quot;phone binder&quot;,&quot;server getPid linkToDeath&quot;);</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    @Override</span><br><span class="line">    public void onCreate() &#123;</span><br><span class="line">        Log.d(&quot;phone binder&quot;,&quot;server onCreate&quot;);</span><br><span class="line">        super.onCreate();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public IBinder onBind(Intent intent) &#123;</span><br><span class="line">        Log.d(&quot;phone binder&quot;,&quot;server onBind&quot;);</span><br><span class="line">        return mBinder;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public boolean onUnbind(Intent intent) &#123;</span><br><span class="line">        Log.d(&quot;phone binder&quot;,&quot;server onUnbind&quot;);</span><br><span class="line">        return super.onUnbind(intent);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void onDestroy() &#123;</span><br><span class="line">        Log.d(&quot;phone binder&quot;,&quot;server onDestroy&quot;);</span><br><span class="line">        super.onDestroy();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<pre><code>
+package com.zhh.server;
+
+import android.app.Service;
+import android.content.Intent;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.util.Log;
+import java.util.ArrayList;
+import java.util.List;
+
+public class PhoneService extends Service {
+
+    List&lt;String&gt; phones = new ArrayList&lt;&gt;();
+    
+    //实现binder接口
+    private IRemoteService.Stub mBinder = new IRemoteService.Stub() {
+        @Override
+        public void addPhone(String name) throws RemoteException {
+            Log.d("phone binder","server add phone:"+name);
+            phones.add(name);
+        }
+
+        @Override
+        public boolean getPhone(String name) throws RemoteException {
+            Log.d("phone binder","server get phone:"+name);
+            if(phones.contains(name)){
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public int getPid() throws RemoteException {
+            Log.d("phone binder","server getPid "+android.os.Process.myPid());
+            return android.os.Process.myPid();
+        }
+
+        @Override
+        public void linkToDeath(IBinder.DeathRecipient recipient, int flags) {
+            super.linkToDeath(recipient, flags);
+            Log.d("phone binder","server getPid linkToDeath");
+
+        }
+    };
+    @Override
+    public void onCreate() {
+        Log.d("phone binder","server onCreate");
+        super.onCreate();
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        Log.d("phone binder","server onBind");
+        return mBinder;
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        Log.d("phone binder","server onUnbind");
+        return super.onUnbind(intent);
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.d("phone binder","server onDestroy");
+        super.onDestroy();
+    }
+}</code></pre>
 <h3 id="3-客户端"><a href="#3-客户端" class="headerlink" title="3.客户端"></a>3.客户端</h3><p>[-&gt;MainActivity.java]</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br></pre></td><td class="code"><pre><span class="line">package com.skytoby.client;</span><br><span class="line"></span><br><span class="line">import android.content.ComponentName;</span><br><span class="line">import android.content.Context;</span><br><span class="line">import android.content.Intent;</span><br><span class="line">import android.content.ServiceConnection;</span><br><span class="line">import android.os.Bundle;</span><br><span class="line">import android.os.IBinder;</span><br><span class="line">import android.os.RemoteException;</span><br><span class="line">import android.support.design.widget.BottomNavigationView;</span><br><span class="line">import android.support.v7.app.AppCompatActivity;</span><br><span class="line">import android.support.annotation.NonNull;</span><br><span class="line">import android.util.Log;</span><br><span class="line">import android.view.MenuItem;</span><br><span class="line">import android.widget.TextView;</span><br><span class="line">import com.skytoby.server.IRemoteService;</span><br><span class="line"></span><br><span class="line">public class MainActivity extends AppCompatActivity &#123;</span><br><span class="line">    private TextView mTextMessage;</span><br><span class="line">    private IRemoteService mService;</span><br><span class="line">    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener</span><br><span class="line">            = new BottomNavigationView.OnNavigationItemSelectedListener() &#123;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public boolean onNavigationItemSelected(@NonNull MenuItem item) &#123;</span><br><span class="line">            switch (item.getItemId()) &#123;</span><br><span class="line">                case R.id.navigation_home:</span><br><span class="line">                    mTextMessage.setText(R.string.title_home);</span><br><span class="line">                    bindService();</span><br><span class="line">                    return true;</span><br><span class="line">                case R.id.navigation_dashboard:</span><br><span class="line">                    mTextMessage.setText(R.string.title_dashboard);</span><br><span class="line">                    unbindService();</span><br><span class="line">                    return true;</span><br><span class="line">                case R.id.navigation_notifications:</span><br><span class="line">                    mTextMessage.setText(R.string.title_notifications);</span><br><span class="line">                    killService();</span><br><span class="line">                    return true;</span><br><span class="line">            &#125;</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    protected void onCreate(Bundle savedInstanceState) &#123;</span><br><span class="line">        super.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_main);</span><br><span class="line">        BottomNavigationView navView = findViewById(R.id.nav_view);</span><br><span class="line">        mTextMessage = findViewById(R.id.message);</span><br><span class="line">        navView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);</span><br><span class="line">        Log.d(&quot;phone binder&quot;,&quot;onCreate&quot;);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    void bindService()&#123;</span><br><span class="line">        Intent intent = new Intent();</span><br><span class="line">        intent.setComponent(new ComponentName(&quot;com.skytoby.server&quot;,&quot;com.skytoby.server.PhoneService&quot;));</span><br><span class="line">        bindService(intent, connection, Context.BIND_AUTO_CREATE);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    void unbindService()&#123;</span><br><span class="line">        if(mService!=null)&#123;</span><br><span class="line">            unbindService(connection);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    void killService()&#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            if(mService!=null)&#123;</span><br><span class="line">                android.os.Process.killProcess(mService.getPid());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; catch (RemoteException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ServiceConnection connection = new ServiceConnection() &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public void onServiceConnected(ComponentName name, IBinder service) &#123;</span><br><span class="line">            Log.d(&quot;phone binder&quot;,&quot;onServiceConnected&quot;);</span><br><span class="line">            try &#123;</span><br><span class="line">                //获取代理</span><br><span class="line">                mService = IRemoteService.Stub.asInterface(service);</span><br><span class="line">                Log.d(&quot;phone binder&quot;,&quot;client getphone:&quot;+mService.getPhone(&quot;apple&quot;));</span><br><span class="line">                mService.addPhone(&quot;apple&quot;);</span><br><span class="line">                Log.d(&quot;phone binder&quot;,&quot;client getphone:&quot;+mService.getPhone(&quot;apple&quot;));</span><br><span class="line">            &#125; catch (RemoteException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public void onServiceDisconnected(ComponentName name) &#123;</span><br><span class="line">            Log.d(&quot;binder&quot;,&quot;onServiceDisconnected&quot;);</span><br><span class="line">            mService =  null;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<pre><code>
+package com.zhh.client;
+
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.support.design.widget.BottomNavigationView;
+import android.support.v7.app.AppCompatActivity;
+import android.support.annotation.NonNull;
+import android.util.Log;
+import android.view.MenuItem;
+import android.widget.TextView;
+import com.zhh.server.IRemoteService;
+
+public class MainActivity extends AppCompatActivity {
+    private TextView mTextMessage;
+    private IRemoteService mService;
+    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
+            = new BottomNavigationView.OnNavigationItemSelectedListener() {
+
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.navigation_home:
+                    mTextMessage.setText(R.string.title_home);
+                    bindService();
+                    return true;
+                case R.id.navigation_dashboard:
+                    mTextMessage.setText(R.string.title_dashboard);
+                    unbindService();
+                    return true;
+                case R.id.navigation_notifications:
+                    mTextMessage.setText(R.string.title_notifications);
+                    killService();
+                    return true;
+            }
+            return false;
+        }
+    };
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        BottomNavigationView navView = findViewById(R.id.nav_view);
+        mTextMessage = findViewById(R.id.message);
+        navView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        Log.d("phone binder","onCreate");
+
+    }
+
+    void bindService(){
+        Intent intent = new Intent();
+        intent.setComponent(new ComponentName("com.zhh.server","com.zhh.server.PhoneService"));
+        bindService(intent, connection, Context.BIND_AUTO_CREATE);
+    }
+
+    void unbindService(){
+        if(mService!=null){
+            unbindService(connection);
+        }
+    }
+
+    void killService(){
+        try {
+            if(mService!=null){
+                android.os.Process.killProcess(mService.getPid());
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.d("phone binder","onServiceConnected");
+            try {
+                //获取代理
+                mService = IRemoteService.Stub.asInterface(service);
+                Log.d("phone binder","client getphone:"+mService.getPhone("apple"));
+                mService.addPhone("apple");
+                Log.d("phone binder","client getphone:"+mService.getPhone("apple"));
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.d("binder","onServiceDisconnected");
+            mService =  null;
+        }
+    };
+
+}
+</code></pre>
 <h3 id="4-运行结果"><a href="#4-运行结果" class="headerlink" title="4.运行结果"></a>4.运行结果</h3><p><img src="/2019/深入理解Binder机制1-AIDL原理/aidl ui.png" alt=""></p>
 <p>点击客户端相应的控件，完成绑定服务，解绑服务，杀死service进程，日志如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">16:09:10.394 27006-27006/com.skytoby.server D/phone binder: server onCreate</span><br><span class="line">16:09:10.395 27006-27006/com.skytoby.server D/phone binder: server onBind</span><br><span class="line">16:09:10.405 27006-27018/com.skytoby.server D/phone binder: server get phone:apple</span><br><span class="line">16:09:10.407 27006-27018/com.skytoby.server D/phone binder: server add phone:apple</span><br><span class="line">16:09:10.409 27006-27018/com.skytoby.server D/phone binder: server get phone:apple</span><br><span class="line">16:16:55.497 27006-27006/com.skytoby.server D/phone binder: server onUnbind</span><br><span class="line">16:16:55.502 27006-27006/com.skytoby.server D/phone binder: server onDestroy</span><br><span class="line">16:16:57.955 27006-27020/com.skytoby.server D/phone binder: server getPid 27006</span><br></pre></td></tr></table></figure>
+
+<pre><code>
+16:09:10.394 27006-27006/com.zhh.server D/phone binder: server onCreate
+16:09:10.395 27006-27006/com.zhh.server D/phone binder: server onBind
+16:09:10.405 27006-27018/com.zhh.server D/phone binder: server get phone:apple
+16:09:10.407 27006-27018/com.zhh.server D/phone binder: server add phone:apple
+16:09:10.409 27006-27018/com.zhh.server D/phone binder: server get phone:apple
+16:16:55.497 27006-27006/com.zhh.server D/phone binder: server onUnbind
+16:16:55.502 27006-27006/com.zhh.server D/phone binder: server onDestroy
+16:16:57.955 27006-27020/com.zhh.server D/phone binder: server getPid 27006
+</code></pre>
 <h2 id="二、AIDL原理分析"><a href="#二、AIDL原理分析" class="headerlink" title="二、AIDL原理分析"></a>二、AIDL原理分析</h2><h3 id="1-IRemoteService类"><a href="#1-IRemoteService类" class="headerlink" title="1. IRemoteService类"></a>1. IRemoteService类</h3><p>aidl生成一个对应的IRemoteService.java，其原理还是利用了framework binder的架构，具体的内部原理后面介绍，先分析下这个生成类，其流程如下：</p>
 <p><img src="/2019/深入理解Binder机制1-AIDL原理/bind_aidl.png" alt="bind_aidl"></p>
 <ul>
@@ -47,6 +237,163 @@ tags:
 <li><p>transact()：运行在客户端，当客户端发起远程请求的同时将当前线程挂起。之后调用服务端的onTransact()直到远程请求返回，当前线程才继续执行。</p>
 </li>
 </ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br></pre></td><td class="code"><pre><span class="line">/*</span><br><span class="line"> * This file is auto-generated.  DO NOT MODIFY.</span><br><span class="line"> * Original file: G:\\Android studio\\Aidl\\client\\src\\main\\aidl\\com\\skytoby\\server\\IRemoteService.aidl</span><br><span class="line"> */</span><br><span class="line">package com.skytoby.server;</span><br><span class="line"></span><br><span class="line">public interface IRemoteService extends android.os.IInterface &#123;</span><br><span class="line">    /**</span><br><span class="line">     * Local-side IPC implementation stub class.</span><br><span class="line">     */</span><br><span class="line">    public static abstract class Stub extends android.os.Binder implements com.skytoby.server.IRemoteService &#123;</span><br><span class="line">        private static final java.lang.String DESCRIPTOR = &quot;com.skytoby.server.IRemoteService&quot;;</span><br><span class="line"></span><br><span class="line">        /**</span><br><span class="line">         * Construct the stub at attach it to the interface.</span><br><span class="line">         */</span><br><span class="line">        public Stub() &#123;</span><br><span class="line">            this.attachInterface(this, DESCRIPTOR);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        /**</span><br><span class="line">         * Cast an IBinder object into an com.skytoby.server.IRemoteService interface,</span><br><span class="line">         * generating a proxy if needed.</span><br><span class="line">         */</span><br><span class="line">        public static com.skytoby.server.IRemoteService asInterface(android.os.IBinder obj) &#123;</span><br><span class="line">            if ((obj == null)) &#123;</span><br><span class="line">                return null;</span><br><span class="line">            &#125;</span><br><span class="line">            android.os.IInterface iin = obj.queryLocalInterface(DESCRIPTOR);</span><br><span class="line">            if (((iin != null) &amp;&amp; (iin instanceof com.skytoby.server.IRemoteService))) &#123;</span><br><span class="line">                return ((com.skytoby.server.IRemoteService) iin);</span><br><span class="line">            &#125;</span><br><span class="line">            return new com.skytoby.server.IRemoteService.Stub.Proxy(obj);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public android.os.IBinder asBinder() &#123;</span><br><span class="line">            return this;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags) throws android.os.RemoteException &#123;</span><br><span class="line">            java.lang.String descriptor = DESCRIPTOR;</span><br><span class="line">            switch (code) &#123;</span><br><span class="line">                case INTERFACE_TRANSACTION: &#123;</span><br><span class="line">                    reply.writeString(descriptor);</span><br><span class="line">                    return true;</span><br><span class="line">                &#125;</span><br><span class="line">                case TRANSACTION_addPhone: &#123;</span><br><span class="line">                    data.enforceInterface(descriptor);</span><br><span class="line">                    java.lang.String _arg0;</span><br><span class="line">                    _arg0 = data.readString();</span><br><span class="line">                    this.addPhone(_arg0);</span><br><span class="line">                    reply.writeNoException();</span><br><span class="line">                    return true;</span><br><span class="line">                &#125;</span><br><span class="line">                case TRANSACTION_getPhone: &#123;</span><br><span class="line">                    data.enforceInterface(descriptor);</span><br><span class="line">                    java.lang.String _arg0;</span><br><span class="line">                    _arg0 = data.readString();</span><br><span class="line">                    boolean _result = this.getPhone(_arg0);</span><br><span class="line">                    reply.writeNoException();</span><br><span class="line">                    reply.writeInt(((_result) ? (1) : (0)));</span><br><span class="line">                    return true;</span><br><span class="line">                &#125;</span><br><span class="line">                case TRANSACTION_getPid: &#123;</span><br><span class="line">                    data.enforceInterface(descriptor);</span><br><span class="line">                    int _result = this.getPid();</span><br><span class="line">                    reply.writeNoException();</span><br><span class="line">                    reply.writeInt(_result);</span><br><span class="line">                    return true;</span><br><span class="line">                &#125;</span><br><span class="line">                default: &#123;</span><br><span class="line">                    return super.onTransact(code, data, reply, flags);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        private static class Proxy implements com.skytoby.server.IRemoteService &#123;</span><br><span class="line">            private android.os.IBinder mRemote;</span><br><span class="line"></span><br><span class="line">            Proxy(android.os.IBinder remote) &#123;</span><br><span class="line">                mRemote = remote;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            @Override</span><br><span class="line">            public android.os.IBinder asBinder() &#123;</span><br><span class="line">                return mRemote;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            public java.lang.String getInterfaceDescriptor() &#123;</span><br><span class="line">                return DESCRIPTOR;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            @Override</span><br><span class="line">            public void addPhone(java.lang.String name) throws android.os.RemoteException &#123;</span><br><span class="line">                android.os.Parcel _data = android.os.Parcel.obtain();</span><br><span class="line">                android.os.Parcel _reply = android.os.Parcel.obtain();</span><br><span class="line">                try &#123;</span><br><span class="line">                    _data.writeInterfaceToken(DESCRIPTOR);</span><br><span class="line">                    _data.writeString(name);</span><br><span class="line">                    mRemote.transact(Stub.TRANSACTION_addPhone, _data, _reply, 0);</span><br><span class="line">                    _reply.readException();</span><br><span class="line">                &#125; finally &#123;</span><br><span class="line">                    _reply.recycle();</span><br><span class="line">                    _data.recycle();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            @Override</span><br><span class="line">            public boolean getPhone(java.lang.String name) throws android.os.RemoteException &#123;</span><br><span class="line">                android.os.Parcel _data = android.os.Parcel.obtain();</span><br><span class="line">                android.os.Parcel _reply = android.os.Parcel.obtain();</span><br><span class="line">                boolean _result;</span><br><span class="line">                try &#123;</span><br><span class="line">                    _data.writeInterfaceToken(DESCRIPTOR);</span><br><span class="line">                    _data.writeString(name);</span><br><span class="line">                    mRemote.transact(Stub.TRANSACTION_getPhone, _data, _reply, 0);</span><br><span class="line">                    _reply.readException();</span><br><span class="line">                    _result = (0 != _reply.readInt());</span><br><span class="line">                &#125; finally &#123;</span><br><span class="line">                    _reply.recycle();</span><br><span class="line">                    _data.recycle();</span><br><span class="line">                &#125;</span><br><span class="line">                return _result;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            @Override</span><br><span class="line">            public int getPid() throws android.os.RemoteException &#123;</span><br><span class="line">                android.os.Parcel _data = android.os.Parcel.obtain();</span><br><span class="line">                android.os.Parcel _reply = android.os.Parcel.obtain();</span><br><span class="line">                int _result;</span><br><span class="line">                try &#123;</span><br><span class="line">                    _data.writeInterfaceToken(DESCRIPTOR);</span><br><span class="line">                    mRemote.transact(Stub.TRANSACTION_getPid, _data, _reply, 0);</span><br><span class="line">                    _reply.readException();</span><br><span class="line">                    _result = _reply.readInt();</span><br><span class="line">                &#125; finally &#123;</span><br><span class="line">                    _reply.recycle();</span><br><span class="line">                    _data.recycle();</span><br><span class="line">                &#125;</span><br><span class="line">                return _result;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        static final int TRANSACTION_addPhone = (android.os.IBinder.FIRST_CALL_TRANSACTION + 0);</span><br><span class="line">        static final int TRANSACTION_getPhone = (android.os.IBinder.FIRST_CALL_TRANSACTION + 1);</span><br><span class="line">        static final int TRANSACTION_getPid = (android.os.IBinder.FIRST_CALL_TRANSACTION + 2);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void addPhone(java.lang.String name) throws android.os.RemoteException;</span><br><span class="line"></span><br><span class="line">    public boolean getPhone(java.lang.String name) throws android.os.RemoteException;</span><br><span class="line"></span><br><span class="line">    public int getPid() throws android.os.RemoteException;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<pre><code>
+/*
+ * This file is auto-generated.  DO NOT MODIFY.
+ * Original file: G:\\Android studio\\Aidl\\client\\src\\main\\aidl\\com\\zhh\\server\\IRemoteService.aidl
+ */
+package com.zhh.server;
+
+public interface IRemoteService extends android.os.IInterface {
+    /**
+     * Local-side IPC implementation stub class.
+     */
+    public static abstract class Stub extends android.os.Binder implements com.zhh.server.IRemoteService {
+        private static final java.lang.String DESCRIPTOR = "com.zhh.server.IRemoteService";
+
+        /**
+         * Construct the stub at attach it to the interface.
+         */
+        public Stub() {
+            this.attachInterface(this, DESCRIPTOR);
+        }
+
+        /**
+         * Cast an IBinder object into an com.zhh.server.IRemoteService interface,
+         * generating a proxy if needed.
+         */
+        public static com.zhh.server.IRemoteService asInterface(android.os.IBinder obj) {
+            if ((obj == null)) {
+                return null;
+            }
+            android.os.IInterface iin = obj.queryLocalInterface(DESCRIPTOR);
+            if (((iin != null) && (iin instanceof com.zhh.server.IRemoteService))) {
+                return ((com.zhh.server.IRemoteService) iin);
+            }
+            return new com.zhh.server.IRemoteService.Stub.Proxy(obj);
+        }
+
+        @Override
+        public android.os.IBinder asBinder() {
+            return this;
+        }
+
+        @Override
+        public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags) throws android.os.RemoteException {
+            java.lang.String descriptor = DESCRIPTOR;
+            switch (code) {
+                case INTERFACE_TRANSACTION: {
+                    reply.writeString(descriptor);
+                    return true;
+                }
+                case TRANSACTION_addPhone: {
+                    data.enforceInterface(descriptor);
+                    java.lang.String _arg0;
+                    _arg0 = data.readString();
+                    this.addPhone(_arg0);
+                    reply.writeNoException();
+                    return true;
+                }
+                case TRANSACTION_getPhone: {
+                    data.enforceInterface(descriptor);
+                    java.lang.String _arg0;
+                    _arg0 = data.readString();
+                    boolean _result = this.getPhone(_arg0);
+                    reply.writeNoException();
+                    reply.writeInt(((_result) ? (1) : (0)));
+                    return true;
+                }
+                case TRANSACTION_getPid: {
+                    data.enforceInterface(descriptor);
+                    int _result = this.getPid();
+                    reply.writeNoException();
+                    reply.writeInt(_result);
+                    return true;
+                }
+                default: {
+                    return super.onTransact(code, data, reply, flags);
+                }
+            }
+        }
+
+        private static class Proxy implements com.zhh.server.IRemoteService {
+            private android.os.IBinder mRemote;
+
+            Proxy(android.os.IBinder remote) {
+                mRemote = remote;
+            }
+
+            @Override
+            public android.os.IBinder asBinder() {
+                return mRemote;
+            }
+
+            public java.lang.String getInterfaceDescriptor() {
+                return DESCRIPTOR;
+            }
+
+            @Override
+            public void addPhone(java.lang.String name) throws android.os.RemoteException {
+                android.os.Parcel _data = android.os.Parcel.obtain();
+                android.os.Parcel _reply = android.os.Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeString(name);
+                    mRemote.transact(Stub.TRANSACTION_addPhone, _data, _reply, 0);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
+
+            @Override
+            public boolean getPhone(java.lang.String name) throws android.os.RemoteException {
+                android.os.Parcel _data = android.os.Parcel.obtain();
+                android.os.Parcel _reply = android.os.Parcel.obtain();
+                boolean _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeString(name);
+                    mRemote.transact(Stub.TRANSACTION_getPhone, _data, _reply, 0);
+                    _reply.readException();
+                    _result = (0 != _reply.readInt());
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
+            }
+
+            @Override
+            public int getPid() throws android.os.RemoteException {
+                android.os.Parcel _data = android.os.Parcel.obtain();
+                android.os.Parcel _reply = android.os.Parcel.obtain();
+                int _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    mRemote.transact(Stub.TRANSACTION_getPid, _data, _reply, 0);
+                    _reply.readException();
+                    _result = _reply.readInt();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
+            }
+        }
+
+        static final int TRANSACTION_addPhone = (android.os.IBinder.FIRST_CALL_TRANSACTION + 0);
+        static final int TRANSACTION_getPhone = (android.os.IBinder.FIRST_CALL_TRANSACTION + 1);
+        static final int TRANSACTION_getPid = (android.os.IBinder.FIRST_CALL_TRANSACTION + 2);
+    }
+
+    public void addPhone(java.lang.String name) throws android.os.RemoteException;
+
+    public boolean getPhone(java.lang.String name) throws android.os.RemoteException;
+
+    public int getPid() throws android.os.RemoteException;
+}</code></pre>
 <h3 id="2-原理"><a href="#2-原理" class="headerlink" title="2. 原理"></a>2. 原理</h3><p>对于应用层来说bindService之后就可以和服务端进行交互了，可以不用里面具体的操作如何，这样的设计大大降低了使用了难度，对于binderService的具体的过程将在后面分析，下面是其分层次的调用图。</p>
 <p><img src="/2019/深入理解Binder机制1-AIDL原理/java_binder.jpg" alt="java_binder" style="zoom:50%;"></p>
