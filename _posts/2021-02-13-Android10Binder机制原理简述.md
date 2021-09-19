@@ -34,17 +34,17 @@ tags:
 
 <p><img src="https://img-blog.csdnimg.cn/51aa29ea36cf4d85aa0cdf6c894989d2.jpg?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="ServiceManager" /></p>
 
-<p>可以看出无论是注册服务和获取服务的过程都需要ServiceManager，需要注意的是此处的Service Manager是指Native层的ServiceManager（C++），并非指framework层的ServiceManager(Java)。ServiceManager是整个Binder通信机制的大管家，是Android进程间通信机制Binder的守护进程，要掌握Binder机制，首先需要了解系统是如何首次<a href="http://gityuan.com/2015/11/07/binder-start-sm/">启动Service Manager</a>。当Service Manager启动之后，Client端和Server端通信时都需要先<a href="http://gityuan.com/2015/11/08/binder-get-sm/">获取Service Manager</a>接口，才能开始通信服务。</p>
+<p>可以看出无论是注册服务和获取服务的过程都需要ServiceManager，需要注意的是此处的Service Manager是指Native层的ServiceManager（C++），并非指framework层的ServiceManager(Java)。ServiceManager是整个Binder通信机制的大管家，是Android进程间通信机制Binder的守护进程，要掌握Binder机制，首先需要了解系统是如何启动Service Manager。当Service Manager启动之后，Client端和Server端通信时都需要先获取Service Manager接口，才能开始通信服务。</p>
 
 <p>图中Client/Server/ServiceManage之间的相互通信都是基于Binder机制。既然基于Binder机制通信，那么同样也是C/S架构，则图中的3大步骤都有相应的Client端与Server端。</p>
 
 <ol>
-  <li><strong><a href="http://gityuan.com/2015/11/14/binder-add-service/">注册服务(addService)</a></strong>：Server进程要先注册Service到ServiceManager。该过程：Server是客户端，ServiceManager是服务端。</li>
-  <li><strong><a href="http://gityuan.com/2015/11/15/binder-get-service/">获取服务(getService)</a></strong>：Client进程使用某个Service前，须先向ServiceManager中获取相应的Service。该过程：Client是客户端，ServiceManager是服务端。</li>
+  <li><strong>注册服务(addService)</strong>：Server进程要先注册Service到ServiceManager。该过程：Server是客户端，ServiceManager是服务端。</li>
+  <li><strong>获取服务(getService)</strong>：Client进程使用某个Service前，须先向ServiceManager中获取相应的Service。该过程：Client是客户端，ServiceManager是服务端。</li>
   <li><strong>使用服务</strong>：Client根据得到的Service信息建立与Service所在的Server进程通信的通路，然后就可以直接与Service交互。该过程：client是客户端，server是服务端。</li>
 </ol>
 
-<p>图中的Client,Server,Service Manager之间交互都是虚线表示，是由于它们彼此之间不是直接交互的，而是都通过与<a href="http://gityuan.com/2015/11/01/binder-driver/">Binder驱动</a>进行交互的，从而实现IPC通信方式。其中Binder驱动位于内核空间，Client,Server,Service Manager位于用户空间。Binder驱动和Service Manager可以看做是Android平台的基础架构，而Client和Server是Android的应用层，开发人员只需自定义实现client、Server端，借助Android的基本平台架构便可以直接进行IPC通信。</p>
+<p>图中的Client,Server,Service Manager之间交互都是虚线表示，是由于它们彼此之间不是直接交互的，而是都通过与Binder驱动进行交互的，从而实现IPC通信方式。其中Binder驱动位于内核空间，Client,Server,Service Manager位于用户空间。Binder驱动和Service Manager可以看做是Android平台的基础架构，而Client和Server是Android的应用层，开发人员只需自定义实现client、Server端，借助Android的基本平台架构便可以直接进行IPC通信。</p>
 
 <h3 id="23-cs模式">2.3 C/S模式</h3>
 
@@ -57,11 +57,9 @@ tags:
   <li>server端：BBinder.onTransact()会接收到相应事务。</li>
 </ul>
 
-<h2 id="三-提纲">三、 提纲</h2>
-
 <p>在后续的Binder源码分析过程中所涉及的源码，会有部分的精简，主要是去掉所有log输出语句，已减少代码篇幅过于长</p>
 
-<h2 id="四-源码目录">四. 源码目录</h2>
+<h2 id="三-源码目录">三. 源码目录</h2>
 <p>从上之下, 整个Binder架构所涉及的总共有以下5个目录:</p>
 
 <pre><code>
@@ -69,10 +67,10 @@ tags:
 /framework/base/core/jni/                (JNI)
 /framework/native/libs/binder            (Native)
 /framework/native/cmds/servicemanager/   (Native)
-/kernel/drivers/staging/android          (Driver)
+/kernel/drivers/android                  (Driver)
 </code></pre>
 
-<h4 id="41-java-framework">4.1 Java framework</h4>
+<h4 id="31-java-framework">3.1 Java framework</h4>
 
 <pre><code>/framework/base/core/java/android/os/  
     - IInterface.java
@@ -90,7 +88,7 @@ tags:
     - android_util_Binder.cpp (核心类)
 </code></pre>
 
-<h4 id="42-native-framework">4.2 Native framework</h4>
+<h4 id="32-native-framework">3.2 Native framework</h4>
 
 <pre><code>
 /framework/native/libs/binder         
@@ -109,7 +107,7 @@ tags:
     - binder.c
 </code></pre>
 
-<h4 id="43-kernel">4.3 Kernel</h4>
+<h4 id="33-kernel">3.3 Kernel</h4>
 
 <pre><code>/kernel/drivers/android/
     - binder.c
