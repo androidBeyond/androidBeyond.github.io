@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      Android10 Binder机制开篇简述
+title:      Android10 Binder机制1-原理简述
 subtitle:   Binder作为Android系统提供的一种IPC机制，无论从事系统开发还是应用开发，都应该有所了解
 date:       2021-02-13
 author:     duguma
