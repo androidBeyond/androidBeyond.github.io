@@ -229,7 +229,7 @@ public static IActivityManager getService() {
              }
   };</code></pre>
 
-<p>在前面<a href="https://skytoby.github.io/2020/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Binder%E6%9C%BA%E5%88%B63-%E8%8E%B7%E5%8F%96%E6%9C%8D%E5%8A%A1getService/" target="_blank" rel="noopener">获取服务</a>那篇文章中可以看出ServiceManager.getService(Context.ACTIVITY_SERVICE);等价于new BinderProxy(nativeData)，这里的b相当于BinderProxy对象。</p>
+<p>在前面获取服务那篇文章中可以看出ServiceManager.getService(Context.ACTIVITY_SERVICE);等价于new BinderProxy(nativeData)，这里的b相当于BinderProxy对象。</p>
 <h4 id="2-2-4-asInterface"><a href="#2-2-4-asInterface" class="headerlink" title="2.2.4 asInterface"></a>2.2.4 asInterface</h4><p>[-&gt;IActivityManager.java]</p>
 
 <pre><code>
@@ -290,8 +290,8 @@ private static class Proxy implements android.app.IActivityManager {
  }</code></pre>
 
 <p>这里mRemote为BinderProxy对象，通过mRemote向服务端传输数据。</p>
-<p>writeStrongBinder、transact操作在<a href="https://skytoby.github.io/2020/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Binder%E6%9C%BA%E5%88%B62-%E6%B3%A8%E5%86%8C%E6%9C%8D%E5%8A%A1addService/" target="_blank" rel="noopener">注册服务</a>那篇文章有详细的介绍，这里不再分析，向目标进程写入BINDER_WORK_TRANSACTION命令，下面进入服务端systemserver进程。</p>
-<h2 id="三、system-server进程"><a href="#三、system-server进程" class="headerlink" title="三、system_server进程"></a>三、system_server进程</h2><p>在<a href="https://skytoby.github.io/2019/Android%E8%BF%9B%E7%A8%8B%E5%88%9B%E5%BB%BA%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/" target="_blank" rel="noopener">进程的启动</a>那篇文章15.2节中，systemserver进程启动时会启动binder线程</p>
+<p>writeStrongBinder、transact操作在注册服务那篇文章有详细的介绍，这里不再分析，向目标进程写入BINDER_WORK_TRANSACTION命令，下面进入服务端systemserver进程。</p>
+<h2 id="三、system-server进程"><a href="#三、system-server进程" class="headerlink" title="三、system_server进程"></a>三、system_server进程</h2><p>在进程的启动那篇文章15.2节中，systemserver进程启动时会启动binder线程</p>
 <h3 id="3-1-onZygoteInit"><a href="#3-1-onZygoteInit" class="headerlink" title="3.1 onZygoteInit()"></a>3.1 onZygoteInit()</h3><p>[-&gt;app_main.cpp]</p>
 
 <pre><code>
@@ -1927,7 +1927,7 @@ public void doConnected(ComponentName name, IBinder service, boolean dead) {
 <p>2.只有当BC_TRANSACTION或BC_REPLY时，才会调用binder_transaction来处理事务，并且都会回应调用者BINDER_WORK_TRANSACTION_COMPLETE，经过binder_thread_read转变成BR_TRANSACTION_COMPLETE；</p>
 <p>3.bindServie是一个非oneway过程，oneway过程没有BC_REPLY。</p>
 <p><img src="https://img-blog.csdnimg.cn/b0655680b5814257bf4b66f7d735daad.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_18,color_FFFFFF,t_70,g_se,x_16" alt="binderservice_cm_pro" style="zoom:75%;"></p>
-<h3 id="9-3-数据流"><a href="#9-3-数据流" class="headerlink" title="9.3 数据流"></a>9.3 数据流</h3><p><strong>用户空间</strong>（下面一些方法在<a href="https://skytoby.github.io/2020/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Binder%E6%9C%BA%E5%88%B62-%E6%B3%A8%E5%86%8C%E6%9C%8D%E5%8A%A1addService/" target="_blank" rel="noopener">addservice</a>篇中介绍）</p>
+<h3 id="9-3-数据流"><a href="#9-3-数据流" class="headerlink" title="9.3 数据流"></a>9.3 数据流</h3><p><strong>用户空间</strong></p>
 <p>1.bindService：组装flat_binder_object等对象组成Parcel data;</p>
 <p>2.IPC.writeTransactionData：组装BC_TRANSACTION和binder_transaction_data结构体，写入mOut;</p>
 <p>3.IPC.talkWithDriver：组装BINDER_WRITE_READ和binder_writer_read结构体，通过ioctl传输到驱动层。</p>
