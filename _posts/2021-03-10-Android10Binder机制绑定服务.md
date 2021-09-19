@@ -15,30 +15,7 @@ tags:
 ---
 
 
-<h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2><h3 id="1-1-Binder架构"><a href="#1-1-Binder架构" class="headerlink" title="1.1 Binder架构"></a>1.1 Binder架构</h3><p>Android内核基于Linux系统，而Linux系统进程间通信方式有很多，如管道，共g享内存，信号，信号量，消息队列，套接字。而Android为什么要用binder进行进程间的通信，这里引用<a href="https://www.zhihu.com/question/39440766/answer/89210950" target="_blank" rel="noopener">gityuan在知乎</a>上的回答：</p>
-<p><strong>（1）从性能的角度数据拷贝次数</strong></p>
-<p>Binder数据拷贝只需要一次，而管道，消息队列，Socket都需要二次，但共享内存连一次拷贝都不需要；从性能角度看，Binder性能仅次于共享内存。</p>
-<p><strong>（2）从稳定性的角度</strong></p>
-<p>Binder基于C/S架构，Server端和Client端相对独立，稳定性较好，而共享内存实现方式复杂，需要考虑到同步并发的问题。从稳定性方面，Binder架构优于共享内存。</p>
-<p><strong>（3）从安全的角度</strong></p>
-<p>传统Linux进程间通信无法获取对方进程可靠的UID/PID，无法鉴别对方身份；而Android为每个应用程序分配UID，Android系统中对外只暴露Client端，Client端将任务发送给Server端，Server端会根据权限控制策略，判断UID/PID是否满足访问权限。</p>
-<p><strong>（4）从语言层面的角度</strong></p>
-<p>Linux是基于C语言，而Android是基于Java语言，Binder符合面向对象的思想，Binder将进程间通信转化为通过对某个Binder对象的引用调用该对象的方法。Binder对象作为一个可以跨进程引用的对象，它的实体位于一个进程中，而它的引用却可以在系统的每个进程之中。</p>
-<p><strong>（5）从公司战略的角度</strong></p>
-<p>Linux内核源码许可基于GPL协议，为了避免遵循GPL协议，就不能在应用层调用底层kernel，Binder基于开源的OpenBinder实现，作者在Google工作，OpenBinder用Apache-2.0协议保护。</p>
-<p>Binder架构采用分层架构设计，每一层都有不同的功能。</p>
-<p>分层的架构设计主要特点如下：</p>
-<ul>
-<li>层与层具有独立性；</li>
-<li>设计灵活，层与层之间都定义好接口，接口不变就不会有影响；</li>
-<li>结构的解耦合，让每一层可以用适合自己的技术方案和语言；</li>
-<li>方便维护，可分层调试和定位问题</li>
-</ul>
-<p>Binder架构分成四层，应用层，Framework层，Native层和内核层</p>
-<p>应用层：Java应用层通过调用IActivityManager.bindService,经过层层调用到AMS.bindService；</p>
-<p>Framework层：Jave IPC Binder通信采用C/S架构，在Framework层实现BinderProxy和Binder;</p>
-<p>Native层：Native IPC，在Native层的C/S架构，实现了BpBinder和BBinder(JavaBBinder);</p>
-<p>Kernel层：Binder驱动，运行在内核空间，可共享。其它三层是在用户空间，不可共享。</p>
+<h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2>
 <h3 id="1-2-Binder-IPC原理"><a href="#1-2-Binder-IPC原理" class="headerlink" title="1.2 Binder IPC原理"></a>1.2 Binder IPC原理</h3><p>Binder通信采用C/S架构，包含Client，Server，ServiceManager以及binder驱动，其中ServiceManager用于管理系统中的各种服务，下面是以AMS服务为例的架构图：</p>
 <p><img src="https://img-blog.csdnimg.cn/82fd1ecd1c4140a88badb932049bd961.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_17,color_FFFFFF,t_70,g_se,x_16" alt="bindservice_binder_frame" style="zoom:67%;"></p>
 <p>无论是注册服务还是获取服务的过程都需要ServiceManager，此处的ServiceManager是指Native层的ServiceManager(C++)，并非指framework层的ServiceManager（Java）。ServiceManager是整个Binder通信机制的大管家，是Android进程间通信机制Binder的守护进程。Client端和Server端通信时都需要先获取ServiceManager接口，才能开始通信服务，查找到目标信息可以缓存起来则不需要每次都向ServiceManager请求。</p>
