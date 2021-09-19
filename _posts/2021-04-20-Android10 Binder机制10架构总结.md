@@ -29,7 +29,7 @@ tags:
 <h3 id="2-Binder内存机制"><a href="#2-Binder内存机制" class="headerlink" title="2.Binder内存机制"></a>2.Binder内存机制</h3><p>binder_mmap是Binder进程间通信的高效的核心机制所在，其模型如下：</p>
 <p><img src="https://img-blog.csdnimg.cn/69bbd7b28a654f2ca72c93d2b14cba04.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_16,color_FFFFFF,t_70,g_se,x_16" alt="内存模型" style="zoom:80%;"></p>
 <p>虚拟进程地址空间（vm_area_struct）和虚拟内核地址空间（vm_struct）都映射到同一块物理内存空间。当client端与server端发送数据时，client作为数据发送端，先从自己的进程空间把IPC通信数据copy_from_user拷贝到内核空间，而server端作为数据接收端，与内核共享数据，不再需要拷贝数据，而是通过内存地址空间的偏移量获取内存地址，整个过程只发生一次内存拷贝。一般的做法，需要Client端进程空间拷贝到内核空间，再由内核空间拷贝到server进程空间，会发生两次拷贝。</p>
-<p><img src="https://img-blog.csdnimg.cn/6f06e6836354483b81acd240f20cb60a.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_17,color_FFFFFF,t_70,g_se,x_16 "屏幕截图.png")" alt="binder内存转换" style="zoom:80%;"></p>
+<p><img src="https://img-blog.csdnimg.cn/6f06e6836354483b81acd240f20cb60a.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_17,color_FFFFFF,t_70,g_se,x_16" alt="binder内存转换" style="zoom:80%;"></p>
 <p>对于进程和内核虚拟地址映射到同一个物理内存的操作（通过地址偏移量来实现）是发生在数据接收端，而数据发送端还是需要将用户态的数据复制到内核态。为什么不直接让发送端和接收端直接映射到同一块物理空间，那样连一次复制的操作都不需要，0次复制那就和Linux标准内核的共享内存IPC没有区别了，对于共享内存虽然效率高，但是对于多进程同步的问题比较复杂，而管道/消息队列等IPC需要复制两次，效率较低。总之Android选择Binder是基于速度和安全性的考虑。</p>
 <h3 id="3-Binder通信流程"><a href="#3-Binder通信流程" class="headerlink" title="3.Binder通信流程"></a>3.Binder通信流程</h3><p>以bindService为例总结Binder通信流程</p>
 <p>1.发起端线程向Binder驱动发起binder_ioctl请求后，waitForResponse进入while循环，不断进行talkWithDriver,此时该线程处理阻塞状态，直到收到BR_XX命令才会结束该过程。</p>
