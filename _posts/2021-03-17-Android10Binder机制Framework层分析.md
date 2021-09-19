@@ -20,9 +20,9 @@ tags:
 
 <p>binder在framework层，采用JNI技术来调用native(C/C++)层的binder架构，从而为上层应用程序提供服务。 看过binder系列之前的文章，我们知道native层中，binder是C/S架构，分为Bn端(Server)和Bp端(Client)。对于java层在命名与架构上非常相近，同样实现了一套IPC通信架构。</p>
 
-<p>framework Binder架构图：查看<a href="http://gityuan.com/images/binder/java_binder/java_binder.jpg">大图</a></p>
+<p>framework Binder架构图</p>
 
-<p><img src="/images/binder/java_binder/java_binder.jpg" alt="java_binder" /></p>
+<p><img src="https://img-blog.csdnimg.cn/5ea1454fb4a543ad9fb2eb38aa82ae22.jpg?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="java_binder" /></p>
 
 <p><strong>图解：</strong></p>
 
@@ -39,9 +39,9 @@ tags:
 
 <h3 id="12-binder类图">1.2 Binder类图</h3>
 
-<p>下面列举framework的binder类关系图：查看<a href="http://gityuan.com/images/binder/java_binder/class_ServiceManager.jpg">大图</a></p>
+<p>下面列举framework的binder类关系图</p>
 
-<p><img src="/images/binder/java_binder/class_ServiceManager.jpg" alt="class_java_binder" /></p>
+<p><img src="https://img-blog.csdnimg.cn/919c51e7a6224a46ae7fd9e9ae296174.jpg?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="class_java_binder" /></p>
 
 <p>图解：(图中浅蓝色都是Interface，其余都是Class)</p>
 
@@ -58,9 +58,7 @@ tags:
 
 <p>整个Binder从kernel至，native，JNI，Framework层所涉及的全部类</p>
 
-<p>点击查看<a href="http://gityuan.com/images/binder/java_binder_framework.jpg">大图</a></p>
-
-<p><img src="/images/binder/java_binder_framework.jpg" alt="java_binder_framework" /></p>
+<p><img src="https://img-blog.csdnimg.cn/899d87caef484e5c8ba433dacd9717e3.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="java_binder_framework" /></p>
 
 <h2 id="二初始化">二、初始化</h2>
 
@@ -68,7 +66,7 @@ tags:
 
 <h3 id="21-startreg">2.1 startReg</h3>
 
-<p>==&gt; AndroidRuntime.cpp</p>
+<p> AndroidRuntime.cpp</p>
 
 <pre><code>int AndroidRuntime::startReg(JNIEnv* env)
 {
@@ -91,7 +89,7 @@ tags:
 
 <h3 id="22-register_android_os_binder">2.2 register_android_os_Binder</h3>
 
-<p>==&gt; android_util_Binder.cpp</p>
+<p> android_util_Binder.cpp</p>
 
 <pre><code>int register_android_os_Binder(JNIEnv* env)
 {
@@ -113,7 +111,7 @@ tags:
 
 <h3 id="23-注册binder">2.3 注册Binder</h3>
 
-<p>==&gt; android_util_Binder.cpp</p>
+<p> android_util_Binder.cpp</p>
 
 <pre><code>static int int_register_android_os_Binder(JNIEnv* env)
 {
@@ -188,7 +186,7 @@ tags:
 
 <h3 id="24-注册binderinternal">2.4 注册BinderInternal</h3>
 
-<p>==&gt; android_util_Binder.cpp</p>
+<p> android_util_Binder.cpp</p>
 
 <pre><code>static int int_register_android_os_BinderInternal(JNIEnv* env)
 {
@@ -220,7 +218,7 @@ tags:
 
 <h3 id="25-注册binderproxy">2.5 注册BinderProxy</h3>
 
-<p>==&gt; android_util_Binder.cpp</p>
+<p> android_util_Binder.cpp</p>
 
 <pre><code>static int int_register_android_os_BinderProxy(JNIEnv* env)
 {
@@ -490,7 +488,7 @@ tags:
 <p>JavaBBinderHolder有一个成员变量mBinder，保存当前创建的JavaBBinder对象，这是一个wp类型的，可能会被垃圾回收器给回收，所以每次使用前，都需要先判断是否存在。</p>
 
 <h4 id="354-javabbinder初始化">3.5.4 JavaBBinder初始化</h4>
-<p>==&gt; [-&gt; android_util_Binder.cpp]</p>
+<p> [-&gt; android_util_Binder.cpp]</p>
 
 <pre><code>JavaBBinder(JNIEnv* env, jobject object)
     : mVM(jnienv_to_javavm(env)), mObject(env-&gt;NewGlobalRef(object))
