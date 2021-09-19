@@ -2060,7 +2060,7 @@ static void binder_transaction(struct binder_proc *proc,
 
 <p>从通信协议的角度来看这个过程:</p>
 
-<p><img src="https://img-blog.csdnimg.cn/4e6fb58ffff24b669787247d7d3b76a2.jpg?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16)" alt="binder_transaction" /></p>
+<p><img src="https://img-blog.csdnimg.cn/4e6fb58ffff24b669787247d7d3b76a2.jpg?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16)" alt="binder_transaction" /></p>
 
 <ul>
   <li>Binder客户端或者服务端向Binder Driver发送的命令都是以BC_开头,例如本文的<code class="language-plaintext highlighter-rouge">BC_TRANSACTION</code>和<code class="language-plaintext highlighter-rouge">BC_REPLY</code>, 所有Binder Driver向Binder客户端或者服务端发送的命令则都是以BR_开头, 例如本文中的<code class="language-plaintext highlighter-rouge">BR_TRANSACTION</code>和<code class="language-plaintext highlighter-rouge">BR_REPLY</code>.</li>
