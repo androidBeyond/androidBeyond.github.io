@@ -15,7 +15,7 @@ tags:
 ---
 
 <h2 id="一概述">一、概述</h2>
-<h3 id="1-1-Binder架构"><a href="#1-1-Binder架构" class="headerlink" title="1.1 Binder架构"></a>1.1 Binder架构</h3><p>Android内核基于Linux系统，而Linux系统进程间通信方式有很多，如管道，共g享内存，信号，信号量，消息队列，套接字。而Android为什么要用binder进行进程间的通信，这里引用<a href="https://www.zhihu.com/question/39440766/answer/89210950" target="_blank" rel="noopener">gityuan在知乎</a>上的回答：</p>
+<h3 id="1-1-Binder架构"><a href="#1-1-Binder架构" class="headerlink" title="1.1 Binder架构"></a>1.1 Binder架构</h3><p>Android内核基于Linux系统，而Linux系统进程间通信方式有很多，如管道，共g享内存，信号，信号量，消息队列，套接字。而Android为什么要用binder进行进程间的通信，主要是从以下几个方面考虑的。</p>
 <p><strong>（1）从性能的角度数据拷贝次数</strong></p>
 <p>Binder数据拷贝只需要一次，而管道，消息队列，Socket都需要二次，但共享内存连一次拷贝都不需要；从性能角度看，Binder性能仅次于共享内存。</p>
 <p><strong>（2）从稳定性的角度</strong></p>
