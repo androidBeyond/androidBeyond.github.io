@@ -1,7 +1,7 @@
 ---
 layout:     post
 title:      Android10 Binder机制7-线程池管理
-subtitle:   Android系统启动完成后，ActivityManager, PackageManager等各大服务都运行在system_server进程，app应用需要使用系统服务都是通过binder来完成进程之间的通信
+subtitle:   Binder线程创建与其所在进程的创建中产生，Java层进程的创建都是通过Process.start()方法
 date:       2021-03-22
 author:     duguma
 header-img: img/article-bg.jpg
@@ -17,11 +17,11 @@ tags:
 
 <h2 id="一-概述">一. 概述</h2>
 
-<p>Android系统启动完成后，ActivityManager, PackageManager等各大服务都运行在system_server进程，app应用需要使用系统服务都是通过binder来完成进程之间的通信，上篇文章<a href="http://gityuan.com/2016/09/04/binder-start-service/">彻底理解Android Binder通信架构</a>，从整体架构以及通信协议的角度来阐述了Binder架构。那对于binder线程是如何管理的呢，又是如何创建的呢？其实无论是system_server进程，还是app进程，都是在进程fork完成后，便会在新进程中执行onZygoteInit()的过程中，启动binder线程池。接下来，就以此为起点展开从线程的视角来看看binder的世界。</p>
+<p>Android系统启动完成后，ActivityManager, PackageManager等各大服务都运行在system_server进程，app应用需要使用系统服务都是通过binder来完成进程之间的通信，那么对于binder线程是如何管理的呢，又是如何创建的呢？其实无论是system_server进程，还是app进程，都是在进程fork完成后，便会在新进程中执行onZygoteInit()的过程中，启动binder线程池。接下来，就以此为起点展开从线程的视角来看看binder的世界。</p>
 
 <h2 id="二-binder线程创建">二. Binder线程创建</h2>
 
-<p>Binder线程创建与其所在进程的创建中产生，Java层进程的创建都是通过<a href="http://gityuan.com/2016/03/26/app-process-create/">Process.start()</a>方法，向Zygote进程发出创建进程的socket消息，Zygote收到消息后会调用Zygote.forkAndSpecialize()来fork出新进程，在新进程中会调用到<code class="language-plaintext highlighter-rouge">RuntimeInit.nativeZygoteInit</code>方法，该方法经过jni映射，最终会调用到app_main.cpp中的onZygoteInit，那么接下来从这个方法说起。</p>
+<p>Binder线程创建与其所在进程的创建中产生，Java层进程的创建都是通过Process.start()方法，向Zygote进程发出创建进程的socket消息，Zygote收到消息后会调用Zygote.forkAndSpecialize()来fork出新进程，在新进程中会调用到<code class="language-plaintext highlighter-rouge">RuntimeInit.nativeZygoteInit</code>方法，该方法经过jni映射，最终会调用到app_main.cpp中的onZygoteInit，那么接下来从这个方法说起。</p>
 
 <h3 id="21-onzygoteinit">2.1 onZygoteInit</h3>
 <p>[-&gt; app_main.cpp]</p>
@@ -35,7 +35,7 @@ tags:
 }
 </code></pre>
 
-<p>ProcessState::self()是单例模式，主要工作是调用open()打开/dev/binder驱动设备，再利用mmap()映射内核的地址空间，将Binder驱动的fd赋值ProcessState对象中的变量mDriverFD，用于交互操作。startThreadPool()是创建一个新的binder线程，不断进行talkWithDriver()。 详细过程,见<a href="http://gityuan.com/2015/11/14/binder-add-service/">注册服务</a>的[小节二].</p>
+<p>ProcessState::self()是单例模式，主要工作是调用open()打开/dev/binder驱动设备，再利用mmap()映射内核的地址空间，将Binder驱动的fd赋值ProcessState对象中的变量mDriverFD，用于交互操作。startThreadPool()是创建一个新的binder线程，不断进行talkWithDriver()。</p>
 
 <h3 id="22-psstartthreadpool">2.2 PS.startThreadPool</h3>
 <p>[-&gt; ProcessState.cpp]</p>
@@ -219,7 +219,7 @@ status_t IPCThreadState::talkWithDriver(bool doReceive)
 }
 </code></pre>
 
-<p>在这里调用的isMain=true，也就是向mOut例如写入的便是<code class="language-plaintext highlighter-rouge">BC_ENTER_LOOPER</code>. 经过talkWithDriver(), 接下来程序往哪进行呢？在文章<a href="http://gityuan.com/2016/09/04/binder-start-service/">彻底理解Android Binder通信架构</a>详细讲解了Binder通信过程，那么从<code class="language-plaintext highlighter-rouge">binder_thread_write()</code>往下说<code class="language-plaintext highlighter-rouge">BC_ENTER_LOOPER</code>的处理过程。</p>
+<p>在这里调用的isMain=true，也就是向mOut例如写入的便是<code class="language-plaintext highlighter-rouge">BC_ENTER_LOOPER</code>. 经过talkWithDriver(), 接下来从<code class="language-plaintext highlighter-rouge">binder_thread_write()</code>往下说<code class="language-plaintext highlighter-rouge">BC_ENTER_LOOPER</code>的处理过程。</p>
 
 <h4 id="271-binder_thread_write">2.7.1 binder_thread_write</h4>
 <p>[-&gt; binder.c]</p>
@@ -436,7 +436,7 @@ IPCThread::self()-&gt;joinThreadPool();   // 1个线程
 
 <p>Binder设计架构中，只有第一个Binder主线程(也就是Binder_1线程)是由应用程序主动创建，Binder线程池的普通线程都是由Binder驱动根据IPC通信需求创建，Binder线程的创建流程图：</p>
 
-<p><img src="/images/binder/binder-thread-pool/binder_thread_create.jpg" alt="binder_thread_create" /></p>
+<p><img src="https://img-blog.csdnimg.cn/fe64d1229eb34935a3e9d777784ed787.jpg?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="binder_thread_create" /></p>
 
 <p>每次由Zygote fork出新进程的过程中，伴随着创建binder线程池，调用spawnPooledThread来创建binder主线程。当线程执行binder_thread_read的过程中，发现当前没有空闲线程，没有请求创建线程，且没有达到上限，则创建新的binder线程。</p>
 
