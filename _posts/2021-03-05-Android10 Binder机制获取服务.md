@@ -95,7 +95,7 @@ private static IBinder rawGetService(String name) throws RemoteException {
        return binder;
    }
 </code></pre>
-<p>由前面<a href="https://skytoby.github.io/2020/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Binder%E6%9C%BA%E5%88%B62-%E6%B3%A8%E5%86%8C%E6%9C%8D%E5%8A%A1addService/" target="_blank" rel="noopener">ServiceManager注册服务</a>中3.3.1节可知getIServiceManager()相当于ServiceManagerProxy</p>
+<p>由前面<a href="{{site.baseurl}}/2021/02/26/Android10Binder机制注册服务/"   target="_blank">ServiceManager注册服务</a>中3.3.1节可知getIServiceManager()相当于ServiceManagerProxy</p>
 <h4 id="2-1-2-allowBlocking"><a href="#2-1-2-allowBlocking" class="headerlink" title="2.1.2 allowBlocking"></a>2.1.2 allowBlocking</h4><p>[-&gt;Binder.java]</p>
 
 <pre><code>
@@ -127,7 +127,7 @@ public IBinder getService(String name) throws RemoteException {
        return binder;
    }
 </code></pre>
-<p>由前面<a href="https://skytoby.github.io/2020/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Binder%E6%9C%BA%E5%88%B62-%E6%B3%A8%E5%86%8C%E6%9C%8D%E5%8A%A1addService/" target="_blank" rel="noopener">ServiceManager注册服务</a>中3.3.1节</p>
+<p>由前面<a href="{{site.baseurl}}/2021/02/26/Android10Binder机制注册服务/"   target="_blank">ServiceManager注册服务</a>中3.3.1节</p>
 <p>mRemote为BinderProxy对象，该对象对应于BpBinder(0)，作为binder代理类，执行native层ServiceManager</p>
 <h3 id="2-3-BP-transact"><a href="#2-3-BP-transact" class="headerlink" title="2.3 BP.transact"></a>2.3 BP.transact</h3><p>[-&gt;BinderProxy.java]</p>
 
@@ -627,8 +627,8 @@ status_t IPCThreadState::talkWithDriver(bool doReceive)
 }</code></pre>
 <p>binder_write_read结构体用来与Binder驱动进行数据交换，通过ioctl与mDriverFD通信，主要操作的是mInt和mOut.</p>
 <p>ioctl通过系统调用进入到Binder Driver。</p>
-<p>进入到Binder Driver在前面ServiceManager注册服务中第四章有详细的描述，这里直接到ServiceManager进程、</p>
-<h2 id="三、ServiceManager进程"><a href="#三、ServiceManager进程" class="headerlink" title="三、ServiceManager进程"></a>三、ServiceManager进程</h2><p>从在前面<a href="https://skytoby.github.io/2020/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Binder%E6%9C%BA%E5%88%B62-%E6%B3%A8%E5%86%8C%E6%9C%8D%E5%8A%A1addService/" target="_blank" rel="noopener">ServiceManager注册服务</a>中第二章可以看到servicemanager启动后，循环再binder_loop过程，会调用binder_parse方法</p>
+<p>进入到Binder Driver在前面<a href="{{site.baseurl}}/2021/02/26/Android10Binder机制注册服务/"   target="_blank">ServiceManager注册服务</a>中第四章有详细的描述，这里直接到ServiceManager进程、</p>
+<h2 id="三、ServiceManager进程"><a href="#三、ServiceManager进程" class="headerlink" title="三、ServiceManager进程"></a>三、ServiceManager进程</h2><p>从在前面<a href="{{site.baseurl}}/2021/02/26/Android10Binder机制注册服务/"   target="_blank">ServiceManager注册服务</a>中第二章可以看到servicemanager启动后，循环再binder_loop过程，会调用binder_parse方法</p>
 <h3 id="3-1-binder-parse"><a href="#3-1-binder-parse" class="headerlink" title="3.1 binder_parse"></a>3.1 binder_parse</h3><p>[-&gt;servicemanager/binder.c]</p>
 
 <pre><code>
