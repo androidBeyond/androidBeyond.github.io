@@ -202,7 +202,8 @@ public class MainActivity extends AppCompatActivity {
 
 }
 </code></pre>
-<h3 id="4-运行结果"><a href="#4-运行结果" class="headerlink" title="4.运行结果"></a>4.运行结果</h3><p><img src="/2019/深入理解Binder机制1-AIDL原理/aidl ui.png" alt=""></p>
+<h3 id="4-运行结果"><a href="#4-运行结果" class="headerlink" title="4.运行结果"></a>4.运行结果</h3><p>
+<img src="https://img-blog.csdnimg.cn/d788903bc82242e6a30d0c4554f856d6.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_9,color_FFFFFF,t_70,g_se,x_16" alt=""></p>
 <p>点击客户端相应的控件，完成绑定服务，解绑服务，杀死service进程，日志如下：</p>
 
 <pre><code>
@@ -216,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
 16:16:57.955 27006-27020/com.zhh.server D/phone binder: server getPid 27006
 </code></pre>
 <h2 id="二、AIDL原理分析"><a href="#二、AIDL原理分析" class="headerlink" title="二、AIDL原理分析"></a>二、AIDL原理分析</h2><h3 id="1-IRemoteService类"><a href="#1-IRemoteService类" class="headerlink" title="1. IRemoteService类"></a>1. IRemoteService类</h3><p>aidl生成一个对应的IRemoteService.java，其原理还是利用了framework binder的架构，具体的内部原理后面介绍，先分析下这个生成类，其流程如下：</p>
-<p><img src="/2019/深入理解Binder机制1-AIDL原理/bind_aidl.png" alt="bind_aidl"></p>
+<p><img src="https://img-blog.csdnimg.cn/1b95a5959cd949bf98b7fad16ca00076.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_15,color_FFFFFF,t_70,g_se,x_16" alt="bind_aidl"></p>
 <ul>
 <li><p>AIDL接口：继承IInterface。</p>
 </li>
@@ -396,4 +397,4 @@ public interface IRemoteService extends android.os.IInterface {
     public int getPid() throws android.os.RemoteException;
 }</code></pre>
 <h3 id="2-原理"><a href="#2-原理" class="headerlink" title="2. 原理"></a>2. 原理</h3><p>对于应用层来说bindService之后就可以和服务端进行交互了，可以不用里面具体的操作如何，这样的设计大大降低了使用了难度，对于binderService的具体的过程将在后面分析，下面是其分层次的调用图。</p>
-<p><img src="/2019/深入理解Binder机制1-AIDL原理/java_binder.jpg" alt="java_binder" style="zoom:50%;"></p>
+<p><img src="https://img-blog.csdnimg.cn/d5820dc2788446308462b04196d75545.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="java_binder" style="zoom:50%;"></p>
