@@ -40,7 +40,7 @@ tags:
 <p>Native层：Native IPC，在Native层的C/S架构，实现了BpBinder和BBinder(JavaBBinder);</p>
 <p>Kernel层：Binder驱动，运行在内核空间，可共享。其它三层是在用户空间，不可共享。</p>
 <h3 id="1-2-Binder-IPC原理"><a href="#1-2-Binder-IPC原理" class="headerlink" title="1.2 Binder IPC原理"></a>1.2 Binder IPC原理</h3><p>Binder通信采用C/S架构，包含Client，Server，ServiceManager以及binder驱动，其中ServiceManager用于管理系统中的各种服务，下面是以AMS服务为例的架构图：</p>
-<p><img src="/2020/深入理解Binder机制4-bindService过程分析/bindservice_binder_frame.PNG" alt="bindservice_binder_frame" style="zoom:67%;"></p>
+<p><img src="https://img-blog.csdnimg.cn/82fd1ecd1c4140a88badb932049bd961.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_17,color_FFFFFF,t_70,g_se,x_16" alt="bindservice_binder_frame" style="zoom:67%;"></p>
 <p>无论是注册服务还是获取服务的过程都需要ServiceManager，此处的ServiceManager是指Native层的ServiceManager(C++)，并非指framework层的ServiceManager（Java）。ServiceManager是整个Binder通信机制的大管家，是Android进程间通信机制Binder的守护进程。Client端和Server端通信时都需要先获取ServiceManager接口，才能开始通信服务，查找到目标信息可以缓存起来则不需要每次都向ServiceManager请求。</p>
 <p>图中Client/Server/ServiceManager之间的相互通信都是基于Binder机制，其主要分为三个过程：</p>
 <p>1.注册服务：AMS注册到ServiceManager。这个过程AMS所在的进程(system_server)是客户端，ServiceManager是服务端。</p>
@@ -49,17 +49,22 @@ tags:
 <p>Client,Server，ServiceManager之间不是直接交互的，都是通过与Binder Driver进行交互的，从而实现IPC通信方式。Binder驱动位于内核层，Client,Server,ServiceManager位于用户空间。Binder驱动和ServiceManager可以看做是Android平台的基础架构，而Client和Server是Android应用层。</p>
 <p>前面已经分析过第一第二个过程注册服务和获取服务，本文主要介绍第三个过程使用服务，以bindService过程为例。</p>
 <h3 id="1-3-bindService流程"><a href="#1-3-bindService流程" class="headerlink" title="1.3 bindService流程"></a>1.3 bindService流程</h3><p>bindService流程如下图，从客户端调用bindService到服务器端通过ServiceConnected对象返回代理类给客户端，下面将从源码的角度分析这个过程。</p>
-<p><img src="/2020/深入理解Binder机制4-bindService过程分析/bindservice.png" alt="bindservice" style="zoom: 67%;"></p>
+<p><img src="https://img-blog.csdnimg.cn/6bbbd8465bc04156a5efe18ba274d36f.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="bindservice" style="zoom: 67%;"></p>
 <h2 id="二、客户端进程"><a href="#二、客户端进程" class="headerlink" title="二、客户端进程"></a>二、客户端进程</h2><h3 id="2-1-CL-bindService"><a href="#2-1-CL-bindService" class="headerlink" title="2.1 CL.bindService"></a>2.1 CL.bindService</h3><p>[-&gt;ContextImpl.java]</p>
-<pre><code>@Override
+
+<pre><code>
+@Override
  public boolean bindService(Intent service, ServiceConnection conn,
          int flags) {
      warnIfCallingFromSystemProcess();
      return bindServiceCommon(service, conn, flags, mMainThread.getHandler(), getUser());
  }
-</code></pre>
+</code></pre>
+
 <h3 id="2-2-CL-bindServiceCommon"><a href="#2-2-CL-bindServiceCommon" class="headerlink" title="2.2 CL.bindServiceCommon"></a>2.2 CL.bindServiceCommon</h3><p>[-&gt;ContextImpl.java]</p>
-<pre><code>private boolean bindServiceCommon(Intent service, ServiceConnection conn, int flags, Handler
+
+<pre><code>
+private boolean bindServiceCommon(Intent service, ServiceConnection conn, int flags, Handler
           handler, UserHandle user) {
       // Keep this in sync with DevicePolicyManager.bindDeviceAdminServiceAsUser.
       IServiceConnection sd;
@@ -94,7 +99,8 @@ tags:
       } catch (RemoteException e) {
           throw e.rethrowFromSystemServer();
       }
-  }</code></pre>
+  }</code></pre>
+
 <p>主要的工作如下：</p>
 <ul>
 <li><p>创建对象LoadedApk.ServiceDispatcher对象</p>
@@ -103,7 +109,9 @@ tags:
 </li>
 </ul>
 <h4 id="2-2-1-getServiceDispatcher"><a href="#2-2-1-getServiceDispatcher" class="headerlink" title="2.2.1 getServiceDispatcher"></a>2.2.1 getServiceDispatcher</h4><p>[-&gt;LoadedApk.java]</p>
-<pre><code>public final IServiceConnection getServiceDispatcher(ServiceConnection c,
+
+<pre><code>
+public final IServiceConnection getServiceDispatcher(ServiceConnection c,
            Context context, Handler handler, int flags) {
        synchronized (mServices) {
            LoadedApk.ServiceDispatcher sd = null;
@@ -128,7 +136,8 @@ tags:
            return sd.getIServiceConnection();
        }
    }
-</code></pre>
+</code></pre>
+
 <ul>
 <li>mServices记录所有context里面每个ServiceConnection以及所对应的所对应的LoadedApk.ServiceDispatcher对象；同一个ServiceConnection只会创建一次，</li>
 </ul>
@@ -136,7 +145,9 @@ tags:
 <li>返回的对象是ServiceConnection.InnerConnection,该对象继承于IServiceConnection.Stub。</li>
 </ul>
 <h4 id="2-2-2-ServiceDispatcher"><a href="#2-2-2-ServiceDispatcher" class="headerlink" title="2.2.2 ServiceDispatcher"></a>2.2.2 ServiceDispatcher</h4><p>[-&gt;LoadedApk.java]</p>
-<pre><code>static final class ServiceDispatcher {
+
+<pre><code>
+static final class ServiceDispatcher {
         private final ServiceDispatcher.InnerConnection mIServiceConnection;
         @UnsupportedAppUsage
         private final ServiceConnection mConnection;
@@ -195,10 +206,13 @@ tags:
             return mIServiceConnection;
         }
         ....
-   }</code></pre>
+   }</code></pre>
+
 <p> getServiceDispatcher返回的是构造方法中的InnerConnection对象。</p>
 <h4 id="2-2-3-AM-getService"><a href="#2-2-3-AM-getService" class="headerlink" title="2.2.3 AM.getService"></a>2.2.3 AM.getService</h4><p>[-&gt;ActivityManager.java]</p>
-<pre><code>public static IActivityManager getService() {
+
+<pre><code>
+public static IActivityManager getService() {
      return IActivityManagerSingleton.get();
  }
  
@@ -213,10 +227,13 @@ tags:
                  final IActivityManager am = IActivityManager.Stub.asInterface(b);
                  return am;
              }
-  };</code></pre>
+  };</code></pre>
+
 <p>在前面<a href="https://skytoby.github.io/2020/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Binder%E6%9C%BA%E5%88%B63-%E8%8E%B7%E5%8F%96%E6%9C%8D%E5%8A%A1getService/" target="_blank" rel="noopener">获取服务</a>那篇文章中可以看出ServiceManager.getService(Context.ACTIVITY_SERVICE);等价于new BinderProxy(nativeData)，这里的b相当于BinderProxy对象。</p>
 <h4 id="2-2-4-asInterface"><a href="#2-2-4-asInterface" class="headerlink" title="2.2.4 asInterface"></a>2.2.4 asInterface</h4><p>[-&gt;IActivityManager.java]</p>
-<pre><code>public static android.app.IActivityManager asInterface(android.os.IBinder obj) {
+
+<pre><code>
+public static android.app.IActivityManager asInterface(android.os.IBinder obj) {
          if ((obj == null)) {
              return null;
          }
@@ -226,9 +243,12 @@ tags:
              return ((android.app.IActivityManager) iin);
          }
          return new android.app.IActivityManager.Stub.Proxy(obj);
-   }</code></pre>
+   }</code></pre>
+
 <h4 id="2-2-5-创建Proxy"><a href="#2-2-5-创建Proxy" class="headerlink" title="2.2.5 创建Proxy"></a>2.2.5 创建Proxy</h4><p>[-&gt;IActivityManager.java]</p>
-<pre><code>private static class Proxy implements android.app.IActivityManager {
+
+<pre><code>
+private static class Proxy implements android.app.IActivityManager {
      private android.os.IBinder mRemote;
       Proxy(android.os.IBinder remote) {
              mRemote = remote;
@@ -267,28 +287,37 @@ tags:
              return _result;
      }
      ...
- }</code></pre>
+ }</code></pre>
+
 <p>这里mRemote为BinderProxy对象，通过mRemote向服务端传输数据。</p>
 <p>writeStrongBinder、transact操作在<a href="https://skytoby.github.io/2020/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Binder%E6%9C%BA%E5%88%B62-%E6%B3%A8%E5%86%8C%E6%9C%8D%E5%8A%A1addService/" target="_blank" rel="noopener">注册服务</a>那篇文章有详细的介绍，这里不再分析，向目标进程写入BINDER_WORK_TRANSACTION命令，下面进入服务端systemserver进程。</p>
 <h2 id="三、system-server进程"><a href="#三、system-server进程" class="headerlink" title="三、system_server进程"></a>三、system_server进程</h2><p>在<a href="https://skytoby.github.io/2019/Android%E8%BF%9B%E7%A8%8B%E5%88%9B%E5%BB%BA%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/" target="_blank" rel="noopener">进程的启动</a>那篇文章15.2节中，systemserver进程启动时会启动binder线程</p>
 <h3 id="3-1-onZygoteInit"><a href="#3-1-onZygoteInit" class="headerlink" title="3.1 onZygoteInit()"></a>3.1 onZygoteInit()</h3><p>[-&gt;app_main.cpp]</p>
-<pre><code>virtual void onZygoteInit()
+
+<pre><code>
+virtual void onZygoteInit()
   {
       sp&lt;ProcessState&gt; proc = ProcessState::self();
       ALOGV("App process: starting thread pool./n");
       proc-&gt;startThreadPool(); //启动新的binder线程
-  }</code></pre>
+  }</code></pre>
+
 <h4 id="3-1-1-startThreadPool"><a href="#3-1-1-startThreadPool" class="headerlink" title="3.1.1  startThreadPool"></a>3.1.1  startThreadPool</h4><p>[-&gt;ProcessState.cpp]</p>
-<pre><code>void ProcessState::startThreadPool()
+
+<pre><code>
+void ProcessState::startThreadPool()
 {
     AutoMutex _l(mLock);
     if (!mThreadPoolStarted) {
         mThreadPoolStarted = true;
         spawnPooledThread(true);
     }
-}</code></pre>
+}</code></pre>
+
 <h4 id="3-1-2-spawnPooledThread"><a href="#3-1-2-spawnPooledThread" class="headerlink" title="3.1.2  spawnPooledThread"></a>3.1.2  spawnPooledThread</h4><p>[-&gt;ProcessState.cpp]</p>
-<pre><code>void ProcessState::spawnPooledThread(bool isMain)
+
+<pre><code>
+void ProcessState::spawnPooledThread(bool isMain)
 {
     if (mThreadPoolStarted) {
         String8 name = makeBinderThreadName();
@@ -298,9 +327,12 @@ tags:
         //执行threadLoop方法
         t-&gt;run(name.string());
     }
-}</code></pre>
+}</code></pre>
+
 <h4 id="3-1-3-new-PoolThread"><a href="#3-1-3-new-PoolThread" class="headerlink" title="3.1.3  new PoolThread"></a>3.1.3  new PoolThread</h4><p>[-&gt;ProcessState.cpp]</p>
-<pre><code>class PoolThread : public Thread
+
+<pre><code>
+class PoolThread : public Thread
 {
     public:
     explicit PoolThread(bool isMain)
@@ -317,9 +349,12 @@ tags:
     }
     
     const bool mIsMain;
-};</code></pre>
+};</code></pre>
+
 <h3 id="3-2-joinThreadPool"><a href="#3-2-joinThreadPool" class="headerlink" title="3.2 joinThreadPool"></a>3.2 joinThreadPool</h3><p>[-&gt;IPCThreadState.cpp]</p>
-<pre><code>void IPCThreadState::joinThreadPool(bool isMain)
+
+<pre><code>
+void IPCThreadState::joinThreadPool(bool isMain)
 {
     LOG_THREADPOOL("**** THREAD %p (PID %d) IS JOINING THE THREAD POOL/n", (void*)pthread_self(), getpid());
 
@@ -353,10 +388,13 @@ tags:
     mOut.writeInt32(BC_EXIT_LOOPER);
     //和binder驱动交互
     talkWithDriver(false);
-}</code></pre>
+}</code></pre>
+
 <p>system_server进程，通过这个while循环来获取并执行binder命令。</p>
 <h3 id="3-3-IPC-getAndExecuteCommand"><a href="#3-3-IPC-getAndExecuteCommand" class="headerlink" title="3.3 IPC.getAndExecuteCommand"></a>3.3 IPC.getAndExecuteCommand</h3><p>[-&gt;IPCThreadState.cpp]</p>
-<pre><code>status_t IPCThreadState::getAndExecuteCommand()
+
+<pre><code>
+status_t IPCThreadState::getAndExecuteCommand()
 {
     status_t result;
     int32_t cmd;
@@ -398,10 +436,13 @@ tags:
     }
 
     return result;
-}</code></pre>
+}</code></pre>
+
 <p>这里system_server的binder线程空闲，停在binder_thread_read方法来处理进程/线程的事务。前面收到BINDER_WORK_TRANSACTION命令，经过binder_thread_read后生成命令cmd=BR_TRANSACTION，再将cmd和数据写回用户空间。</p>
 <h3 id="3-4-IPC-executeCommand"><a href="#3-4-IPC-executeCommand" class="headerlink" title="3.4 IPC.executeCommand"></a>3.4 IPC.executeCommand</h3><p>[-&gt;IPCThreadState.cpp]</p>
-<pre><code>status_t IPCThreadState::executeCommand(int32_t cmd)
+
+<pre><code>
+status_t IPCThreadState::executeCommand(int32_t cmd)
 {
     BBinder* obj;
     RefBase::weakref_type* refs;
@@ -500,7 +541,8 @@ tags:
     }
 
     return result;
-}</code></pre>
+}</code></pre>
+
 <ul>
 <li><p>对于oneway的情况，执行完本次transact则全部结束</p>
 </li>
@@ -508,7 +550,9 @@ tags:
 </li>
 </ul>
 <h4 id="3-4-1-ipcSetDataReference"><a href="#3-4-1-ipcSetDataReference" class="headerlink" title="3.4.1 ipcSetDataReference"></a>3.4.1 ipcSetDataReference</h4><p>[-&gt;Parcel.cpp]</p>
-<pre><code>void Parcel::ipcSetDataReference(const uint8_t* data, size_t dataSize,
+
+<pre><code>
+void Parcel::ipcSetDataReference(const uint8_t* data, size_t dataSize,
     const binder_size_t* objects, size_t objectsCount, release_func relFunc, void* relCookie)
 {
     binder_size_t minOffset = 0;
@@ -537,7 +581,8 @@ tags:
         minOffset = offset + sizeof(flat_binder_object);
     }
     scanForFds();
-}</code></pre>
+}</code></pre>
+
 <p>Parcel成员变量说明：</p>
 <p>mData：parcel数据起始地址</p>
 <p>mDataSize：parcel数据大小</p>
@@ -546,7 +591,9 @@ tags:
 <p>mOwner：释放函数freeBuffer</p>
 <p>mOwnerCookie：释放函数所需信息</p>
 <h4 id="3-4-2-freeDataNoInit"><a href="#3-4-2-freeDataNoInit" class="headerlink" title="3.4.2 freeDataNoInit"></a>3.4.2 freeDataNoInit</h4><p>[-&gt;Parcel.cpp]</p>
-<pre><code>void Parcel::freeDataNoInit()
+
+<pre><code>
+void Parcel::freeDataNoInit()
 {
     if (mOwner) {
         LOG_ALLOC("Parcel %p: freeing other owner data", this);
@@ -572,9 +619,12 @@ tags:
         }
         if (mObjects) free(mObjects);
     }
-}</code></pre>
+}</code></pre>
+
 <h4 id="3-4-3-releaseObjects"><a href="#3-4-3-releaseObjects" class="headerlink" title="3.4.3 releaseObjects"></a>3.4.3 releaseObjects</h4><p>[-&gt;Parcel.cpp]</p>
-<pre><code>void Parcel::releaseObjects()
+
+<pre><code>
+void Parcel::releaseObjects()
 {
     const sp&lt;ProcessState&gt; proc(ProcessState::self());
     size_t i = mObjectsSize;
@@ -587,9 +637,12 @@ tags:
         //见3.4.3小节
         release_object(proc, *flat, this, &mOpenAshmemSize);
     }
-}</code></pre>
+}</code></pre>
+
 <h4 id="3-4-4-release-object"><a href="#3-4-4-release-object" class="headerlink" title="3.4.4 release_object"></a>3.4.4 release_object</h4><p>[-&gt;Parcel.cpp]</p>
-<pre><code>static void release_object(const sp&lt;ProcessState&gt;& proc,
+
+<pre><code>
+static void release_object(const sp&lt;ProcessState&gt;& proc,
     const flat_binder_object& obj, const void* who, size_t* outAshmemSize)
 {
     switch (obj.hdr.type) {
@@ -632,10 +685,13 @@ tags:
     }
 
     ALOGE("Invalid object type 0x%08x", obj.hdr.type);
-}</code></pre>
+}</code></pre>
+
 <p>根据flat_binder_object的类型，来减少相应的强弱引用。</p>
 <h4 id="3-4-5-Parcel"><a href="#3-4-5-Parcel" class="headerlink" title="3.4.5 ~Parcel"></a>3.4.5 ~Parcel</h4><p>[-&gt;Parcel.cpp]</p>
-<pre><code>Parcel::~Parcel()
+
+<pre><code>
+Parcel::~Parcel()
 {
     freeDataNoInit();
     LOG_ALLOC("Parcel %p: destroyed", this);
@@ -649,10 +705,13 @@ void Parcel::freeDataNoInit()
     } else {
     ...
     }
- }</code></pre>
+ }</code></pre>
+
 <p>执行完executeCommand方法后，会释放局部变量Parcelbuffer，则会析构Parcel。接下来，则会执行freeBuffer方法</p>
 <h4 id="3-4-6-freeBuffer"><a href="#3-4-6-freeBuffer" class="headerlink" title="3.4.6  freeBuffer"></a>3.4.6  freeBuffer</h4><p>[-&gt;IPCThreadState.cpp]</p>
-<pre><code>void IPCThreadState::freeBuffer(Parcel* parcel, const uint8_t* data,
+
+<pre><code>
+void IPCThreadState::freeBuffer(Parcel* parcel, const uint8_t* data,
                                 size_t /*dataSize*/,
                                 const binder_size_t* /*objects*/,
                                 size_t /*objectsSize*/, void* /*cookie*/)
@@ -666,10 +725,13 @@ void Parcel::freeDataNoInit()
     IPCThreadState* state = self();
     state-&gt;mOut.writeInt32(BC_FREE_BUFFER);
     state-&gt;mOut.writePointer((uintptr_t)data);
-}</code></pre>
+}</code></pre>
+
 <p>向binder驱动写入BC_FREE_BUFFER命令。</p>
 <h3 id="3-5-BBbinder-transact"><a href="#3-5-BBbinder-transact" class="headerlink" title="3.5 BBbinder.transact"></a>3.5 BBbinder.transact</h3><p>[-&gt;binder/Binder.cpp]</p>
-<pre><code>status_t BBinder::transact(
+
+<pre><code>
+status_t BBinder::transact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
     data.setDataPosition(0);
@@ -691,9 +753,12 @@ void Parcel::freeDataNoInit()
 
     return err;
 }
-</code></pre>
+</code></pre>
+
 <h4 id="3-5-1-onTransact"><a href="#3-5-1-onTransact" class="headerlink" title="3.5.1 onTransact"></a>3.5.1 onTransact</h4><p>[-&gt;android_util_Binder.cpp]</p>
-<pre><code>status_t onTransact(
+
+<pre><code>
+status_t onTransact(
         uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags = 0) override
     {
         JNIEnv* env = javavm_to_jnienv(mVM);
@@ -744,12 +809,15 @@ void Parcel::freeDataNoInit()
         //    &lt;&lt; "Transact from " &lt;&lt; this &lt;&lt; " to Java code returning "
         //    &lt;&lt; reply &lt;&lt; ": " &lt;&lt; *reply &lt;&lt; endl;
         return res != JNI_FALSE ? NO_ERROR : UNKNOWN_TRANSACTION;
-    }</code></pre>
+    }</code></pre>
+
 <p>mObject是在服务注册addService过程中，会调用WriteStrongBinder方法，将Binder传入JavaBBinder构造函数的参数，最终赋值给mObject。</p>
 <p>gBinderOffsets在int_register_android_os_Binder函数中进行的初始化。</p>
 <p>这样通过JNI的方式，从C++回到Java代码，进入IActivityManager.execTransact方法。</p>
 <p>[-&gt;android_util_Binder.cpp]</p>
-<pre><code>static int int_register_android_os_Binder(JNIEnv* env)
+
+<pre><code>
+static int int_register_android_os_Binder(JNIEnv* env)
 {
     jclass clazz = FindClassOrDie(env, kBinderPathName);
 
@@ -763,9 +831,12 @@ void Parcel::freeDataNoInit()
         env, kBinderPathName,
         gBinderMethods, NELEM(gBinderMethods));
 }
-</code></pre>
+</code></pre>
+
 <h4 id="3-5-2-execTransact"><a href="#3-5-2-execTransact" class="headerlink" title="3.5.2 execTransact"></a>3.5.2 execTransact</h4><p>[-&gt;Binder.java]</p>
-<pre><code>// Entry point from android_util_Binder.cpp's onTransact
+
+<pre><code>
+// Entry point from android_util_Binder.cpp's onTransact
  @UnsupportedAppUsage
  private boolean execTransact(int code, long dataObj, long replyObj,
          int flags) {
@@ -820,9 +891,12 @@ void Parcel::freeDataNoInit()
      binderCallsStats.callEnded(callSession);
 
      return res;
- }</code></pre>
+ }</code></pre>
+
 <h3 id="3-6-IActivityManager-onTransact"><a href="#3-6-IActivityManager-onTransact" class="headerlink" title="3.6 IActivityManager.onTransact"></a>3.6 IActivityManager.onTransact</h3><p>[-&gt;IActivityManager.java]</p>
-<pre><code>public static abstract class Stub extends android.os.Binder implements android.app.IActivityManager {
+
+<pre><code>
+public static abstract class Stub extends android.os.Binder implements android.app.IActivityManager {
   ...
  @Override
  public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags) throws android.os.RemoteException {
@@ -836,9 +910,12 @@ void Parcel::freeDataNoInit()
            ...
         }
   }
-}</code></pre>
+}</code></pre>
+
 <h3 id="3-7-onTransact-bindService"><a href="#3-7-onTransact-bindService" class="headerlink" title="3.7 onTransact$bindService$"></a>3.7 onTransact$bindService$</h3><p>[-&gt;IActivityManager.java]</p>
-<pre><code>private boolean onTransact$bindService$(android.os.Parcel data, android.os.Parcel reply) throws  android.os.RemoteException {
+
+<pre><code>
+private boolean onTransact$bindService$(android.os.Parcel data, android.os.Parcel reply) throws  android.os.RemoteException {
            data.enforceInterface(DESCRIPTOR);
            android.app.IApplicationThread _arg0;
             //获取ApplicationThread的代理对象
@@ -867,11 +944,14 @@ void Parcel::freeDataNoInit()
            reply.writeNoException();
            reply.writeInt(_result);
            return true;
-       }</code></pre>
+       }</code></pre>
+
 <p>IPC::waitForResponse对于非oneway方式，还在等待system_server这边的响应，只有收到BR_REPLY或者BR_DEAD_REPLY等其他出错的情况下，才会退出waitForResponse。</p>
 <p>当bindService完成后，还需要将bindservice完成的回应消息告诉发起端的进程。在3.4节中IPC.executeCommand过程中处理完成BR_TRANSACTION命令的同时，还会通过 sendReply(reply, 0);向Binder Driver发送BC_RELY消息。这里Rely流程不再详细介绍，还是和进入之前相应的流程类似。</p>
 <h3 id="3-8-AMS-bindService"><a href="#3-8-AMS-bindService" class="headerlink" title="3.8 AMS.bindService"></a>3.8 AMS.bindService</h3><p>[-&gt;ActivityManagerService.java]</p>
-<pre><code>public int bindService(IApplicationThread caller, IBinder token, Intent service,
+
+<pre><code>
+public int bindService(IApplicationThread caller, IBinder token, Intent service,
            String resolvedType, IServiceConnection connection, int flags, String callingPackage,
            int userId) throws TransactionTooLargeException {
        enforceNotIsolatedCaller("bindService");
@@ -890,9 +970,12 @@ void Parcel::freeDataNoInit()
            return mServices.bindServiceLocked(caller, token, service,
                    resolvedType, connection, flags, callingPackage, userId);
        }
-   }</code></pre>
+   }</code></pre>
+
 <h3 id="3-9-AS-bindServiceLocked"><a href="#3-9-AS-bindServiceLocked" class="headerlink" title="3.9 AS.bindServiceLocked"></a>3.9 AS.bindServiceLocked</h3><p>[-&gt;ActiveServices.java]</p>
-<pre><code>int bindServiceLocked(IApplicationThread caller, IBinder token, Intent service,
+
+<pre><code>
+int bindServiceLocked(IApplicationThread caller, IBinder token, Intent service,
            String resolvedType, final IServiceConnection connection, int flags,
            String callingPackage, final int userId) throws TransactionTooLargeException {
        if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "bindService: " + service
@@ -1173,9 +1256,12 @@ void Parcel::freeDataNoInit()
        }
 
        return 1;
-   }</code></pre>
+   }</code></pre>
+
 <h3 id="3-10-AS-bringUpServiceLocked"><a href="#3-10-AS-bringUpServiceLocked" class="headerlink" title="3.10 AS.bringUpServiceLocked"></a>3.10 AS.bringUpServiceLocked</h3><p>[-&gt;ActiveServices.java]</p>
-<pre><code>private String bringUpServiceLocked(ServiceRecord r, int intentFlags, boolean execInFg,
+
+<pre><code>
+private String bringUpServiceLocked(ServiceRecord r, int intentFlags, boolean execInFg,
             boolean whileRestarting, boolean permissionsReviewRequired)
             throws TransactionTooLargeException {
         //Slog.i(TAG, "Bring up service:");
@@ -1315,9 +1401,12 @@ void Parcel::freeDataNoInit()
         }
 
         return null;
-    }</code></pre>
+    }</code></pre>
+
 <h3 id="3-11-AS-realStartServiceLocked"><a href="#3-11-AS-realStartServiceLocked" class="headerlink" title="3.11 AS.realStartServiceLocked"></a>3.11 AS.realStartServiceLocked</h3><p>[-&gt;ActiveServices.java]</p>
-<pre><code>private final void realStartServiceLocked(ServiceRecord r,
+
+<pre><code>
+private final void realStartServiceLocked(ServiceRecord r,
            ProcessRecord app, boolean execInFg) throws RemoteException {
        if (app.thread == null) {
            throw new RemoteException();
@@ -1413,9 +1502,12 @@ void Parcel::freeDataNoInit()
            }
        }
    }
-</code></pre>
+</code></pre>
+
 <h2 id="四、服务端进程"><a href="#四、服务端进程" class="headerlink" title="四、服务端进程"></a>四、服务端进程</h2><h3 id="4-1-AT-scheduleCreateService"><a href="#4-1-AT-scheduleCreateService" class="headerlink" title="4.1 AT.scheduleCreateService"></a>4.1 AT.scheduleCreateService</h3><p>[-&gt;ActivityThread.java]</p>
-<pre><code>public final void scheduleCreateService(IBinder token,
+
+<pre><code>
+public final void scheduleCreateService(IBinder token,
                ServiceInfo info, CompatibilityInfo compatInfo, int processState) {
            updateProcessState(processState, false);
            //准备服务创建所需要的数据
@@ -1426,10 +1518,13 @@ void Parcel::freeDataNoInit()
 
            sendMessage(H.CREATE_SERVICE, s);
     }
-</code></pre>
+</code></pre>
+
 <p>通过handler机制，发送消息给服务端进程的主线程的handler处理。</p>
 <h3 id="4-2-AT-handleMessage"><a href="#4-2-AT-handleMessage" class="headerlink" title="4.2 AT.handleMessage"></a>4.2 AT.handleMessage</h3><p>[-&gt;ActivityThread.java]</p>
-<pre><code>public void handleMessage(Message msg) {
+
+<pre><code>
+public void handleMessage(Message msg) {
       if (DEBUG_MESSAGES) Slog.v(TAG, "&gt;&gt;&gt; handling: " + codeToString(msg.what));
           switch (msg.what) {
               case CREATE_SERVICE:
@@ -1441,9 +1536,12 @@ void Parcel::freeDataNoInit()
                   ....
             }
             
-        }</code></pre>
+        }</code></pre>
+
 <h3 id="4-3-AT-handleCreateService"><a href="#4-3-AT-handleCreateService" class="headerlink" title="4.3 AT.handleCreateService"></a>4.3 AT.handleCreateService</h3><p>[-&gt;ActivityThread.java]</p>
-<pre><code>private void handleCreateService(CreateServiceData data) {
+
+<pre><code>
+private void handleCreateService(CreateServiceData data) {
        // If we are getting ready to gc after going to the background, well
        // we are back active so skip it.
        //当应用处于后台即将进行gc,而此时被调回到活动，则此时跳过本次gc
@@ -1491,10 +1589,13 @@ void Parcel::freeDataNoInit()
                    + ": " + e.toString(), e);
            }
        }
-   }</code></pre>
+   }</code></pre>
+
 <p>前面3.11中realStartServiceLocked过程，执行完成scheduleCreateService操作后，接下来，继续回到system_server进程，开始执行requestServiceBindingsLocked过程。</p>
 <h2 id="五、system-server进程"><a href="#五、system-server进程" class="headerlink" title="五、system_server进程"></a>五、system_server进程</h2><h3 id="5-1-AS-requestServiceBindingsLocked"><a href="#5-1-AS-requestServiceBindingsLocked" class="headerlink" title="5.1 AS.requestServiceBindingsLocked"></a>5.1 AS.requestServiceBindingsLocked</h3><p>[-&gt;ActiveServices.java]</p>
-<pre><code>private final void requestServiceBindingsLocked(ServiceRecord r, boolean execInFg)
+
+<pre><code>
+private final void requestServiceBindingsLocked(ServiceRecord r, boolean execInFg)
            throws TransactionTooLargeException {
        for (int i=r.bindings.size()-1; i&gt;=0; i--) {
            IntentBindRecord ibr = r.bindings.valueAt(i);
@@ -1502,10 +1603,13 @@ void Parcel::freeDataNoInit()
                break;
            }
        }
-   }</code></pre>
+   }</code></pre>
+
 <p>通过bindService方式启动服务，那么ServiceRecord的bindings肯定不会为空。</p>
 <h3 id="5-2-AS-requestServiceBindingLocked"><a href="#5-2-AS-requestServiceBindingLocked" class="headerlink" title="5.2 AS.requestServiceBindingLocked"></a>5.2 AS.requestServiceBindingLocked</h3><p>[-&gt;ActiveServices.java]</p>
-<pre><code>private final boolean requestServiceBindingLocked(ServiceRecord r, IntentBindRecord i,
+
+<pre><code>
+private final boolean requestServiceBindingLocked(ServiceRecord r, IntentBindRecord i,
             boolean execInFg, boolean rebind) throws TransactionTooLargeException {
         if (r.app == null || r.app.thread == null) {
             // If service is not currently running, can't yet bind.
@@ -1541,10 +1645,13 @@ void Parcel::freeDataNoInit()
             }
         }
         return true;
-    }</code></pre>
+    }</code></pre>
+
 <p>scheduleBindService通过Binder代理的方式，调用AT的scheduleBindService，其代理对象由IApplicationThread.aidl生成和AMS类似。</p>
 <h2 id="六、服务端进程"><a href="#六、服务端进程" class="headerlink" title="六、服务端进程"></a>六、服务端进程</h2><h3 id="6-1-AT-scheduleBindService"><a href="#6-1-AT-scheduleBindService" class="headerlink" title="6.1 AT.scheduleBindService"></a>6.1 AT.scheduleBindService</h3><p>[-&gt;ActivityThread.java]</p>
-<pre><code>public final void scheduleBindService(IBinder token, Intent intent,
+
+<pre><code>
+public final void scheduleBindService(IBinder token, Intent intent,
              boolean rebind, int processState) {
          updateProcessState(processState, false);
          BindServiceData s = new BindServiceData();
@@ -1556,10 +1663,13 @@ void Parcel::freeDataNoInit()
              Slog.v(TAG, "scheduleBindService token=" + token + " intent=" + intent + " uid="
                      + Binder.getCallingUid() + " pid=" + Binder.getCallingPid());
          sendMessage(H.BIND_SERVICE, s);
-     }</code></pre>
+     }</code></pre>
+
 <p>发送消息到服务端进程的主线程处理。</p>
 <h3 id="6-2-AT-handleMessage"><a href="#6-2-AT-handleMessage" class="headerlink" title="6.2 AT.handleMessage"></a>6.2 AT.handleMessage</h3><p>[-&gt;ActivityThread.java]</p>
-<pre><code>public void handleMessage(Message msg) {
+
+<pre><code>
+public void handleMessage(Message msg) {
           if (DEBUG_MESSAGES) Slog.v(TAG, "&gt;&gt;&gt; handling: " + codeToString(msg.what));
           switch (msg.what) {
              ...
@@ -1571,9 +1681,12 @@ void Parcel::freeDataNoInit()
                   break;
                ...
                }
-        }</code></pre>
+        }</code></pre>
+
 <h3 id="6-3-AT-handleBindService"><a href="#6-3-AT-handleBindService" class="headerlink" title="6.3 AT.handleBindService"></a>6.3 AT.handleBindService</h3><p>[-&gt;ActivityThread.java]</p>
-<pre><code>private void handleBindService(BindServiceData data) {
+
+<pre><code>
+private void handleBindService(BindServiceData data) {
        Service s = mServices.get(data.token);
        if (DEBUG_SERVICE)
            Slog.v(TAG, "handleBindService s=" + s + " rebind=" + data.rebind);
@@ -1605,10 +1718,13 @@ void Parcel::freeDataNoInit()
                }
            }
        }
-   }</code></pre>
+   }</code></pre>
+
 <p>经过Binder IPC进入到system_server进程，并将binder传回到system_server进程。</p>
 <h2 id="七、system-server进程"><a href="#七、system-server进程" class="headerlink" title="七、system_server进程"></a>七、system_server进程</h2><h3 id="7-1-AMS-publishService"><a href="#7-1-AMS-publishService" class="headerlink" title="7.1 AMS.publishService"></a>7.1 AMS.publishService</h3><p>[-&gt;ActivityManagerService.java]</p>
-<pre><code>public void publishService(IBinder token, Intent intent, IBinder service) {
+
+<pre><code>
+public void publishService(IBinder token, Intent intent, IBinder service) {
        // Refuse possible leaked file descriptors
        if (intent != null && intent.hasFileDescriptors() == true) {
            throw new IllegalArgumentException("File descriptors passed in Intent");
@@ -1620,10 +1736,13 @@ void Parcel::freeDataNoInit()
            }
            mServices.publishServiceLocked((ServiceRecord)token, intent, service);
        }
-   }</code></pre>
+   }</code></pre>
+
 <p>服务端的onBind返回的binder对象，在经过writeStrongBinder传递到底层，再回到system_server进程，经过readStrongBinder获取代理对象。</p>
 <h3 id="7-2-AMS-publishServiceLocked"><a href="#7-2-AMS-publishServiceLocked" class="headerlink" title="7.2 AMS.publishServiceLocked"></a>7.2 AMS.publishServiceLocked</h3><p>[-&gt;ActiveServices.java]</p>
-<pre><code>void publishServiceLocked(ServiceRecord r, Intent intent, IBinder service) {
+
+<pre><code>
+void publishServiceLocked(ServiceRecord r, Intent intent, IBinder service) {
        final long origId = Binder.clearCallingIdentity();
        try {
            if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "PUBLISHING " + r
@@ -1667,10 +1786,13 @@ void Parcel::freeDataNoInit()
        } finally {
            Binder.restoreCallingIdentity(origId);
        }
-   }</code></pre>
+   }</code></pre>
+
 <p>c.conn是指客户端进程的IServiceConnection.Stub.Proxy代理对象，通过BinderIPC调用，进入客户端的IServiceConnection.Stub对象，回到客户端进程中的InnerConnection对象。</p>
 <h2 id="八、客户端进程"><a href="#八、客户端进程" class="headerlink" title="八、客户端进程"></a>八、客户端进程</h2><h3 id="8-1-InnerConnection-connected"><a href="#8-1-InnerConnection-connected" class="headerlink" title="8.1  InnerConnection.connected"></a>8.1  InnerConnection.connected</h3><p>[-&gt;LoadedApk.java]</p>
-<pre><code>private static class InnerConnection extends IServiceConnection.Stub {
+
+<pre><code>
+private static class InnerConnection extends IServiceConnection.Stub {
             @UnsupportedAppUsage
             final WeakReference&lt;LoadedApk.ServiceDispatcher&gt; mDispatcher;
 
@@ -1687,18 +1809,24 @@ void Parcel::freeDataNoInit()
                 }
             }
         }
-</code></pre>
+</code></pre>
+
 <h3 id="8-2-SD-connected"><a href="#8-2-SD-connected" class="headerlink" title="8.2  SD.connected"></a>8.2  SD.connected</h3><p>[-&gt;LoadedApk.java]</p>
-<pre><code>public void connected(ComponentName name, IBinder service, boolean dead) {
+
+<pre><code>
+public void connected(ComponentName name, IBinder service, boolean dead) {
           if (mActivityThread != null) {
               //这里是主线程的handler
               mActivityThread.post(new RunConnection(name, service, 0, dead));
           } else {
               doConnected(name, service, dead);
           }
-      }</code></pre>
+      }</code></pre>
+
 <h3 id="8-3-new-RunConnection"><a href="#8-3-new-RunConnection" class="headerlink" title="8.3  new RunConnection"></a>8.3  new RunConnection</h3><p>[-&gt;LoadedApk.java]</p>
-<pre><code>private final class RunConnection implements Runnable {
+
+<pre><code>
+private final class RunConnection implements Runnable {
           RunConnection(ComponentName name, IBinder service, int command, boolean dead) {
               mName = name;
               mService = service;
@@ -1719,9 +1847,12 @@ void Parcel::freeDataNoInit()
           final IBinder mService; //onBinder返回的代理对象
           final int mCommand;
           final boolean mDead;
-      }</code></pre>
+      }</code></pre>
+
 <h3 id="8-4-doConnected"><a href="#8-4-doConnected" class="headerlink" title="8.4 doConnected"></a>8.4 doConnected</h3><p>[-&gt;LoadedApk.java]</p>
-<pre><code>public void doConnected(ComponentName name, IBinder service, boolean dead) {
+
+<pre><code>
+public void doConnected(ComponentName name, IBinder service, boolean dead) {
            ServiceDispatcher.ConnectionInfo old;
            ServiceDispatcher.ConnectionInfo info;
 
@@ -1779,7 +1910,8 @@ void Parcel::freeDataNoInit()
                // The binding machinery worked, but the remote returned null from onBind().
                mConnection.onNullBinding(name);
            }
-       }</code></pre>
+       }</code></pre>
+
 <h2 id="九、总结"><a href="#九、总结" class="headerlink" title="九、总结"></a>九、总结</h2><h3 id="9-1-通信流程"><a href="#9-1-通信流程" class="headerlink" title="9.1 通信流程"></a>9.1 通信流程</h3><p>1.发起端线程向Binder驱动发起binder_ioctl请求后，waitForResponse进入while循环，不断进行talkWithDriver,此时该线程处理阻塞状态，直到收到BR_XX命令才会结束该过程。</p>
 <ul>
 <li>BR_TRANSACTION_COMPLETE: oneway模式下,收到该命令则退出；</li>
@@ -1790,11 +1922,11 @@ void Parcel::freeDataNoInit()
 </ul>
 <p>2.waitForResponse收到BR_TRANSACTION_COMPLETE，则直接退出循环，不会执行executeCommand方法，除上述五种BR_XXX命令，当收到其他BR命令，则会执行executeCommand方法。</p>
 <p>3.目标Binder线程创建之后，便进入joinThreadPool方法，不断循环执行getAndExecuteCommand方法，当bwr的读写buffer没有数据时，则阻塞在binder_thread_read的wait_event过程。正常情况下binder线程一旦创建就不会退出。</p>
-<p><img src="/2020/深入理解Binder机制4-bindService过程分析/bindservice_cm_frame.PNG" alt="bindservice_cm_frame" style="zoom:80%;"></p>
+<p><img src="https://img-blog.csdnimg.cn/5dd1300ea9394c76a04c63f760e542b2.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_14,color_FFFFFF,t_70,g_se,x_16" alt="bindservice_cm_frame" style="zoom:80%;"></p>
 <h3 id="9-2-通信协议"><a href="#9-2-通信协议" class="headerlink" title="9.2 通信协议"></a>9.2 通信协议</h3><p>1.Binder客户端和服务端向Binder驱动发送的命令都是以BC_开头，Binder驱动向服务端或客户端发送的命令都是以 BR _开头；</p>
 <p>2.只有当BC_TRANSACTION或BC_REPLY时，才会调用binder_transaction来处理事务，并且都会回应调用者BINDER_WORK_TRANSACTION_COMPLETE，经过binder_thread_read转变成BR_TRANSACTION_COMPLETE；</p>
 <p>3.bindServie是一个非oneway过程，oneway过程没有BC_REPLY。</p>
-<p><img src="/2020/深入理解Binder机制4-bindService过程分析/binderservice_cm_pro.png" alt="binderservice_cm_pro" style="zoom:75%;"></p>
+<p><img src="https://img-blog.csdnimg.cn/b0655680b5814257bf4b66f7d735daad.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_18,color_FFFFFF,t_70,g_se,x_16" alt="binderservice_cm_pro" style="zoom:75%;"></p>
 <h3 id="9-3-数据流"><a href="#9-3-数据流" class="headerlink" title="9.3 数据流"></a>9.3 数据流</h3><p><strong>用户空间</strong>（下面一些方法在<a href="https://skytoby.github.io/2020/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Binder%E6%9C%BA%E5%88%B62-%E6%B3%A8%E5%86%8C%E6%9C%8D%E5%8A%A1addService/" target="_blank" rel="noopener">addservice</a>篇中介绍）</p>
 <p>1.bindService：组装flat_binder_object等对象组成Parcel data;</p>
 <p>2.IPC.writeTransactionData：组装BC_TRANSACTION和binder_transaction_data结构体，写入mOut;</p>
@@ -1813,9 +1945,11 @@ void Parcel::freeDataNoInit()
 <p><strong>回到用户空间</strong></p>
 <p>7.IPC.executeCommand:处理BR_TRANSACIOTN命令，将binder_transaction_data数据解析成BBinder.transact所需的参数</p>
 <p>8.onTransact:层层回调，进入该方法，反序列化数据后，调用bindService方法。</p>
-<p><img src="/2020/深入理解Binder机制4-bindService过程分析/bindservice_data.png" alt="bindservice_data"></p>
+<p><img src="https://img-blog.csdnimg.cn/6917dbbe54534ee992954d58f17a5cdb.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_17,color_FFFFFF,t_70,g_se,x_16" alt="bindservice_data"></p>
 <h2 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h2><p>源码路径</p>
-<pre><code>frameworks/base/core/java/android/app/ContextImpl.java
+
+<pre><code>
+frameworks/base/core/java/android/app/ContextImpl.java
 frameworks/base/core/java/android/app/LoadedApk.java
 frameworks/base/core/java/android/app/ActivityManager.java
 frameworks/base/core/java/android/os/Binder.java
@@ -1831,5 +1965,6 @@ native/libs/binder/ProcessState.cpp
 native/libs/binder/Parcel.cpp
 native/libs/binder/IPCThreadState.cpp
 native/libs/binder/Binder.cpp
-</code></pre>
+</code></pre>
+
       
