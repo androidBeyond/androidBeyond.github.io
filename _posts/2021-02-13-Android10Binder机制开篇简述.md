@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      Android10 Binder机制原理简述
+title:      Android10 Binder机制开篇简述
 subtitle:   Binder作为Android系统提供的一种IPC机制，无论从事系统开发还是应用开发，都应该有所了解
 date:       2021-02-13
 author:     duguma
@@ -24,7 +24,7 @@ tags:
 
 <p>从进程角度来看IPC机制</p>
 
-<p><img src="/images/binder/prepare/binder_interprocess_communication.png" alt="binder_interprocess_communication" /></p>
+<p><img src="https://img-blog.csdnimg.cn/08dadd726d0d43139dc748a53756e7a0.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_16,color_FFFFFF,t_70,g_se,x_16" alt="binder_interprocess_communication" /></p>
 
 <p>每个Android的进程，只能运行在自己进程所拥有的虚拟地址空间。对应一个4GB的虚拟地址空间，其中3GB是用户空间，1GB是内核空间，当然内核空间的大小是可以通过参数配置调整的。对于用户空间，不同进程之间彼此是不能共享的，而内核空间却是可共享的。Client进程向Server进程通信，恰恰是利用进程间可共享的内核内存空间来完成底层通信工作的，Client端与Server端进程往往采用ioctl等方法跟内核空间的驱动进行交互。</p>
 
@@ -32,7 +32,7 @@ tags:
 
 <p>Binder通信采用C/S架构，从组件视角来说，包含Client、Server、ServiceManager以及binder驱动，其中ServiceManager用于管理系统中的各种服务。架构图如下所示：</p>
 
-<p><img src="/images/binder/prepare/IPC-Binder.jpg" alt="ServiceManager" /></p>
+<p><img src="https://img-blog.csdnimg.cn/51aa29ea36cf4d85aa0cdf6c894989d2.jpg?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_20,color_FFFFFF,t_70,g_se,x_16" alt="ServiceManager" /></p>
 
 <p>可以看出无论是注册服务和获取服务的过程都需要ServiceManager，需要注意的是此处的Service Manager是指Native层的ServiceManager（C++），并非指framework层的ServiceManager(Java)。ServiceManager是整个Binder通信机制的大管家，是Android进程间通信机制Binder的守护进程，要掌握Binder机制，首先需要了解系统是如何首次<a href="http://gityuan.com/2015/11/07/binder-start-sm/">启动Service Manager</a>。当Service Manager启动之后，Client端和Server端通信时都需要先<a href="http://gityuan.com/2015/11/08/binder-get-sm/">获取Service Manager</a>接口，才能开始通信服务。</p>
 
@@ -50,7 +50,7 @@ tags:
 
 <p>BpBinder(客户端)和BBinder(服务端)都是Android中Binder通信相关的代表，它们都从IBinder类中派生而来，关系图如下：</p>
 
-<p><img src="/images/binder/prepare/Ibinder_classes.jpg" alt="Binder关系图" /></p>
+<p><img src="https://img-blog.csdnimg.cn/a0a9cc94251e4fb0bdf68b38d9caf544.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_9,color_FFFFFF,t_70,g_se,x_16" alt="Binder关系图" /></p>
 
 <ul>
   <li>client端：BpBinder.transact()来发送事务请求；</li>
@@ -59,44 +59,22 @@ tags:
 
 <h2 id="三-提纲">三、 提纲</h2>
 
-<p>在后续的Binder源码分析过程中所涉及的源码，会有部分的精简，主要是去掉所有log输出语句，已减少代码篇幅过于长。通过前面的介绍，下面罗列一下关于Binder系列文章的提纲：</p>
-
-<ul>
-  <li><a href="http://gityuan.com/2015/11/01/binder-driver/">Binder系列1—Binder Driver初探</a></li>
-  <li><a href="http://gityuan.com/2015/11/02/binder-driver-2/">Binder系列2—Binder Driver再探</a></li>
-  <li><a href="http://gityuan.com/2015/11/07/binder-start-sm/">Binder系列3—启动Service Manager</a></li>
-  <li><a href="http://gityuan.com/2015/11/08/binder-get-sm/">Binder系列4—获取Service Manager</a></li>
-  <li><a href="http://gityuan.com/2015/11/14/binder-add-service/">Binder系列5—注册服务(addService)</a></li>
-  <li><a href="http://gityuan.com/2015/11/15/binder-get-service/">Binder系列6—获取服务(getService)</a></li>
-  <li><a href="http://gityuan.com/2015/11/21/binder-framework/">Binder系列7—framework层分析</a></li>
-  <li><a href="http://gityuan.com/2015/11/22/binder-use/">Binder系列8—如何使用Binder</a></li>
-  <li><a href="http://gityuan.com/2015/11/23/binder-aidl/">Binder系列9—如何使用AIDL</a></li>
-  <li><a href="http://gityuan.com/2015/11/28/binder-summary/">Binder系列10—总结</a></li>
-</ul>
-
-<p>文章是从底层驱动往上层写的，这并不适合大家的理解，建议读者还是从上层往底层看。下面说说这个系列文章之间的彼此联系，也是对你阅读顺序的一个建议，更好的建议，大家可以上微博跟<strong><a href="http://weibo.com/gityuan">@Gityuan</a></strong>，或许邮件跟我进行交流与反馈：</p>
-
-<p>首先阅读<a href="http://gityuan.com/2015/11/14/binder-add-service/">Binder系列5—注册服务(addService)</a>和<a href="http://gityuan.com/2015/11/15/binder-get-service/">Binder系列6—获取服务(getService)</a>，这两个过程都需要于ServiceManager打交道，那么这两个过程在开始之前都需要<a href="http://gityuan.com/2015/11/08/binder-get-sm/">Binder系列4—获取Service Manager</a>，既然要获取Service Manager，那么就需要先<a href="http://gityuan.com/2015/11/07/binder-start-sm/">Binder系列3—启动Service Manager</a>。在看Binder服务的注册和获取这两个过程中，不断追溯下去，最终调用到底层Binder底层驱动，这时需要了解<a href="http://gityuan.com/2015/11/01/binder-driver/">Binder系列1—Binder Driver初探</a>和<a href="http://gityuan.com/2015/11/02/binder-driver-2/">Binder系列2—Binder Driver再探</a>。</p>
-
-<p>看完Binder系列1~系列6，那么对Binder的整个流程会有一个比较清晰的认知，这还只是停留在Native层(C/C++)。接下来，可以看看上层<a href="http://gityuan.com/2015/11/21/binder-framework/">Binder系列7—framework层分析</a>的Binder架构情况，Java层 Binder架构的核心逻辑都是交由Native架构来完成，更多的是对Binder的一个封装过程，只有真正理解了Native层Binder架构，才能算掌握的Binder。</p>
-
-<p>前面的这些都是讲述Binder整个流程以及原理，再接下来你可能想要自己写一套Binder的C/S架构服务。如果你是<strong>系统工程师</strong>可能会比较关心Native层和framework层分别该如何实现自己的自定义的Binder通信服务，见<a href="http://gityuan.com/2015/11/22/binder-use/">Binder系列8—如何使用Binder</a>；如果你是<strong>应用开发工程师</strong>则应该更关心App是如何使用Binder的，那么可以查看文章<a href="http://gityuan.com/2015/11/23/binder-aidl/">Binder系列9—如何使用AIDL</a>。</p>
-
-<p>最后是对Binder的一个简单总结<a href="http://gityuan.com/2015/11/28/binder-summary/">Binder系列10—总结</a>。</p>
+<p>在后续的Binder源码分析过程中所涉及的源码，会有部分的精简，主要是去掉所有log输出语句，已减少代码篇幅过于长</p>
 
 <h2 id="四-源码目录">四. 源码目录</h2>
 <p>从上之下, 整个Binder架构所涉及的总共有以下5个目录:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/framework/base/core/java/               (Java)
+<pre><code>
+/framework/base/core/java/               (Java)
 /framework/base/core/jni/                (JNI)
 /framework/native/libs/binder            (Native)
 /framework/native/cmds/servicemanager/   (Native)
 /kernel/drivers/staging/android          (Driver)
-</code></pre></div></div>
+</code></pre>
 
 <h4 id="41-java-framework">4.1 Java framework</h4>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/framework/base/core/java/android/os/  
+<pre><code>/framework/base/core/java/android/os/  
     - IInterface.java
     - IBinder.java
     - Parcel.java
@@ -110,11 +88,12 @@ tags:
     - android_os_Parcel.cpp
     - AndroidRuntime.cpp
     - android_util_Binder.cpp (核心类)
-</code></pre></div></div>
+</code></pre>
 
 <h4 id="42-native-framework">4.2 Native framework</h4>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/framework/native/libs/binder         
+<pre><code>
+/framework/native/libs/binder         
     - IServiceManager.cpp
     - BpBinder.cpp
     - Binder.cpp
@@ -128,11 +107,11 @@ tags:
 /framework/native/cmds/servicemanager/
     - service_manager.c
     - binder.c
-</code></pre></div></div>
+</code></pre>
 
 <h4 id="43-kernel">4.3 Kernel</h4>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/kernel/drivers/staging/android/
+<pre><code>/kernel/drivers/android/
     - binder.c
     - uapi/binder.h
-</code></pre></div></div>
+</code></pre>
