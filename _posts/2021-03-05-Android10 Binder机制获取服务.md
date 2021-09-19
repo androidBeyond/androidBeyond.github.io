@@ -15,13 +15,15 @@ tags:
 ---
 
 <h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2><p>本文将介绍系统服务获取的具体流程，如获取ActivityManagerService时，通过ServiceManager中的getService静态方法获取具体的服务，这个流程经历Java层，Native层，Kernel层，其通信流程如下：</p>
-<p><img src="/2020/深入理解Binder机制3-获取服务getService/bind_getService.PNG" alt="bind_getService"></p>
+<p><img src="https://img-blog.csdnimg.cn/5dd1300ea9394c76a04c63f760e542b2.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_14,color_FFFFFF,t_70,g_se,x_16" alt="bind_getService"></p>
 <p>1.发起端进程向Binder Driver发送binder_ioct请求后，采用不断的循环talkWithDriver，此时线程处于阻塞状态，直到收到BR_RPLEY命令才会结束该流程；</p>
 <p>2.waitForResponse收到BR_RPLEY命令后，则直接退出循环，不会再执行executeCommand方法，除六种其他命令外(BR_REPLY、BR_TRANSACTION_COMPLETE、BR_DEAD_REPLY、BR_FAILED_REPLY、BR_ACQUIRE_RESULT<br>、BR_REPLY)会执行executeCommand方法；</p>
 <p>3.由于ServiceManager进程已经启动，并且有binder_loop一直在循环查询命令，当收到BR_TRANSACTION命令后，就开始处理findService过程。</p>
 <p>4.找到服务之后，通过binder驱动再传回到发起端进程，waitForResponse处理驱动发过来的BR_RPLEY，将服务的代理类返回给发起端进程。</p>
 <h2 id="二、获取服务进程"><a href="#二、获取服务进程" class="headerlink" title="二、获取服务进程"></a>二、获取服务进程</h2><h3 id="2-1-SM-getService"><a href="#2-1-SM-getService" class="headerlink" title="2.1 SM.getService"></a>2.1 SM.getService</h3><p>[-&gt;ServiceManager.java]</p>
-<pre><code>public static IBinder getService(String name) {
+
+<pre><code>
+public static IBinder getService(String name) {
       try {
           IBinder service = sCache.get(name);
           if (service != null) {
@@ -35,7 +37,9 @@ tags:
       return null;
   }</code></pre>
 <h4 id="2-1-1-rawGetService"><a href="#2-1-1-rawGetService" class="headerlink" title="2.1.1 rawGetService"></a>2.1.1 rawGetService</h4><p>[-&gt;ServiceManager.java]</p>
-<pre><code>private static IBinder rawGetService(String name) throws RemoteException {
+
+<pre><code>
+private static IBinder rawGetService(String name) throws RemoteException {
        final long start = sStatLogger.getTime();
 
        final IBinder binder = getIServiceManager().getService(name);
@@ -93,7 +97,9 @@ tags:
 </code></pre>
 <p>由前面<a href="https://skytoby.github.io/2020/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Binder%E6%9C%BA%E5%88%B62-%E6%B3%A8%E5%86%8C%E6%9C%8D%E5%8A%A1addService/" target="_blank" rel="noopener">ServiceManager注册服务</a>中3.3.1节可知getIServiceManager()相当于ServiceManagerProxy</p>
 <h4 id="2-1-2-allowBlocking"><a href="#2-1-2-allowBlocking" class="headerlink" title="2.1.2 allowBlocking"></a>2.1.2 allowBlocking</h4><p>[-&gt;Binder.java]</p>
-<pre><code>public static IBinder allowBlocking(IBinder binder) {
+
+<pre><code>
+public static IBinder allowBlocking(IBinder binder) {
        try {
            if (binder instanceof BinderProxy) {
                ((BinderProxy) binder).mWarnOnBlocking = false;
@@ -107,7 +113,9 @@ tags:
    }</code></pre>
 <p>这个方法用来判断IBinder类，根据不同情况添加标志。</p>
 <h3 id="2-2-SMP-getService"><a href="#2-2-SMP-getService" class="headerlink" title="2.2 SMP.getService"></a>2.2 SMP.getService</h3><p>[-&gt;ServiceManagerNative::ServiceManagerProxy]</p>
-<pre><code>public IBinder getService(String name) throws RemoteException {
+
+<pre><code>
+public IBinder getService(String name) throws RemoteException {
        Parcel data = Parcel.obtain();
        Parcel reply = Parcel.obtain();
        data.writeInterfaceToken(IServiceManager.descriptor);
@@ -122,7 +130,9 @@ tags:
 <p>由前面<a href="https://skytoby.github.io/2020/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Binder%E6%9C%BA%E5%88%B62-%E6%B3%A8%E5%86%8C%E6%9C%8D%E5%8A%A1addService/" target="_blank" rel="noopener">ServiceManager注册服务</a>中3.3.1节</p>
 <p>mRemote为BinderProxy对象，该对象对应于BpBinder(0)，作为binder代理类，执行native层ServiceManager</p>
 <h3 id="2-3-BP-transact"><a href="#2-3-BP-transact" class="headerlink" title="2.3 BP.transact"></a>2.3 BP.transact</h3><p>[-&gt;BinderProxy.java]</p>
-<pre><code>public boolean transact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
+
+<pre><code>
+public boolean transact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
        Binder.checkParcel(this, code, data, "Unreasonably large binder buffer");
 
        if (mWarnOnBlocking && ((flags & FLAG_ONEWAY) == 0)) {
@@ -152,7 +162,9 @@ tags:
    }
 </code></pre>
 <h3 id="2-4-android-os-BinderProxy-transact"><a href="#2-4-android-os-BinderProxy-transact" class="headerlink" title="2.4  android_os_BinderProxy_transact"></a>2.4  android_os_BinderProxy_transact</h3><p>[-&gt;android_util_Binder.cpp]</p>
-<pre><code>static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
+
+<pre><code>
+static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
         jint code, jobject dataObj, jobject replyObj, jint flags) // throws RemoteException
 {
     if (dataObj == NULL) {
@@ -214,7 +226,9 @@ tags:
     return JNI_FALSE;
 }</code></pre>
 <h3 id="2-5-BpBinder-transact"><a href="#2-5-BpBinder-transact" class="headerlink" title="2.5 BpBinder::transact"></a>2.5 BpBinder::transact</h3><p>[-&gt;BpBinder.cpp]</p>
-<pre><code>status_t BpBinder::transact(
+
+<pre><code>
+status_t BpBinder::transact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
     // Once a binder has died, it will never come back to life.
@@ -229,7 +243,9 @@ tags:
     return DEAD_OBJECT;
 }</code></pre>
 <h4 id="2-5-1-BpBinder-transact"><a href="#2-5-1-BpBinder-transact" class="headerlink" title="2.5.1 BpBinder::transact"></a>2.5.1 BpBinder::transact</h4><p>[-&gt;IPCThreadState.cpp]</p>
-<pre><code>IPCThreadState* IPCThreadState::self()
+
+<pre><code>
+IPCThreadState* IPCThreadState::self()
 {
     if (gHaveTLS) {
 restart:
@@ -264,7 +280,9 @@ restart:
 <p>TLS(Thread local storage),线程本地存储空间，每个线程都有自己私有的TLS,线程之间不能共享。</p>
 <p>pthread_setspecific/pthread_getspecific可以设置和获取这些空间中的内容。</p>
 <h4 id="2-5-2-new-IPCThreadState"><a href="#2-5-2-new-IPCThreadState" class="headerlink" title="2.5.2 new IPCThreadState"></a>2.5.2 new IPCThreadState</h4><p>[-&gt;IPCThreadState.cpp]</p>
-<pre><code>IPCThreadState::IPCThreadState()
+
+<pre><code>
+IPCThreadState::IPCThreadState()
     : mProcess(ProcessState::self()),
       mStrictModePolicy(0),
       mLastTransactionBinderFlags(0)
@@ -279,7 +297,9 @@ restart:
 <p>mInt用来接收来自Binder设备的数据，默认大小事256</p>
 <p>mOut用来存储发往Binder设备的数据，默认大小事256</p>
 <h3 id="2-6-IPC-transact"><a href="#2-6-IPC-transact" class="headerlink" title="2.6 IPC::transact"></a>2.6 IPC::transact</h3><p>[-&gt;IPCThreadState.cpp]</p>
-<pre><code>status_t IPCThreadState::transact(int32_t handle,
+
+<pre><code>
+status_t IPCThreadState::transact(int32_t handle,
                                   uint32_t code, const Parcel& data,
                                   Parcel* reply, uint32_t flags)
 {
@@ -349,7 +369,9 @@ restart:
 <li>waitForResponse等待响应</li>
 </ul>
 <h3 id="2-7-IPC-writeTransactionData"><a href="#2-7-IPC-writeTransactionData" class="headerlink" title="2.7  IPC::writeTransactionData"></a>2.7  IPC::writeTransactionData</h3><p>[-&gt;IPCThreadState.cpp]</p>
-<pre><code>status_t IPCThreadState::writeTransactionData(int32_t cmd, uint32_t binderFlags,
+
+<pre><code>
+status_t IPCThreadState::writeTransactionData(int32_t cmd, uint32_t binderFlags,
     int32_t handle, uint32_t code, const Parcel& data, status_t* statusBuffer)
 {
     binder_transaction_data tr;
@@ -396,7 +418,9 @@ restart:
 <li>data.ptr.offsets，记录flat_binder_object结构体的数据偏移量</li>
 </ul>
 <h3 id="2-8-IPC-waitForResponse"><a href="#2-8-IPC-waitForResponse" class="headerlink" title="2.8 IPC::waitForResponse"></a>2.8 IPC::waitForResponse</h3><p>[-&gt;IPCThreadState.cpp]</p>
-<pre><code>status_t IPCThreadState::waitForResponse(Parcel *reply, status_t *acquireResult)
+
+<pre><code>
+status_t IPCThreadState::waitForResponse(Parcel *reply, status_t *acquireResult)
 {
     uint32_t cmd;
     int32_t err;
@@ -489,7 +513,9 @@ finish:
 }</code></pre>
 <p>talkWithDriver过程是和binder驱动通信过程，Binder驱动收到BC_TRANSACTION后，会回应BR_TRANSACTION_COMPLETE,然后等待目标进程的BR_REPLY.</p>
 <h3 id="2-9-IPC-talkWithDriver"><a href="#2-9-IPC-talkWithDriver" class="headerlink" title="2.9 IPC::talkWithDriver"></a>2.9 IPC::talkWithDriver</h3><p>[-&gt;IPCThreadState.cpp]</p>
-<pre><code>status_t IPCThreadState::talkWithDriver(bool doReceive)
+
+<pre><code>
+status_t IPCThreadState::talkWithDriver(bool doReceive)
 {
     if (mProcess-&gt;mDriverFD &lt;= 0) {
         return -EBADF;
@@ -604,7 +630,9 @@ finish:
 <p>进入到Binder Driver在前面ServiceManager注册服务中第四章有详细的描述，这里直接到ServiceManager进程、</p>
 <h2 id="三、ServiceManager进程"><a href="#三、ServiceManager进程" class="headerlink" title="三、ServiceManager进程"></a>三、ServiceManager进程</h2><p>从在前面<a href="https://skytoby.github.io/2020/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Binder%E6%9C%BA%E5%88%B62-%E6%B3%A8%E5%86%8C%E6%9C%8D%E5%8A%A1addService/" target="_blank" rel="noopener">ServiceManager注册服务</a>中第二章可以看到servicemanager启动后，循环再binder_loop过程，会调用binder_parse方法</p>
 <h3 id="3-1-binder-parse"><a href="#3-1-binder-parse" class="headerlink" title="3.1 binder_parse"></a>3.1 binder_parse</h3><p>[-&gt;servicemanager/binder.c]</p>
-<pre><code>int binder_parse(struct binder_state *bs, struct binder_io *bio,
+
+<pre><code>
+int binder_parse(struct binder_state *bs, struct binder_io *bio,
                  uintptr_t ptr, size_t size, binder_handler func)
 {
     int r = 1;
@@ -655,7 +683,9 @@ finish:
     return r;
 }</code></pre>
 <h3 id="3-2-svcmgr-handler"><a href="#3-2-svcmgr-handler" class="headerlink" title="3.2 svcmgr_handler"></a>3.2 svcmgr_handler</h3><p>[-&gt;service_manager.c]</p>
-<pre><code>int svcmgr_handler(struct binder_state *bs,
+
+<pre><code>
+int svcmgr_handler(struct binder_state *bs,
                    struct binder_transaction_data *txn,
                    struct binder_io *msg,
                    struct binder_io *reply)
@@ -724,7 +754,9 @@ finish:
     return 0;
 }</code></pre>
 <h3 id="3-3-do-find-service"><a href="#3-3-do-find-service" class="headerlink" title="3.3 do_find_service"></a>3.3 do_find_service</h3><p>[-&gt;service_manager.c]</p>
-<pre><code>uint32_t do_find_service(const uint16_t *s, size_t len, uid_t uid, pid_t spid)
+
+<pre><code>
+uint32_t do_find_service(const uint16_t *s, size_t len, uid_t uid, pid_t spid)
 {
     //查找列表
     struct svcinfo *si = find_svc(s, len);
@@ -750,7 +782,9 @@ finish:
 }</code></pre>
 <p>这里返回已经注册的服务。</p>
 <h3 id="3-4-binder-send-reply"><a href="#3-4-binder-send-reply" class="headerlink" title="3.4 binder_send_reply"></a>3.4 binder_send_reply</h3><p>[-&gt;servicemanager/binder.c]</p>
-<pre><code>void binder_send_reply(struct binder_state *bs,
+
+<pre><code>
+void binder_send_reply(struct binder_state *bs,
                        struct binder_io *reply,
                        binder_uintptr_t buffer_to_free,
                        int status)
@@ -788,7 +822,9 @@ finish:
 <p>将BC_FREE_BUFFER和BC_REPLY发送给binder驱动，向client发送reply。</p>
 <h2 id="四、获取服务进程"><a href="#四、获取服务进程" class="headerlink" title="四、获取服务进程"></a>四、获取服务进程</h2><p>上面2.2节中transact之后，执行reply的readStrongBinder操作。</p>
 <h3 id="4-1-readStrongBinder"><a href="#4-1-readStrongBinder" class="headerlink" title="4.1 readStrongBinder"></a>4.1 readStrongBinder</h3><p>[-&gt;Parcel.java]</p>
-<pre><code>/**
+
+<pre><code>
+/**
  * Read an object from the parcel at the current dataPosition().
  */
 public final IBinder readStrongBinder() {
@@ -796,7 +832,9 @@ public final IBinder readStrongBinder() {
     return nativeReadStrongBinder(mNativePtr);
 }</code></pre>
 <h3 id="4-2-android-os-Parcel-readStrongBinder"><a href="#4-2-android-os-Parcel-readStrongBinder" class="headerlink" title="4.2 android_os_Parcel_readStrongBinder"></a>4.2 android_os_Parcel_readStrongBinder</h3><p>[-&gt;android_os_Parcel.cpp]</p>
-<pre><code>static jobject android_os_Parcel_readStrongBinder(JNIEnv* env, jclass clazz, jlong nativePtr)
+
+<pre><code>
+static jobject android_os_Parcel_readStrongBinder(JNIEnv* env, jclass clazz, jlong nativePtr)
 {
     Parcel* parcel = reinterpret_cast&lt;Parcel*&gt;(nativePtr);
     if (parcel != NULL) {
@@ -806,12 +844,16 @@ public final IBinder readStrongBinder() {
     return NULL;
 }</code></pre>
 <h3 id="4-3-readStrongBinder-Java"><a href="#4-3-readStrongBinder-Java" class="headerlink" title="4.3 readStrongBinder(Java)"></a>4.3 readStrongBinder(Java)</h3><p>[-&gt;Parcel.java]</p>
-<pre><code>public final IBinder readStrongBinder() {
+
+<pre><code>
+public final IBinder readStrongBinder() {
      return nativeReadStrongBinder(mNativePtr);
  }
  </code></pre>
 <p>[-&gt;android_os_Parcel.cpp]</p>
-<pre><code>static jobject android_os_Parcel_readStrongBinder(JNIEnv* env, jclass clazz, jlong nativePtr)
+
+<pre><code>
+static jobject android_os_Parcel_readStrongBinder(JNIEnv* env, jclass clazz, jlong nativePtr)
 {
     //指向Parcel内存
     Parcel* parcel = reinterpret_cast&lt;Parcel*&gt;(nativePtr);
@@ -821,7 +863,9 @@ public final IBinder readStrongBinder() {
     return NULL;
 }</code></pre>
 <h3 id="4-4-readStrongBinder-C"><a href="#4-4-readStrongBinder-C" class="headerlink" title="4.4 readStrongBinder(C++)"></a>4.4 readStrongBinder(C++)</h3><p>[-&gt;Parcel.cpp]</p>
-<pre><code>sp&lt;IBinder&gt; Parcel::readStrongBinder() const
+
+<pre><code>
+sp&lt;IBinder&gt; Parcel::readStrongBinder() const
 {
     sp&lt;IBinder&gt; val; //sp为智能指针，strong point
     // Note that a lot of code in Android reads binders by hand with this
@@ -837,7 +881,9 @@ status_t Parcel::readNullableStrongBinder(sp&lt;IBinder&gt;* val) const
     return unflatten_binder(ProcessState::self(), *this, val);
 }</code></pre>
 <h4 id="4-4-1-unflatten-binder"><a href="#4-4-1-unflatten-binder" class="headerlink" title="4.4.1 unflatten_binder"></a>4.4.1 unflatten_binder</h4><p>[-&gt;Parcel.cpp]</p>
-<pre><code>status_t unflatten_binder(const sp&lt;ProcessState&gt;& proc,
+
+<pre><code>
+status_t unflatten_binder(const sp&lt;ProcessState&gt;& proc,
     const Parcel& in, sp&lt;IBinder&gt;* out)
 {
     const flat_binder_object* flat = in.readObject&lt;flat_binder_object&gt;();
@@ -858,7 +904,9 @@ status_t Parcel::readNullableStrongBinder(sp&lt;IBinder&gt;* val) const
     return BAD_TYPE;
 }</code></pre>
 <h4 id="4-4-2-getStrongProxyForHandle"><a href="#4-4-2-getStrongProxyForHandle" class="headerlink" title="4.4.2 getStrongProxyForHandle"></a>4.4.2 getStrongProxyForHandle</h4><p>[-&gt;ProcessState.cpp]</p>
-<pre><code>sp&lt;IBinder&gt; ProcessState::getStrongProxyForHandle(int32_t handle)
+
+<pre><code>
+sp&lt;IBinder&gt; ProcessState::getStrongProxyForHandle(int32_t handle)
 {
     sp&lt;IBinder&gt; result;
 
@@ -890,7 +938,9 @@ status_t Parcel::readNullableStrongBinder(sp&lt;IBinder&gt;* val) const
 }</code></pre>
 <p>返回BpHwBinder代理对象。</p>
 <h4 id="4-4-3-lookupHandleLocked"><a href="#4-4-3-lookupHandleLocked" class="headerlink" title="4.4.3 lookupHandleLocked"></a>4.4.3 lookupHandleLocked</h4><p>[-&gt;ProcessState.cpp]</p>
-<pre><code>ProcessState::handle_entry* ProcessState::lookupHandleLocked(int32_t handle)
+
+<pre><code>
+ProcessState::handle_entry* ProcessState::lookupHandleLocked(int32_t handle)
 {
     const size_t N=mHandleToObject.size();
      //当handle值大于mHandleToObject时才进入
@@ -905,14 +955,18 @@ status_t Parcel::readNullableStrongBinder(sp&lt;IBinder&gt;* val) const
     return &mHandleToObject.editItemAt(handle);
 }</code></pre>
 <h4 id="4-4-4-finish-unflatten-binder"><a href="#4-4-4-finish-unflatten-binder" class="headerlink" title="4.4.4 finish_unflatten_binder"></a>4.4.4 finish_unflatten_binder</h4><p>[-&gt;Parcel.cpp]</p>
-<pre><code>inline static status_t finish_unflatten_binder(
+
+<pre><code>
+inline static status_t finish_unflatten_binder(
     BpHwBinder* /*proxy*/, const flat_binder_object& /*flat*/,
     const Parcel& /*in*/)
 {
     return NO_ERROR;
 }</code></pre>
 <h3 id="4-5-javaObjectForIBinder"><a href="#4-5-javaObjectForIBinder" class="headerlink" title="4.5  javaObjectForIBinder"></a>4.5  javaObjectForIBinder</h3><p>[-&gt;android_util_Binder.cpp]</p>
-<pre><code>jobject javaObjectForIBinder(JNIEnv* env, const sp&lt;IBinder&gt;& val)
+
+<pre><code>
+jobject javaObjectForIBinder(JNIEnv* env, const sp&lt;IBinder&gt;& val)
 {
     if (val == NULL) return NULL;
     //如果是JavaBBinder则直接返回
@@ -959,7 +1013,9 @@ status_t Parcel::readNullableStrongBinder(sp&lt;IBinder&gt;* val) const
     return object;
 }</code></pre>
 <p>gBinderProxyOffsets作为全局变量，其初始化在int_register_android_os_BinderProxy方法中。</p>
-<pre><code>static int int_register_android_os_BinderProxy(JNIEnv* env)
+
+<pre><code>
+static int int_register_android_os_BinderProxy(JNIEnv* env)
 {
     jclass clazz = FindClassOrDie(env, "java/lang/Error");
     gErrorOffsets.mClass = MakeGlobalRefOrDie(env, clazz);
@@ -982,7 +1038,9 @@ status_t Parcel::readNullableStrongBinder(sp&lt;IBinder&gt;* val) const
 }</code></pre>
 <p>env-&gt;CallStaticObjectMethod，jni调用BinderProxy中的getInstance方法。</p>
 <h3 id="4-6-getInstance"><a href="#4-6-getInstance" class="headerlink" title="4.6 getInstance"></a>4.6 getInstance</h3><p>[-&gt;BinderProxy.java]</p>
-<pre><code>private static BinderProxy getInstance(long nativeData, long iBinder) {
+
+<pre><code>
+private static BinderProxy getInstance(long nativeData, long iBinder) {
        BinderProxy result;
        synchronized (sProxyMap) {
            try {
@@ -1006,7 +1064,9 @@ status_t Parcel::readNullableStrongBinder(sp&lt;IBinder&gt;* val) const
    }</code></pre>
 <p>由上面分析， <strong>reply.readStrongBinder();等价于new BinderProxy</strong>即SMP.getService等价于new BinderProxy</p>
 <h2 id="五、总结"><a href="#五、总结" class="headerlink" title="五、总结"></a>五、总结</h2><p><strong>getService的核心过程</strong></p>
-<pre><code>public IBinder getService(String name) throws RemoteException {
+
+<pre><code>
+public IBinder getService(String name) throws RemoteException {
        //这里需要将Java层的Parcel转换成Native层的Parcel
        Parcel data = Parcel.obtain();
        Parcel reply = Parcel.obtain();
@@ -1022,7 +1082,9 @@ status_t Parcel::readNullableStrongBinder(sp&lt;IBinder&gt;* val) const
    }</code></pre>
 <p>获取服务通过BpBinder发送GET_SERVICE_TRANSACTION命令和Binder驱动层进行数据交互，javaObjectForIBinder的作用是创建 BinderProxy对象，并将BpHwBinder对象的地址保存到BinderProxy的mObjects中,最后返回代理对象。</p>
 <h2 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h2><p>源码路径</p>
-<pre><code>frameworks/base/core/java/android/os/ServiceManager.java
+
+<pre><code>
+frameworks/base/core/java/android/os/ServiceManager.java
 frameworks/base/core/java/android/os/ServiceManagerNative.java
 frameworks/base/core/java/android/os/Parcel.java
 frameworks/base/core/java/android/os/BinderProxy.java
