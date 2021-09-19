@@ -62,7 +62,7 @@ tags:
 
 <h2 id="二初始化">二、初始化</h2>
 
-<p>在Android系统开机过程中，Zygote启动时会有一个<a href="http://gityuan.com/2016/02/13/android-zygote/#jnistartreg">虚拟机注册过程</a>，该过程调用AndroidRuntime::<code class="language-plaintext highlighter-rouge">startReg</code>方法来完成jni方法的注册。</p>
+<p>在Android系统开机过程中，Zygote启动时会有一个虚拟机注册过程，该过程调用AndroidRuntime::<code class="language-plaintext highlighter-rouge">startReg</code>方法来完成jni方法的注册。</p>
 
 <h3 id="21-startreg">2.1 startReg</h3>
 
@@ -308,7 +308,7 @@ tags:
 
 <p>BinderInternal.java中有一个native方法getContextObject()，JNI调用执行上述方法。</p>
 
-<p>对于ProcessState::self()-&gt;getContextObject()，在<a href="http://gityuan.com/2015/11/08/binder-get-sm/">获取ServiceManager</a>的第3节已详细解决，即<code class="language-plaintext highlighter-rouge">ProcessState::self()-&gt;getContextObject()</code>等价于 <code class="language-plaintext highlighter-rouge">new BpBinder(0)</code>;</p>
+<p>对于ProcessState::self()-&gt;getContextObject()，在之前章节有过详细的分析，即<code class="language-plaintext highlighter-rouge">ProcessState::self()-&gt;getContextObject()</code>等价于 <code class="language-plaintext highlighter-rouge">new BpBinder(0)</code>;</p>
 
 <h4 id="322-javaobjectforibinder">3.2.2 javaObjectForIBinder</h4>
 <p>[-&gt; android_util_binder.cpp]</p>
@@ -611,7 +611,7 @@ BBinder* IBinder::localBinder()
 }
 </code></pre>
 
-<p>Java层的BinderProxy.transact()最终交由Native层的BpBinder::transact()完成。Native Binder的<a href="http://gityuan.com/2015/11/14/binder-add-service/">注册服务(addService)</a>中有详细说明BpBinder执行过程。另外，该方法可抛出RemoteException。</p>
+<p>Java层的BinderProxy.transact()最终交由Native层的BpBinder::transact()完成。另外，该方法可抛出RemoteException。</p>
 
 <h3 id="39-小结">3.9 小结</h3>
 
@@ -649,7 +649,7 @@ BBinder* IBinder::localBinder()
 }
 </code></pre>
 
-<p>关于getIServiceManager()，在前面<a href="http://gityuan.com/2015/11/21/binder-framework/#getiservicemanager">小节3.2</a>已经讲述了，等价于new ServiceManagerProxy(new BinderProxy())。
+<p>关于getIServiceManager()等价于new ServiceManagerProxy(new BinderProxy())。
 其中sCache = new HashMap&lt;String, IBinder&gt;()以hashmap格式缓存已组成的名称。请求获取服务过程中，先从缓存中查询是否存在，如果缓存中不存在的话，再通过binder交互来查询相应的服务。</p>
 
 <h3 id="42-smpgetservice">4.2 SMP.getService</h3>
@@ -794,7 +794,7 @@ BBinder* IBinder::localBinder()
 }
 </code></pre>
 
-<p>那么这个reply是哪来的呢，在文章<a href="http://gityuan.com/2015/11/07/binder-start-sm/">Binder系列3—启动ServiceManager</a></p>
+<p>那么这个reply是哪来的呢，在之前的系列文章有分析过，在此不再赘述</p>
 
 <h4 id="471-binder_send_reply">4.7.1 binder_send_reply</h4>
 <p>[-&gt; servicemanager/binder.c]</p>
