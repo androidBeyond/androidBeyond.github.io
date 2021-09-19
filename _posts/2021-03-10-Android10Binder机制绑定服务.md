@@ -1922,7 +1922,7 @@ public void doConnected(ComponentName name, IBinder service, boolean dead) {
 <p><strong>回到用户空间</strong></p>
 <p>7.IPC.executeCommand:处理BR_TRANSACIOTN命令，将binder_transaction_data数据解析成BBinder.transact所需的参数</p>
 <p>8.onTransact:层层回调，进入该方法，反序列化数据后，调用bindService方法。</p>
-<p><img src="https://img-blog.csdnimg.cn/6917dbbe54534ee992954d58f17a5cdb.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_17,color_FFFFFF,t_70,g_se,x_16" alt="bindservice_data"></p>
+<p><img src="https://img-blog.csdnimg.cn/803f08a8a0bb46c6a6638427d4606952.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_17,color_FFFFFF,t_70,g_se,x_16" alt="bindservice_data"></p>
 <h2 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h2><p>源码路径</p>
 
 <pre><code>
