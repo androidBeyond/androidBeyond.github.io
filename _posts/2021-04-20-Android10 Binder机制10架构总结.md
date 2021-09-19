@@ -1,7 +1,7 @@
 ---
 layout:     post
 title:      Android10 Binder机制10-架构总结
-subtitle:   本文从Java framework到Native，再到Linux Kernel，全面分析Binder通信架构.
+subtitle:   本文对Binder机制进行一个最终总结，从不懂角度阐述一下Binder机制
 date:       2021-04-20
 author:     duguma
 header-img: img/article-bg.jpg
