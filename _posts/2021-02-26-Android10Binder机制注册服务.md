@@ -16,7 +16,9 @@ tags:
  
  <h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2><p>本文将分析系统服务的注册流程，如注册ActivityManagerService时，通过ServiceManager中的静态方法addService注册具体的服务。ServiceManger是Binder IPC通信过程中的守护进程，是一个具体的服务，其功能主要是查询和注册服务。</p>
 <h2 id="二、ServiceManager启动"><a href="#二、ServiceManager启动" class="headerlink" title="二、ServiceManager启动"></a>二、ServiceManager启动</h2><p>ServiceManager是由init进程通过servicemanager.rc文件而创建，其所在的可执行文件在system/bin/servicemanager，对应的源文件是service_manager.c。</p>
-<pre><code>service servicemanager /system/bin/servicemanager
+
+<pre><code>
+service servicemanager /system/bin/servicemanager
     class core animation
     user system
     group system readproc
@@ -33,10 +35,13 @@ tags:
     onrestart restart gatekeeperd
     writepid /dev/cpuset/system-background/tasks
     shutdown critical
-</code></pre>
+</code></pre>
+
 <p>启动ServiceManager的入口时文件中的main方法.</p>
 <h3 id="2-1-mian"><a href="#2-1-mian" class="headerlink" title="2.1 mian"></a>2.1 mian</h3><p>[-&gt;service_manager.c]</p>
-<pre><code>int main(int argc, char** argv)
+
+<pre><code>
+int main(int argc, char** argv)
 {
     struct binder_state *bs;
     union selinux_callback cb;
@@ -92,9 +97,12 @@ tags:
     binder_loop(bs, svcmgr_handler);
 
     return 0;
-}</code></pre>
+}</code></pre>
+
 <h3 id="2-2-binder-open"><a href="#2-2-binder-open" class="headerlink" title="2.2 binder_open"></a>2.2 binder_open</h3><p>[-&gt;servicemanager/binder.c]</p>
-<pre><code>struct binder_state *binder_open(const char* driver, size_t mapsize)
+
+<pre><code>
+struct binder_state *binder_open(const char* driver, size_t mapsize)
 {
     struct binder_state *bs;
     struct binder_version vers;
@@ -136,7 +144,8 @@ fail_map:
 fail_open:
     free(bs);
     return NULL;
-}</code></pre>
+}</code></pre>
+
 <ul>
 <li><p>调用open打开binder驱动设备，open方法经过系统调用，进入binder驱动，然后调用binder_open方法，该方法会在binder驱动层创建一个binder_proc对象，再将binder_proc对象赋值给fd-&gt;private_data，同时放入全局链表binder_procs。</p>
 </li>
@@ -146,13 +155,18 @@ fail_open:
 </li>
 </ul>
 <h3 id="2-3-binder-become-context-manager"><a href="#2-3-binder-become-context-manager" class="headerlink" title="2.3 binder_become_context_manager"></a>2.3 binder_become_context_manager</h3><p>[-&gt;servicemanager/binder.c]</p>
-<pre><code>int binder_become_context_manager(struct binder_state *bs)
+
+<pre><code>
+int binder_become_context_manager(struct binder_state *bs)
 {
     return ioctl(bs-&gt;fd, BINDER_SET_CONTEXT_MGR, 0);
-}</code></pre>
+}</code></pre>
+
 <p>成为上下文管理者，整个系统只有一个这样的管理者，经过系统调用binder驱动层的binder_ioctl方法。</p>
 <h3 id="2-4-binder-loop"><a href="#2-4-binder-loop" class="headerlink" title="2.4 binder_loop"></a>2.4 binder_loop</h3><p>[-&gt;servicemanager/binder.c]</p>
-<pre><code>void binder_loop(struct binder_state *bs, binder_handler func)
+
+<pre><code>
+void binder_loop(struct binder_state *bs, binder_handler func)
 {
     int res;
     struct binder_write_read bwr;
@@ -188,11 +202,14 @@ fail_open:
             break;
         }
     }
-}</code></pre>
+}</code></pre>
+
 <p>进入循环读写操作，main方法传递过来的参数fun指向svcmgr_handler。</p>
 <h2 id="三、注册服务"><a href="#三、注册服务" class="headerlink" title="三、注册服务"></a>三、注册服务</h2><p>ServiceManager.addService(String name, IBinder service)过程</p>
 <h3 id="3-1-SM-addService"><a href="#3-1-SM-addService" class="headerlink" title="3.1 SM.addService"></a>3.1 SM.addService</h3><p>[-&gt;ServiceManager.java]</p>
-<pre><code>public static void addService(String name, IBinder service) {
+
+<pre><code>
+public static void addService(String name, IBinder service) {
     addService(name, service, false, IServiceManager.DUMP_FLAG_PRIORITY_DEFAULT);
 }
 
@@ -203,9 +220,12 @@ public static void addService(String name, IBinder service, boolean allowIsolate
     } catch (RemoteException e) {
         Log.e(TAG, "error in addService", e);
     }
-}</code></pre>
+}</code></pre>
+
 <h3 id="3-2-getIServiceManager"><a href="#3-2-getIServiceManager" class="headerlink" title="3.2  getIServiceManager"></a>3.2  getIServiceManager</h3><p>[-&gt;ServiceManager.java]</p>
-<pre><code>private static IServiceManager getIServiceManager() {
+
+<pre><code>
+private static IServiceManager getIServiceManager() {
        if (sServiceManager != null) {
            return sServiceManager;
        }
@@ -217,9 +237,12 @@ public static void addService(String name, IBinder service, boolean allowIsolate
    }
    
     public static final native IBinder getContextObject();
-	</code></pre>
+	</code></pre>
+
 <p>getContextObject通过Native方式调用。</p>
-<h4 id="3-2-1-Binder-allowBlocking"><a href="#3-2-1-Binder-allowBlocking" class="headerlink" title="3.2.1 Binder.allowBlocking"></a>3.2.1 Binder.allowBlocking</h4><pre><code>public static IBinder allowBlocking(IBinder binder) {
+<h4 id="3-2-1-Binder-allowBlocking"><a href="#3-2-1-Binder-allowBlocking" class="headerlink" title="3.2.1 Binder.allowBlocking"></a>3.2.1 Binder.allowBlocking</h4>
+<pre><code>
+public static IBinder allowBlocking(IBinder binder) {
        try {
            //是BinderProxy类
            if (binder instanceof BinderProxy) {
@@ -231,16 +254,22 @@ public static void addService(String name, IBinder service, boolean allowIsolate
        } catch (RemoteException ignored) {
        }
        return binder;
-   }</code></pre>
+   }</code></pre>
+
 <p>这个方法用来判断IBinder类，根据不同情况添加标志，具体可见3.7节</p>
 <h4 id="3-2-2-getContextObject"><a href="#3-2-2-getContextObject" class="headerlink" title="3.2.2 getContextObject"></a>3.2.2 getContextObject</h4><p>[-&gt;android_util_Binder.cpp]</p>
-<pre><code>static jobject android_os_BinderInternal_getContextObject(JNIEnv* env, jobject clazz)
+
+<pre><code>
+static jobject android_os_BinderInternal_getContextObject(JNIEnv* env, jobject clazz)
 {
     sp&lt;IBinder&gt; b = ProcessState::self()-&gt;getContextObject(NULL);
     return javaObjectForIBinder(env, b);
-}</code></pre>
+}</code></pre>
+
 <h5 id="3-2-2-1-ProcessState-self"><a href="#3-2-2-1-ProcessState-self" class="headerlink" title="3.2.2.1 ProcessState::self"></a>3.2.2.1 ProcessState::self</h5><p>[-&gt;ProcessState.cpp]</p>
-<pre><code>sp&lt;ProcessState&gt; ProcessState::self()
+
+<pre><code>
+sp&lt;ProcessState&gt; ProcessState::self()
 {
     Mutex::Autolock _l(gProcessMutex);
     if (gProcess != NULL) {
@@ -249,9 +278,12 @@ public static void addService(String name, IBinder service, boolean allowIsolate
     //创建ProcessState对象
     gProcess = new ProcessState("/dev/binder");
     return gProcess;
-}</code></pre>
+}</code></pre>
+
 <p>单例模式创建ProcessState对象，其初始化如下：</p>
-<pre><code>ProcessState::ProcessState(const char *driver)
+
+<pre><code>
+ProcessState::ProcessState(const char *driver)
     : mDriverName(String8(driver))
     , mDriverFD(open_driver(driver)) //打开驱动
     , mVMStart(MAP_FAILED)
@@ -280,12 +312,15 @@ public static void addService(String name, IBinder service, boolean allowIsolate
     }
 
     LOG_ALWAYS_FATAL_IF(mDriverFD &lt; 0, "Binder driver could not be opened.  Terminating.");
-}</code></pre>
+}</code></pre>
+
 <p>ProcessState一个进程只打开一个binder设置一次，其中mDriverFD，记录binder驱动的fd，用于访问binder设置；</p>
 <p>BINDER_VM_SIZE = 1 <em> 1024 </em> 1024 - 4096 * 2)，binder分配的内存大小为1M-8K；</p>
 <p>DEFAULT_MAX_BINDER_THREADS =15，binder默认最大可并发访问的线程数为16。</p>
 <p>打开驱动的过程如下，这里就只介绍到这里。</p>
-<pre><code>static int open_driver(const char *driver)
+
+<pre><code>
+static int open_driver(const char *driver)
 {
     //打开/dev/binder设置
     int fd = open(driver, O_RDWR | O_CLOEXEC);
@@ -314,14 +349,20 @@ public static void addService(String name, IBinder service, boolean allowIsolate
         ALOGW("Opening '%s' failed: %s/n", driver, strerror(errno));
     }
     return fd;
-}</code></pre>
+}</code></pre>
+
 <h5 id="3-2-2-2-PS-getContextObject"><a href="#3-2-2-2-PS-getContextObject" class="headerlink" title="3.2.2.2  PS.getContextObject"></a>3.2.2.2  PS.getContextObject</h5><p>[-&gt;ProcessState.cpp]</p>
-<pre><code>sp&lt;IBinder&gt; ProcessState::getContextObject(const sp&lt;IBinder&gt;& /*caller*/)
+
+<pre><code>
+sp&lt;IBinder&gt; ProcessState::getContextObject(const sp&lt;IBinder&gt;& /*caller*/)
 {
     return getStrongProxyForHandle(0);
-}</code></pre>
+}</code></pre>
+
 <h5 id="3-2-2-3-PS-getStrongProxyForHandle"><a href="#3-2-2-3-PS-getStrongProxyForHandle" class="headerlink" title="3.2.2.3 PS.getStrongProxyForHandle"></a>3.2.2.3 PS.getStrongProxyForHandle</h5><p>[-&gt;ProcessState.cpp]</p>
-<pre><code>sp&lt;IBinder&gt; ProcessState::getStrongProxyForHandle(int32_t handle)
+
+<pre><code>
+sp&lt;IBinder&gt; ProcessState::getStrongProxyForHandle(int32_t handle)
 {
     sp&lt;IBinder&gt; result;
 
@@ -376,10 +417,13 @@ public static void addService(String name, IBinder service, boolean allowIsolate
     }
 
     return result;
-}</code></pre>
+}</code></pre>
+
 <p>当handler值所对应的Binder不存在或弱引用无效时会创建BpBinder，否则直接获取。对应handler等于0的情况，通过PING_TRANSACTION来判断是否准备就绪。如果context manager还未生效前，一个BpBinder的本地已经被创建，那么驱动将无法提供context manager的引用。</p>
 <h4 id="3-2-3-javaObjectForIBinder"><a href="#3-2-3-javaObjectForIBinder" class="headerlink" title="3.2.3 javaObjectForIBinder"></a>3.2.3 javaObjectForIBinder</h4><p>[-&gt;android_util_Binder.cpp]</p>
-<pre><code>jobject javaObjectForIBinder(JNIEnv* env, const sp&lt;IBinder&gt;& val)
+
+<pre><code>
+jobject javaObjectForIBinder(JNIEnv* env, const sp&lt;IBinder&gt;& val)
 {
     if (val == NULL) return NULL;
 
@@ -425,11 +469,14 @@ public static void addService(String name, IBinder service, boolean allowIsolate
 
     return object;
 }
-</code></pre>
+</code></pre>
+
 <p>根据BpBinder（C++）创建BinderProxy（java）对象，主要工作是创建BinderProxy对象。</p>
 <p>ServiceManagerNative.asInterface(Binder.allowBlocking(BinderInternal.getContextObject()));相当于</p>
 <p>ServiceManagerNative.asInterface(new BinderProxy())</p>
-<h3 id="3-3-SMN-asInterface"><a href="#3-3-SMN-asInterface" class="headerlink" title="3.3 SMN.asInterface"></a>3.3 SMN.asInterface</h3><pre><code>static public IServiceManager asInterface(IBinder obj)
+<h3 id="3-3-SMN-asInterface"><a href="#3-3-SMN-asInterface" class="headerlink" title="3.3 SMN.asInterface"></a>3.3 SMN.asInterface</h3>
+<pre><code>
+static public IServiceManager asInterface(IBinder obj)
    {
        if (obj == null) {
            return null;
@@ -441,11 +488,14 @@ public static void addService(String name, IBinder service, boolean allowIsolate
        }
 
        return new ServiceManagerProxy(obj);
-   }</code></pre>
+   }</code></pre>
+
 <p>由3.2节可知ServiceManagerNative.asInterface(new BinderProxy()),等价于</p>
 <p>new ServiceManagerProxy(new BinderProxy());</p>
 <h4 id="3-3-1-ServiceManagerProxy"><a href="#3-3-1-ServiceManagerProxy" class="headerlink" title="3.3.1 ServiceManagerProxy"></a>3.3.1 ServiceManagerProxy</h4><p>[-&gt;ServiceManagerNative::ServiceManagerProxy]</p>
-<pre><code>class ServiceManagerProxy implements IServiceManager {
+
+<pre><code>
+class ServiceManagerProxy implements IServiceManager {
     public ServiceManagerProxy(IBinder remote) {
         mRemote = remote;
     }
@@ -455,13 +505,16 @@ public static void addService(String name, IBinder service, boolean allowIsolate
     }
    ...
 }
-</code></pre>
+</code></pre>
+
 <p><strong>mRemote为BinderProxy对象</strong>，该对象对应于BpBinder(0)，作为binder代理类，执行native层ServiceManager</p>
 <p> getIServiceManager()等价于new ServiceManagerProxy(new BinderProxy());</p>
 <p> getIServiceManager().addService等价于ServiceManagerProxy.addService</p>
 <p>framework层的ServiceManager的调用实际交给了ServiceManagerProxy成员变量BinderProxy，而BinderProxy通过JNI方式，最终调用的BpBinder对象，可以看出binder架构的核心功能依赖于native架构的服务来完成。</p>
 <h3 id="3-4-SMP-addService"><a href="#3-4-SMP-addService" class="headerlink" title="3.4 SMP.addService"></a>3.4 SMP.addService</h3><p>[-&gt;ServiceManagerNative::ServiceManagerProxy]</p>
-<pre><code>public void addService(String name, IBinder service, boolean allowIsolated, int dumpPriority)
+
+<pre><code>
+public void addService(String name, IBinder service, boolean allowIsolated, int dumpPriority)
         throws RemoteException {
     Parcel data = Parcel.obtain();
     Parcel reply = Parcel.obtain();
@@ -476,15 +529,21 @@ public static void addService(String name, IBinder service, boolean allowIsolate
     reply.recycle();
     data.recycle();
 }
-</code></pre>
+</code></pre>
+
 <h3 id="3-5-writeStrongBinder-Java"><a href="#3-5-writeStrongBinder-Java" class="headerlink" title="3.5 writeStrongBinder(Java)"></a>3.5 writeStrongBinder(Java)</h3><p>[-&gt;Parcel.java]</p>
-<pre><code>public final void writeStrongBinder(IBinder val) {
+
+<pre><code>
+public final void writeStrongBinder(IBinder val) {
     //native调用
     nativeWriteStrongBinder(mNativePtr, val);
 }
-</code></pre>
+</code></pre>
+
 <h4 id="3-5-1-android-os-Parcel-writeStrongBinder"><a href="#3-5-1-android-os-Parcel-writeStrongBinder" class="headerlink" title="3.5.1 android_os_Parcel_writeStrongBinder"></a>3.5.1 android_os_Parcel_writeStrongBinder</h4><p>[-&gt;android_os_Parcel.cpp]</p>
-<pre><code>static void android_os_Parcel_writeStrongBinder(JNIEnv* env, jclass clazz, jlong nativePtr, jobject object)
+
+<pre><code>
+static void android_os_Parcel_writeStrongBinder(JNIEnv* env, jclass clazz, jlong nativePtr, jobject object)
 {
     //将java层的Parce转换为native层的Parcel
     Parcel* parcel = reinterpret_cast&lt;Parcel*&gt;(nativePtr);
@@ -495,10 +554,13 @@ public static void addService(String name, IBinder service, boolean allowIsolate
         }
     }
 }
-</code></pre>
+</code></pre>
+
 <p>nativePtr为native层创建Parcel对象后返回的指针地址。</p>
 <h4 id="3-5-2-ibinderForJavaObject"><a href="#3-5-2-ibinderForJavaObject" class="headerlink" title="3.5.2 ibinderForJavaObject"></a>3.5.2 ibinderForJavaObject</h4><p>[-&gt;android_util_Binder.cpp]</p>
-<pre><code>sp&lt;IBinder&gt; ibinderForJavaObject(JNIEnv* env, jobject obj)
+
+<pre><code>
+sp&lt;IBinder&gt; ibinderForJavaObject(JNIEnv* env, jobject obj)
 {
     if (obj == NULL) return NULL;
 
@@ -518,11 +580,14 @@ public static void addService(String name, IBinder service, boolean allowIsolate
 
     ALOGW("ibinderForJavaObject: %p is not a Binder object", obj);
     return NULL;
-}</code></pre>
+}</code></pre>
+
 <p>根据Binder(Java)生成JavaBBinderHolder(C++)对象，并把JavaBBinderHolder对象地址保存到Binder.mObject成员变量</p>
 <p>如果是BinderProxy(Java)返回的是Binder Native代理BpBinder。</p>
 <h4 id="3-5-3-JavaBBinderHolder"><a href="#3-5-3-JavaBBinderHolder" class="headerlink" title="3.5.3 JavaBBinderHolder"></a>3.5.3 JavaBBinderHolder</h4><p>[-&gt;android_util_Binder.cpp]</p>
-<pre><code>class JavaBBinderHolder
+
+<pre><code>
+class JavaBBinderHolder
 {
 public:
     sp&lt;JavaBBinder&gt; get(JNIEnv* env, jobject obj)
@@ -549,9 +614,12 @@ public:
 private:
     Mutex           mLock;
     wp&lt;JavaBBinder&gt; mBinder;
-};</code></pre>
+};</code></pre>
+
 <h4 id="3-5-4-new-JavaBBinder"><a href="#3-5-4-new-JavaBBinder" class="headerlink" title="3.5.4 new JavaBBinder"></a>3.5.4 new JavaBBinder</h4><p>[-&gt;android_util_Binder.cpp]</p>
-<pre><code>class JavaBBinder : public BBinder
+
+<pre><code>
+class JavaBBinder : public BBinder
 {
  public:
     JavaBBinder(JNIEnv* env, jobject /* Java Binder */ object)
@@ -571,16 +639,22 @@ private:
     {
         return mObject;
     }
-  }</code></pre>
+  }</code></pre>
+
 <p>创建JavaBBinder，该类继承于BBinder， data.writeStrongBinder(service);等价于parcel-&gt;writeStrongBinder(new JavaBBinder(env, obj))</p>
 <h3 id="3-6-writeStrongBinder-C"><a href="#3-6-writeStrongBinder-C" class="headerlink" title="3.6 writeStrongBinder(C++)"></a>3.6 writeStrongBinder(C++)</h3><p>[-&gt;Parcel.cpp]</p>
-<pre><code>status_t Parcel::writeStrongBinder(const sp&lt;IBinder&gt;& val)
+
+<pre><code>
+status_t Parcel::writeStrongBinder(const sp&lt;IBinder&gt;& val)
 {
     return flatten_binder(ProcessState::self(), val, this);
 }
-</code></pre>
+</code></pre>
+
 <h4 id="3-6-1-flatten-binder"><a href="#3-6-1-flatten-binder" class="headerlink" title="3.6.1 flatten_binder"></a>3.6.1 flatten_binder</h4><p>[-&gt;Parcel.cpp]</p>
-<pre><code>status_t flatten_binder(const sp&lt;ProcessState&gt;& /*proc*/,
+
+<pre><code>
+status_t flatten_binder(const sp&lt;ProcessState&gt;& /*proc*/,
     const sp&lt;IBinder&gt;& binder, Parcel* out)
 {
     flat_binder_object obj;
@@ -617,20 +691,26 @@ private:
     }
 
     return finish_flatten_binder(binder, obj, out);
-}</code></pre>
+}</code></pre>
+
 <p>主要是将Binder对象扁平化，转换成flat_binder_object。</p>
 <p>对于Binder实体，cookie记录Binder实体的指针</p>
 <p>对于Binder代理，则用handle记录Binder代理的句柄。</p>
 <h4 id="3-6-2-finish-flatten-binder"><a href="#3-6-2-finish-flatten-binder" class="headerlink" title="3.6.2 finish_flatten_binder"></a>3.6.2 finish_flatten_binder</h4><p>[-&gt;Parcel.cpp]</p>
-<pre><code>inline static status_t finish_flatten_binder(
+
+<pre><code>
+inline static status_t finish_flatten_binder(
     const sp&lt;IBinder&gt;& /*binder*/, const flat_binder_object& flat, Parcel* out)
 {
     return out-&gt;writeObject(flat, false);
 }
-</code></pre>
+</code></pre>
+
 <p>回到3.4的addService过程，则进入transact过程</p>
 <h3 id="3-7-BP-transact"><a href="#3-7-BP-transact" class="headerlink" title="3.7 BP.transact"></a>3.7 BP.transact</h3><p>[-&gt;BinderProxy.java]</p>
-<pre><code>public boolean transact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
+
+<pre><code>
+public boolean transact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
        Binder.checkParcel(this, code, data, "Unreasonably large binder buffer");
 
        if (mWarnOnBlocking && ((flags & FLAG_ONEWAY) == 0)) {
@@ -657,9 +737,12 @@ private:
                Trace.traceEnd(Trace.TRACE_TAG_ALWAYS);
            }
        }
-   }</code></pre>
+   }</code></pre>
+
 <h3 id="3-8-android-os-BinderProxy-transact"><a href="#3-8-android-os-BinderProxy-transact" class="headerlink" title="3.8  android_os_BinderProxy_transact"></a>3.8  android_os_BinderProxy_transact</h3><p>[-&gt;android_util_Binder.cpp]</p>
-<pre><code>static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
+
+<pre><code>
+static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
         jint code, jobject dataObj, jobject replyObj, jint flags) // throws RemoteException
 {
     if (dataObj == NULL) {
@@ -719,9 +802,12 @@ private:
 
     signalExceptionForError(env, obj, err, true /*canThrowRemoteException*/, data-&gt;dataSize());
     return JNI_FALSE;
-}</code></pre>
+}</code></pre>
+
 <h3 id="3-9-BpBinder-transact"><a href="#3-9-BpBinder-transact" class="headerlink" title="3.9 BpBinder::transact"></a>3.9 BpBinder::transact</h3><p>[-&gt;BpBinder.cpp]</p>
-<pre><code>status_t BpBinder::transact(
+
+<pre><code>
+status_t BpBinder::transact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
     // Once a binder has died, it will never come back to life.
@@ -735,9 +821,12 @@ private:
 
     return DEAD_OBJECT;
 }
-</code></pre>
+</code></pre>
+
 <h4 id="3-9-1-BpBinder-transact"><a href="#3-9-1-BpBinder-transact" class="headerlink" title="3.9.1 BpBinder::transact"></a>3.9.1 BpBinder::transact</h4><p>[-&gt;IPCThreadState.cpp]</p>
-<pre><code>IPCThreadState* IPCThreadState::self()
+
+<pre><code>
+IPCThreadState* IPCThreadState::self()
 {
     if (gHaveTLS) {
 restart:
@@ -768,11 +857,14 @@ restart:
     //释放锁
     pthread_mutex_unlock(&gTLSMutex);
     goto restart;
-}</code></pre>
+}</code></pre>
+
 <p>TLS(Thread local storage),线程本地存储空间，每个线程都有自己私有的TLS,线程之间不能共享。</p>
 <p>pthread_setspecific/pthread_getspecific可以设置和获取这些空间中的内容。</p>
 <h4 id="3-9-2-new-IPCThreadState"><a href="#3-9-2-new-IPCThreadState" class="headerlink" title="3.9.2 new IPCThreadState"></a>3.9.2 new IPCThreadState</h4><p>[-&gt;IPCThreadState.cpp]</p>
-<pre><code>IPCThreadState::IPCThreadState()
+
+<pre><code>
+IPCThreadState::IPCThreadState()
     : mProcess(ProcessState::self()),
       mStrictModePolicy(0),
       mLastTransactionBinderFlags(0)
@@ -782,12 +874,15 @@ restart:
     mIn.setDataCapacity(256);
     mOut.setDataCapacity(256);
 }
-</code></pre>
+</code></pre>
+
 <p>每个线程都有一个IPCThreadState，每个IPCThreadState都有一个mIn，mOut，成员变量mProcess保存了ProcessState变量，每个进程只有一个。</p>
 <p>mInt用来接收来自Binder设备的数据，默认大小事256</p>
 <p>mOut用来存储发往Binder设备的数据，默认大小事256</p>
 <h3 id="3-10-IPC-transact"><a href="#3-10-IPC-transact" class="headerlink" title="3.10 IPC::transact"></a>3.10 IPC::transact</h3><p>[-&gt;IPCThreadState.cpp]</p>
-<pre><code>status_t IPCThreadState::transact(int32_t handle,
+
+<pre><code>
+status_t IPCThreadState::transact(int32_t handle,
                                   uint32_t code, const Parcel& data,
                                   Parcel* reply, uint32_t flags)
 {
@@ -849,7 +944,8 @@ restart:
     }
 
     return err;
-}</code></pre>
+}</code></pre>
+
 <p>transact主要工作：</p>
 <ul>
 <li><p>errorCheck错误检查</p>
@@ -860,7 +956,9 @@ restart:
 </li>
 </ul>
 <h3 id="3-11-IPC-writeTransactionData"><a href="#3-11-IPC-writeTransactionData" class="headerlink" title="3.11  IPC::writeTransactionData"></a>3.11  IPC::writeTransactionData</h3><p>[-&gt;IPCThreadState.cpp]</p>
-<pre><code>status_t IPCThreadState::writeTransactionData(int32_t cmd, uint32_t binderFlags,
+
+<pre><code>
+status_t IPCThreadState::writeTransactionData(int32_t cmd, uint32_t binderFlags,
     int32_t handle, uint32_t code, const Parcel& data, status_t* statusBuffer)
 {
     binder_transaction_data tr;
@@ -896,7 +994,8 @@ restart:
 
     return NO_ERROR;
 }
-</code></pre>
+</code></pre>
+
 <p>handler对象用来标记目的端，注册服务的目的端为ServiceManager,这里handle = 0所对应的是binder实体对象。</p>
 <p>binder_transaction_data是binder驱动通信的数据结构，该过程吧Binder请求码BC_TRANSACTION和binder_transaction_data结构体写入mOut，写完后执行waitForResponse方法。</p>
 <p>binder_transaction_data中重要的成员变量</p>
@@ -911,7 +1010,9 @@ restart:
 </li>
 </ul>
 <h3 id="3-12-IPC-waitForResponse"><a href="#3-12-IPC-waitForResponse" class="headerlink" title="3.12 IPC::waitForResponse"></a>3.12 IPC::waitForResponse</h3><p>[-&gt;IPCThreadState.cpp]</p>
-<pre><code>status_t IPCThreadState::waitForResponse(Parcel *reply, status_t *acquireResult)
+
+<pre><code>
+status_t IPCThreadState::waitForResponse(Parcel *reply, status_t *acquireResult)
 {
     uint32_t cmd;
     int32_t err;
@@ -1001,10 +1102,13 @@ finish:
     }
 
     return err;
-}</code></pre>
+}</code></pre>
+
 <p>talkWithDriver过程是和binder驱动通信过程，Binder驱动收到BC_TRANSACTION后，会回应BR_TRANSACTION_COMPLETE,然后等待目标进程的BR_REPLY.</p>
 <h3 id="3-13-IPC-talkWithDriver"><a href="#3-13-IPC-talkWithDriver" class="headerlink" title="3.13 IPC::talkWithDriver"></a>3.13 IPC::talkWithDriver</h3><p>[-&gt;IPCThreadState.cpp]</p>
-<pre><code>status_t IPCThreadState::talkWithDriver(bool doReceive)
+
+<pre><code>
+status_t IPCThreadState::talkWithDriver(bool doReceive)
 {
     if (mProcess-&gt;mDriverFD &lt;= 0) {
         return -EBADF;
@@ -1113,7 +1217,8 @@ finish:
     }
 
     return err;
-}</code></pre>
+}</code></pre>
+
 <p>binder_write_read结构体用来与Binder驱动进行数据交换，通过ioctl与mDriverFD通信，主要操作的是mInt和mOut.</p>
 <p>ioctl通过系统调用进入到Binder Driver。</p>
 <h2 id="四、Binder-Driver"><a href="#四、Binder-Driver" class="headerlink" title="四、Binder Driver"></a>四、Binder Driver</h2><p>用户态的程序调用Kernel层驱动需陷入内核态，进行系统调用（syscall），其定义在kernel/include/linux/syscalls.h文件中</p>
@@ -1121,7 +1226,9 @@ finish:
 <p>__ioctl是系统调用中相应的处理方法，通过查找找到内核binder驱动的binder_ioctl的方法。</p>
 <p>上面传过来的是BINDER_WRITE_READ命令</p>
 <h3 id="4-1-binder-ioctl"><a href="#4-1-binder-ioctl" class="headerlink" title="4.1 binder_ioctl"></a>4.1 binder_ioctl</h3><p>[-&gt;android/binder.c]</p>
-<pre><code>static long binder_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+
+<pre><code>
+static long binder_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
 	int ret;
 	struct binder_proc *proc = filp-&gt;private_data;  //binder进程
@@ -1223,7 +1330,8 @@ err:
 err_unlocked:
 	trace_binder_ioctl_done(ret);
 	return ret;
-}</code></pre>
+}</code></pre>
+
 <p> binder_ioctl负责两个进程间收发IPC数据和IPC reply数据</p>
 <blockquote>
 <p> binder_ioctl(文件描述符，ioctl命令，数据类型)</p>
@@ -1272,7 +1380,9 @@ err_unlocked:
 </tbody>
 </table>
 <h4 id="4-1-1-binder-get-thread"><a href="#4-1-1-binder-get-thread" class="headerlink" title="4.1.1 binder_get_thread"></a>4.1.1 binder_get_thread</h4><p>[-&gt;android/binder.c]</p>
-<pre><code>static struct binder_thread *binder_get_thread(struct binder_proc *proc)
+
+<pre><code>
+static struct binder_thread *binder_get_thread(struct binder_proc *proc)
 {
 	struct binder_thread *thread;
 	struct binder_thread *new_thread;
@@ -1296,9 +1406,12 @@ err_unlocked:
 	}
 	return thread;
 }
-</code></pre>
+</code></pre>
+
 <h4 id="4-1-2-binder-get-thread-ilocked"><a href="#4-1-2-binder-get-thread-ilocked" class="headerlink" title="4.1.2 binder_get_thread_ilocked"></a>4.1.2 binder_get_thread_ilocked</h4><p>[-&gt;android/binder.c]</p>
-<pre><code>static struct binder_thread *binder_get_thread_ilocked(
+
+<pre><code>
+static struct binder_thread *binder_get_thread_ilocked(
 		struct binder_proc *proc, struct binder_thread *new_thread)
 {
 	struct binder_thread *thread = NULL;
@@ -1337,10 +1450,13 @@ err_unlocked:
 	thread-&gt;reply_error.cmd = BR_OK;
 	INIT_LIST_HEAD(&new_thread-&gt;waiting_thread_node);
 	return thread;
-}</code></pre>
+}</code></pre>
+
 <p>从binder_proc中查找binder_thread,如果当前线程已经加入到proc的线程队列则直接返回，如果不存在则创建binder_thread，并将当前线程添加到当期的proc。</p>
 <h3 id="4-2-binder-ioctl-write-read"><a href="#4-2-binder-ioctl-write-read" class="headerlink" title="4.2 binder_ioctl_write_read"></a>4.2 binder_ioctl_write_read</h3><p>[-&gt;android/binder.c]</p>
-<pre><code>static int binder_ioctl_write_read(struct file *filp,
+
+<pre><code>
+static int binder_ioctl_write_read(struct file *filp,
 				unsigned int cmd, unsigned long arg,
 				struct binder_thread *thread)
 {
@@ -1410,9 +1526,12 @@ err_unlocked:
 out:
 	return ret;
 }
-</code></pre>
+</code></pre>
+
 <h3 id="4-3-binder-thread-write"><a href="#4-3-binder-thread-write" class="headerlink" title="4.3  binder_thread_write"></a>4.3  binder_thread_write</h3><p>[-&gt;android/binder.c]</p>
-<pre><code>static int binder_thread_write(struct binder_proc *proc,
+
+<pre><code>
+static int binder_thread_write(struct binder_proc *proc,
 			struct binder_thread *thread,
 			binder_uintptr_t binder_buffer, size_t size,
 			binder_size_t *consumed)
@@ -1452,9 +1571,11 @@ out:
 		    ...
 		}
 	}
-   }</code></pre>
+   }</code></pre>
+
 <h3 id="4-4-binder-transaction"><a href="#4-4-binder-transaction" class="headerlink" title="4.4 binder_transaction"></a>4.4 binder_transaction</h3><p>[-&gt;android/binder.c]</p>
-<pre><code>
+
+<pre><code>
 static void binder_transaction(struct binder_proc *proc,
 			       struct binder_thread *thread,
 			       struct binder_transaction_data *tr, int reply,
@@ -1757,7 +1878,9 @@ static void binder_transaction(struct binder_proc *proc,
 	WRITE_ONCE(e-&gt;debug_id_done, t_debug_id);
 	return;
      ...
-}</code></pre>
+}
+</code></pre>
+
 <p>binder_transaction主要的工作如下</p>
 <ul>
 <li><p>注册服务的过程，传递的是BBinder对象，所以hdr-&gt;type为BINDER_TYPE_BINDER；</p>
@@ -1770,7 +1893,9 @@ static void binder_transaction(struct binder_proc *proc,
 </li>
 </ul>
 <h4 id="4-4-1-binder-translate-binder"><a href="#4-4-1-binder-translate-binder" class="headerlink" title="4.4.1  binder_translate_binder"></a>4.4.1  binder_translate_binder</h4><p>[-&gt;android/binder.c]</p>
-<pre><code>static int binder_translate_binder(struct flat_binder_object *fp,
+
+<pre><code>
+static int binder_translate_binder(struct flat_binder_object *fp,
 				   struct binder_transaction *t,
 				   struct binder_thread *thread)
 {
@@ -1822,9 +1947,12 @@ static void binder_transaction(struct binder_proc *proc,
 done:
 	binder_put_node(node);
 	return ret;
-}</code></pre>
+}</code></pre>
+
 <h4 id="4-4-2-binder-proc-transaction"><a href="#4-4-2-binder-proc-transaction" class="headerlink" title="4.4.2  binder_proc_transaction"></a>4.4.2  binder_proc_transaction</h4><p>[-&gt;android/binder.c]</p>
-<pre><code>static bool binder_proc_transaction(struct binder_transaction *t,
+
+<pre><code>
+static bool binder_proc_transaction(struct binder_transaction *t,
 				    struct binder_proc *proc,
 				    struct binder_thread *thread)
 {
@@ -1878,10 +2006,13 @@ done:
 
 	return true;
 }
-</code></pre>
+</code></pre>
+
 <p>4.2节中执行完binder_thread_write，再执行binder_thread_read操作,见4.5节</p>
 <h4 id="4-4-3-binder-inc-ref-for-node"><a href="#4-4-3-binder-inc-ref-for-node" class="headerlink" title="4.4.3 binder_inc_ref_for_node"></a>4.4.3 binder_inc_ref_for_node</h4><p>[-&gt;android/binder.c]</p>
-<pre><code>static int binder_inc_ref_for_node(struct binder_proc *proc,
+
+<pre><code>
+static int binder_inc_ref_for_node(struct binder_proc *proc,
 			struct binder_node *node,
 			bool strong,
 			struct list_head *target_list,
@@ -1912,9 +2043,12 @@ done:
 		 */
 		kfree(new_ref);
 	return ret;
-}</code></pre>
+}</code></pre>
+
 <h4 id="4-4-4-binder-get-ref-for-node-olocked"><a href="#4-4-4-binder-get-ref-for-node-olocked" class="headerlink" title="4.4.4 binder_get_ref_for_node_olocked"></a>4.4.4 binder_get_ref_for_node_olocked</h4><p>[-&gt;android/binder.c]</p>
-<pre><code>static struct binder_ref *binder_get_ref_for_node_olocked(
+
+<pre><code>
+static struct binder_ref *binder_get_ref_for_node_olocked(
 					struct binder_proc *proc,
 					struct binder_node *node,
 					struct binder_ref *new_ref)
@@ -1982,7 +2116,8 @@ done:
 	binder_node_unlock(node);
 	return new_ref;
 }
-</code></pre>
+</code></pre>
+
 <p>handle值计算方法规律：</p>
 <ul>
 <li>每个进程binder_proc记录的binder_ref的handle值是从1开始递增的</li>
@@ -1990,7 +2125,9 @@ done:
 <li>同一个服务的binder_node在不同进程的binder_ref的handle值可以不同</li>
 </ul>
 <h3 id="4-5-binder-thread-read"><a href="#4-5-binder-thread-read" class="headerlink" title="4.5 binder_thread_read"></a>4.5 binder_thread_read</h3><p>[-&gt;android/binder.c]</p>
-<pre><code>static int binder_thread_read(struct binder_proc *proc,
+
+<pre><code>
+static int binder_thread_read(struct binder_proc *proc,
 			      struct binder_thread *thread,
 			      binder_uintptr_t binder_buffer, size_t size,
 			      binder_size_t *consumed, int non_block)
@@ -2209,12 +2346,15 @@ done:
 	} elseB
 		binder_inner_proc_unlock(proc);
 	return 0;
-}</code></pre>
+}</code></pre>
+
 <p>这里binder_thread_read主要是读取队列中的事务，将BR_TRANSACTION_COMPLETE命令写回客户端的用户空间，并且将BR_TRANSACTION命令写回服务端的用户空间。</p>
 <p>下面看下服务端进程servicemanager。</p>
 <h2 id="五、ServiceManager进程"><a href="#五、ServiceManager进程" class="headerlink" title="五、ServiceManager进程"></a>五、ServiceManager进程</h2><p>从第二大节中可以看到servicemanager启动后，循环再binder_loop过程，会调用binder_parse方法</p>
 <h3 id="5-1-binder-parse"><a href="#5-1-binder-parse" class="headerlink" title="5.1 binder_parse"></a>5.1 binder_parse</h3><p>[-&gt;servicemanager/binder.c]</p>
-<pre><code>int binder_parse(struct binder_state *bs, struct binder_io *bio,
+
+<pre><code>
+int binder_parse(struct binder_state *bs, struct binder_io *bio,
                  uintptr_t ptr, size_t size, binder_handler func)
 {
     int r = 1;
@@ -2263,9 +2403,12 @@ done:
     }
 
     return r;
-}</code></pre>
+}</code></pre>
+
 <h3 id="5-2-svcmgr-handler"><a href="#5-2-svcmgr-handler" class="headerlink" title="5.2 svcmgr_handler"></a>5.2 svcmgr_handler</h3><p>[-&gt;service_manager.c]</p>
-<pre><code>int svcmgr_handler(struct binder_state *bs,
+
+<pre><code>
+int svcmgr_handler(struct binder_state *bs,
                    struct binder_transaction_data *txn,
                    struct binder_io *msg,
                    struct binder_io *reply)
@@ -2338,9 +2481,12 @@ done:
 
     bio_put_uint32(reply, 0);
     return 0;
-}</code></pre>
+}</code></pre>
+
 <h3 id="5-3-do-add-service"><a href="#5-3-do-add-service" class="headerlink" title="5.3 do_add_service"></a>5.3 do_add_service</h3><p>[-&gt;service_manager.c]</p>
-<pre><code>int do_add_service(struct binder_state *bs, const uint16_t *s, size_t len, uint32_t handle,
+
+<pre><code>
+int do_add_service(struct binder_state *bs, const uint16_t *s, size_t len, uint32_t handle,
                    uid_t uid, int allow_isolated, uint32_t dumpsys_priority, pid_t spid) {
     struct svcinfo *si;
 
@@ -2390,9 +2536,12 @@ done:
     //主要用于清理内存等收尾工作
     binder_link_to_death(bs, handle, &si-&gt;death);
     return 0;
-}</code></pre>
+}</code></pre>
+
 <h3 id="5-4-binder-send-reply"><a href="#5-4-binder-send-reply" class="headerlink" title="5.4 binder_send_reply"></a>5.4 binder_send_reply</h3><p>[-&gt;servicemanager/binder.c]</p>
-<pre><code>void binder_send_reply(struct binder_state *bs,
+
+<pre><code>
+void binder_send_reply(struct binder_state *bs,
                        struct binder_io *reply,
                        binder_uintptr_t buffer_to_free,
                        int status)
@@ -2425,10 +2574,13 @@ done:
     }
     //向Binder驱动写数据，见5.5
     binder_write(bs, &data, sizeof(data));
-}</code></pre>
+}</code></pre>
+
 <p>将BC_FREE_BUFFER和BC_REPLY发送给binder驱动，向client发送reply。</p>
 <h3 id="5-5-binder-write"><a href="#5-5-binder-write" class="headerlink" title="5.5 binder_write"></a>5.5 binder_write</h3><p>[-&gt;servicemanager/binder.c]</p>
-<pre><code>int binder_write(struct binder_state *bs, void *data, size_t len)
+
+<pre><code>
+int binder_write(struct binder_state *bs, void *data, size_t len)
 {
     struct binder_write_read bwr;
     int res;
@@ -2445,12 +2597,15 @@ done:
                 strerror(errno));
     }
     return res;
-}</code></pre>
+}</code></pre>
+
 <p>这里ioctl操作又回到驱动层，见第四节，流程和上面的一样，这里不再详细分析。</p>
 <h2 id="六、总结"><a href="#六、总结" class="headerlink" title="六、总结"></a>六、总结</h2><h3 id="6-1-servicemanager启动流程"><a href="#6-1-servicemanager启动流程" class="headerlink" title="6.1 servicemanager启动流程"></a>6.1 servicemanager启动流程</h3><p>1.打开Binder启动，调用mmap方法分配128K的内存映射空间：binder_open</p>
 <p>2.通知binder驱动，使其成为上下文管理者，整个系统只有一个：binder_become_context_manager</p>
 <p>3.进入循环等待，等待Client请求：binder_loop</p>
-<h3 id="6-2-addService核心过程"><a href="#6-2-addService核心过程" class="headerlink" title="6.2 addService核心过程"></a>6.2 addService核心过程</h3><pre><code>public static void addService(String name, IBinder service) {
+<h3 id="6-2-addService核心过程"><a href="#6-2-addService核心过程" class="headerlink" title="6.2 addService核心过程"></a>6.2 addService核心过程</h3>
+<pre><code>
+public static void addService(String name, IBinder service) {
       //此处需要将Java层Parcel转换为Native层的Parcel
       Parcel data = Parcel.obtain();
       Parcel reply = Parcel.obtain();
@@ -2465,14 +2620,17 @@ done:
       reply.recycle();
       data.recycle();
 }
-</code></pre>
+</code></pre>
+
 <p>通过创建JavaBBinder对象，将服务添加到ServiceManager中，和binder驱动的交互通过BpBinder.transact发送ADD_SERVICE_TRANSACTION实现添加，svclist保存所有已经注册的服务（包括服务名和handle信息）</p>
 <h3 id="6-3-通信流程"><a href="#6-3-通信流程" class="headerlink" title="6.3 通信流程"></a>6.3 通信流程</h3><p>1.发起端进程向Binder Driver发送binder_ioct请求后，采用不断的循环talkWithDriver，此时线程处于阻塞状态，直到收到BR_TRANSACTION_COMPLETE命令才会结束该流程；</p>
 <p>2.waitForResponse收到BR_TRANSACTION_COMPLETE命令后，则直接退出循环，不会再执行executeCommand方法，除六种其他命令外会执行该方法；</p>
 <p>3.由于ServiceManager进程已经启动，并且有binder_loop一直在循环查询命令，当收到BR_TRANSACTION命令后，就开始处理addService过程。</p>
-<p><img src="/2020/深入理解Binder机制2-注册服务addService/binder_addservice.PNG" alt="binder_addservice"></p>
+<p><img src="https://img-blog.csdnimg.cn/5dd1300ea9394c76a04c63f760e542b2.png?x-oss-process=,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAYW5kcm9pZEJleW9uZA==,size_14,color_FFFFFF,t_70,g_se,x_16" alt="binder_addservice"></p>
 <h2 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h2><p>源码路径</p>
-<pre><code>frameworks/base/core/java/android/os/ServiceManager.java
+
+<pre><code>
+frameworks/base/core/java/android/os/ServiceManager.java
 frameworks/base/core/java/android/os/ServiceManagerNative.java
 frameworks/base/core/java/android/os/Parcel.java
 frameworks/base/core/java/android/os/BinderProxy.java
@@ -2488,5 +2646,6 @@ native/cmds/servicemanager/service_manager.c
 native/cmds/servicemanager/servicemanager.rc
 
 kernel/include/linux/syscalls.h
-kernel/drivers/android/binder.c</code></pre>
+kernel/drivers/android/binder.c</code></pre>
+
       
