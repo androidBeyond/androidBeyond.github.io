@@ -13,7 +13,7 @@ Hi，我是独孤码农，现居古城西安，从事android开发十余年，�
 <br>
 <small>
 <font color="a0a9a9">
-<b>特别说明：</b>
+<b>特别说明:</b>
 <li>微信加好友请备注:独孤码农并且说明来意</li>
 </font>
 <small>
