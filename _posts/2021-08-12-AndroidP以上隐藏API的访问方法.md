@@ -129,7 +129,7 @@ bool MemberSignature::IsExempted(const std::vector&lt;std::string&gt;& exemption
 }
 </code></pre>
 
-继续跟踪传递进来的参数` runtime->GetHiddenApiExemptions()` 会有个有趣的发现：这个API 竟然是暴露到 Java 层的，有一个对应的 ` VMRuntime.setHiddenApiExemptions`  Java方法；也就是说，只要我们通过 ` VMRuntime.setHiddenApiExemptions`  设置下豁免条件，我们就能愉快滴使用反射了。
+继续跟踪传递进来的参数`runtime->GetHiddenApiExemptions()` 会有个有趣的发现：这个API 竟然是暴露到 Java 层的，有一个对应的 `VMRuntime.setHiddenApiExemptions`  Java方法；也就是说，只要我们通过 `VMRuntime.setHiddenApiExemptions`  设置下豁免条件，我们就能愉快滴使用反射了。
 再结合上面这个方法，我们只需要通过 「元反射」来反射调用 VMRuntime.setHiddenApiExemptions 就能将我们自己要使用的隐藏 API 全部都豁免掉了。更进一步，如果我们再观察下上面的 IsExempted 方法里面调用的 DoesPrefixMatch，发现这玩意儿在对方法签名进行前缀匹配；童鞋们，我们所有Java方法类的签名都是以 L开头啊！我们可以直接传个 L进去，所有的隐藏API就全部被赦免了！
 # 四，访问方案
 下面给出最终的访问解决方案，以供参考
