@@ -1,7 +1,7 @@
 ---
 layout:     post
 title:      Android SWT类问题分析总结
-subtitle:   SWT(Software Watch Dog ) 主要用来监控SystemServer等重要线程/Service 的运行情况。如果发现其阻塞超过 60s ,看门狗进程就会把系统重启，进而保证系统可以恢复到正常状态。
+subtitle:   Android SWT(Software Watch Dog ) 主要用来监控SystemServer等重要线程/Service 的运行情况。如果发现系统阻塞会尝试重启系统，以保证恢复到正常状态
 date:       2021-12-08
 author:     coderman
 header-img: img/article-bg.jpg
@@ -9,10 +9,10 @@ top: false
 catalog: true 
 tags:
     - Android
-	- SWT
+    - SWT
+    - Watch dog
 ---
 
-<article class="baidu_pl">   
  <h1>一、 SWT 手机重启问题简介</h1>
  <p>SWT(Software Watch Dog ) 主要用来监控<code>SystemServer</code>等<code>重要线程/Service</code> 的运行情况。如果发现其阻塞超过 60s ,看门狗进程就会把系统重启&#xff0c;进而保证系统可以恢复到正常状态。</p>
  <p>判断阻塞的方法&#xff1a;</p>
@@ -92,13 +92,3 @@ adb pull /sdcard/mtklog
  adb pull /data/aee_exp
 //3.导 data 下MTK缓存 的aee log
  adb pull /data/vendor/mtklog/aee_exp</code></pre>
- <p><img src="https://img-blog.csdnimg.cn/img_convert/c9046aed6e0428c13f510b4bf32a6fa2.png" alt="640?wx_fmt&#61;jpeg" /></p>
- <p><img src="https://img-blog.csdnimg.cn/img_convert/7d8a5b7f794217014ff3526a4a860536.png" alt="640?wx_fmt&#61;jpeg" /></p>
- <p>长按识别二维码&#xff0c;领福利</p>
- <p>至此&#xff0c;本篇已结束&#xff0c;如有不对的地方&#xff0c;欢迎您的建议与指正。同时期待您的关注&#xff0c;感谢您的阅读&#xff0c;谢谢&#xff01;</p>
- <p>如有侵权&#xff0c;请联系小编&#xff0c;小编对此深感抱歉&#xff0c;届时小编会删除文章&#xff0c;立即停止侵权行为&#xff0c;请您多多包涵。<img class="rich_pages" src="https://img-blog.csdnimg.cn/img_convert/729bc616ee8d39d368da134cd2572cb4.gif" alt="640?wx_fmt&#61;gif" /></p> 
-</div>
-                </div>
-        </div>
-        <div id="treeSkill"></div>
-    </article>
