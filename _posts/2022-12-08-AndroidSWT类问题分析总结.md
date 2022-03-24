@@ -13,82 +13,100 @@ tags:
     - Watch dog
 ---
 
- <h1>一、 SWT 手机重启问题简介</h1>
- <p>SWT(Software Watch Dog ) 主要用来监控<code>SystemServer</code>等<code>重要线程/Service</code> 的运行情况。如果发现其阻塞超过 60s ,看门狗进程就会把系统重启&#xff0c;进而保证系统可以恢复到正常状态。</p>
- <p>判断阻塞的方法&#xff1a;</p>
- <ul class="list-paddingleft-2"><li><p>1.利用 Services 注册monitor 去Check</p></li></ul>
- <p>主要是&#xff1a; AMS、 Foreground Thread</p>
- <ul class="list-paddingleft-2"><li><p></p></li></ul>
- <ol start="2" class="list-paddingleft-2"><li><p>发送handler 到重要的Loop 线程来Check 是否阻塞。</p></li></ol>
- <p>主要是&#xff1a; Main Thread、UI Thread、IO Thread、Display Thread、WMS 、Other Services。</p>
- <p>SWT 判断阻塞的方法 图文描述如下&#xff1a;</p>
- <p><img src="https://img-blog.csdnimg.cn/img_convert/ac4f6fa3a87d2c100da7dc6e6ed20e59.png" alt="640?wx_fmt&#61;other" /></p>
- <p>SWT 判断阻塞的方法</p>
- <h1>二、 SWT 手机重启问题处理流程</h1>
- <p>SWT 处理流程&#xff1a;1.每半分钟check 一次system_server 进程&#xff1a;<code>dump</code> 一次<code>system_server</code> 的<code>backtrace</code></p>
- <p>2.一分钟卡住后kill&#xff0c;并重新计数&#xff1a;<code>dump</code>&#xff0c;并<code>kill</code>掉 <code>system_server</code>进程 &#xff0c;否则重新计时。</p>
- <p>3.SWT 处理大致流程如下&#xff1a;</p>
- <p><img src="https://img-blog.csdnimg.cn/img_convert/bff87a15b02bfe3c5b5f7a934b0e17f2.png" alt="640?wx_fmt&#61;other" /></p>
- <p>SWT 处理流程</p>
- <h1>三、 SWT 手机重启问题的原因</h1>
- <p>导致 <code>SWT</code>重启原因的原因有很多种。</p>
- <p>主要导致的原因如下&#xff1a;</p>
- <p><img src="https://img-blog.csdnimg.cn/img_convert/5a45aa37538ec64c9a85b78fbb7c5803.png" alt="640?wx_fmt&#61;other" /></p>
- <p>检查SWT 原因分类</p>
- <h1>四、 SWT 手机重启问题分析流程</h1>
- <p>首先搜索关键 watchdog&#xff0c;查看是否有重启发生。</p>
- <p><img src="https://img-blog.csdnimg.cn/img_convert/445ed1389a99f484ed17aea0e1d73e03.png" alt="640?wx_fmt&#61;other" /></p>
- <p>SWT 流程分析</p>
- <h1>五、SWT 手机重启问题分析举例</h1>
- <h2>1.分析 trace &#xff0c;确认线程关系</h2>
- <p>线程被 Block 搜索关键字 held by</p>
- <p><img src="https://img-blog.csdnimg.cn/img_convert/9ad979d96b642f5a9f0890752d8e1a5b.png" alt="640?wx_fmt&#61;other" /></p>
- <p>确认线程关系</p>
- <p>线程被 Waiting 结合代码分析。</p>
- <p><img src="https://img-blog.csdnimg.cn/img_convert/58c8873f63f604b250b69b4a77c6fdcf.png" alt="640?wx_fmt&#61;other" /></p>
- <p>确认线程关系</p>
- <h2>2.线程死锁</h2>
- <p>确认Block的线程是否有闭环的死锁关系。</p>
- <p><img src="https://img-blog.csdnimg.cn/img_convert/5849e3621dc7811b21e5322ef405327b.png" alt="640?wx_fmt&#61;other" /></p>
- <p>线程死锁</p>
- <p><img src="https://img-blog.csdnimg.cn/img_convert/9b55aba294e660023c1c3835b1fa69c0.png" alt="640?wx_fmt&#61;other" /></p>
- <p>线程死锁</p>
- <h2>3.Binder的Server 端卡住</h2>
- <p>线程状态 Native&#xff0c;并且callstack中含有一对</p>
- <p>IPCThreadState::waitForResponseIPCThreadState::talkWithDriver</p>
- <p><img src="https://img-blog.csdnimg.cn/img_convert/52e3913eca5f0738803a45027d0a687d.png" alt="640?wx_fmt&#61;other" /></p>
- <p>Bind的Server端卡住</p>
- <p><img src="https://img-blog.csdnimg.cn/img_convert/15fb89bee1f210dbad911054388c087a.png" alt="640?wx_fmt&#61;other" /></p>
- <p>Bind的Server端卡住</p>
- <h2>4.SurfaceFlinger 卡住导致重启</h2>
- <p>搜索<code>关键字</code> I watchdog ,surfaceflinger hang&#xff0c;默认卡住<code>40s</code>&#xff0c;就会重启。</p>
- <p><img src="https://img-blog.csdnimg.cn/img_convert/49bc56dc92728a0e12a42b8ccb9faf58.png" alt="640?wx_fmt&#61;other" /></p>
- <p>SurfaceFlinger 卡住</p>
- <h2>5.Native 方法执行时间过长导致重启</h2>
- <p>线程状态 Native&#xff0c;查看是否有PowerManagerService.nativeSetAutoSuspend</p>
- <p><img src="https://img-blog.csdnimg.cn/img_convert/fb43b37ed5a28ef0a4a26c892da90394.png" alt="640?wx_fmt&#61;other" /></p>
- <p>Native 方法执行时间过长</p>
- <h2>6.Zygote Fork 进程时卡住</h2>
- <p>线程状态Native&#xff0c;查看是否有Process.zygoteSendArgsAndGetResult</p>
- <p><img src="https://img-blog.csdnimg.cn/img_convert/10595da5d53e2247bb1a7b1011367dd1.png" alt="640?wx_fmt&#61;other" /></p>
- <p>Zygote Fork 进程时卡住</p>
- <h2>7.Dump 时间过长</h2>
- <p><code>Dump</code> 超过60s 可能会引起手机重启。<code>关键字</code>dumpStackTracesdumpStackTraces process</p>
- <p><img src="https://img-blog.csdnimg.cn/img_convert/c9b41e9ec4802ded25faf3a1dbf8ebbd.png" alt="640?wx_fmt&#61;other" /></p>
- <p>Dump 时间过长</p>
- <p><img src="https://img-blog.csdnimg.cn/img_convert/57d8f1e74d4e6b9ab2307d8c45372954.png" alt="640?wx_fmt&#61;other" /></p>
- <p>前面有ANR 发生</p>
- <p><img src="https://img-blog.csdnimg.cn/img_convert/0d9aa967112f793ae5a6bbdc644f7247.png" alt="640?wx_fmt&#61;other" /></p>
- <p>前面有ANR 发生</p>
- <p><img src="https://img-blog.csdnimg.cn/img_convert/72123e10a440f1f1fd39901708d973a5.png" alt="640?wx_fmt&#61;other" /></p>
- <p>前面有fatal JE NE KE 等Exception发生</p>
- <p><img src="https://img-blog.csdnimg.cn/img_convert/e28e34920472208728dae0f0dfc5fd3e.png" alt="640?wx_fmt&#61;other" /></p>
- <p>自动化测试脚本有call dumpsys 去dump 系统信息</p>
- <h1>六、 Android O以上导 Log 注意事项</h1>
- <p><code>Android O</code> 以上的 <code>mtklog</code> 和<code>db</code> 不在同一个目录&#xff0c;需要执行以下<code>adb</code>命令 导<code>Log</code>.</p>
- <pre class="has"><code class="language-javascript">//1. 导 MTK log 
+    <article class="baidu_pl">
+        <div id="article_content" class="article_content clearfix">
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-03853629ec.css">
+                <div id="content_views" class="markdown_views prism-atom-one-light">
+                    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                        <path stroke-linecap="round" d="M5,0 0,2.5 5,5z" id="raphael-marker-block" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+                    </svg>
+                    <h1><a id="SWT__0"></a>SWT 重启问题分析</h1> 
+<blockquote> 
+ <p>一、SWT 重启问题简介<br /> 二、SWT 重启问题处理流程<br /> 三、SWT 重启问题的原因<br /> 四、SWT 重启问题分析流程<br /> 五、SWT 重启问题分析举例<br /> 六、Android O以上导 Log 注意事项</p> 
+</blockquote> 
+<h1><a id="_SWT__9"></a>一、 SWT 重启问题简介</h1> 
+<p><strong>SWT(Software Watch Dog )</strong> 主要用来监控<code>SystemServer</code>等<code>重要线程/Service</code> 的运行情况。如果发现其阻塞超过 <strong>60s</strong> ,看门狗进程就会把系统重启&#xff0c;进而保证系统可以恢复到正常状态。</p> 
+<p><strong>判断阻塞的方法</strong>&#xff1a;</p> 
+<ul><li>1.利用 Services 注册monitor 去Check</li></ul> 
+<p>主要是&#xff1a; <strong>AMS</strong>、 <strong>Foreground Thread</strong></p> 
+<ul><li> 
+  <ol><li>发送handler 到重要的Loop 线程来Check 是否阻塞。</li></ol> </li></ul> 
+<p>主要是&#xff1a; <strong>Main Thread</strong>、<strong>UI Thread</strong>、<strong>IO Thread</strong>、<strong>Display Thread</strong>、<strong>WMS</strong> 、<strong>Other Services</strong>。</p> 
+<p><strong>SWT 判断阻塞的方法 图文描述如下&#xff1a;</strong></p> 
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy81ODUxMjU2LTQxYjg2MWY1ODU0ZWVmNmYucG5n?x-oss-process&#61;image/format,png" alt="img" /></p> 
+<p>SWT 判断阻塞的方法</p> 
+<h1><a id="_SWT___31"></a>二、 SWT 重启问题处理流程</h1> 
+<p><strong>SWT 处理流程&#xff1a;</strong><br /> <strong>1.每半分钟check 一次system_server 进程</strong>&#xff1a;<br /> 检查系统是否卡住&#xff0c;如果卡住&#xff0c;<code>dump</code> 一次<code>system_server</code> 的<code>backtrace</code></p> 
+<p><strong>2.一分钟卡住后kill&#xff0c;并重新计数</strong>&#xff1a;<br /> 如果卡住&#xff0c;第二次<code>dump</code>&#xff0c;并<code>kill</code>掉 <code>system_server</code>进程 &#xff0c;否则重新计时。</p> 
+<p><strong>3.SWT 处理大致流程如下&#xff1a;</strong></p> 
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy81ODUxMjU2LTUwM2RkZGQ2NGZkYzJkZjAucG5n?x-oss-process&#61;image/format,png" alt="img" /></p> 
+<p>SWT 处理流程</p> 
+<h1><a id="_SWT___48"></a>三、 SWT 重启问题的原因</h1> 
+<p>导致 <code>SWT</code>重启原因的原因有很多种。</p> 
+<p>主要导致的原因如下&#xff1a;</p> 
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy81ODUxMjU2LTliMTE5YTMyZmJjNTc4NTcucG5n?x-oss-process&#61;image/format,png" alt="img" /></p> 
+<p>检查SWT 原因分类</p> 
+<h1><a id="_SWT___60"></a>四、 SWT 重启问题分析流程</h1> 
+<p>首先搜索关键 <strong>watchdog</strong>&#xff0c;查看是否有重启发生。</p> 
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy81ODUxMjU2LTU4MTJmOWY3NDdiYjUyNTEucG5n?x-oss-process&#61;image/format,png" alt="img" /></p> 
+<p>SWT 流程分析</p> 
+<h1><a id="SWT__70"></a>五、SWT 重启问题分析举例</h1> 
+<h2><a id="1_trace__72"></a>1.分析 trace &#xff0c;确认线程关系</h2> 
+<p>线程被 <strong>Block</strong> 搜索关键字 <strong>held by</strong></p> 
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy81ODUxMjU2LTU1YWNiNTBkNTA5NmRkMDgucG5n?x-oss-process&#61;image/format,png" alt="img" /></p> 
+<p>确认线程关系</p> 
+<p>线程被 <strong>Waiting</strong> 结合代码分析。</p> 
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy81ODUxMjU2LTVkZGI5MDU2OTg5M2FmOTQucG5n?x-oss-process&#61;image/format,png" alt="img" /></p> 
+<p>确认线程关系</p> 
+<h2><a id="2_90"></a>2.线程死锁</h2> 
+<p>确认<strong>Block</strong>的线程是否有闭环的死锁关系。</p> 
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy81ODUxMjU2LTIxYzEyYmIxNWU1YmIxZWUucG5n?x-oss-process&#61;image/format,png" alt="img" /></p> 
+<p>线程死锁</p> 
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy81ODUxMjU2LThiNTFhZWE4MzAzZTVkZDkucG5n?x-oss-process&#61;image/format,png" alt="img" /></p> 
+<p>线程死锁</p> 
+<h2><a id="3BinderServer__106"></a>3.Binder的Server 端卡住</h2> 
+<p>线程状态 <strong>Native</strong>&#xff0c;并且<strong>callstack</strong>中含有一对</p> 
+<p><strong>IPCThreadState::waitForResponse</strong><br /> <strong>IPCThreadState::talkWithDriver</strong><br /> 的明显特征。</p> 
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy81ODUxMjU2LTQ4Mzk4MGQyZTIwYzQxOTAucG5n?x-oss-process&#61;image/format,png" alt="img" /></p> 
+<p>Bind的Server端卡住</p> 
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy81ODUxMjU2LTQ4NzA3MTgwZTM2ZjdiMGMucG5n?x-oss-process&#61;image/format,png" alt="img" /></p> 
+<p>Bind的Server端卡住</p> 
+<h2><a id="4SurfaceFlinger__126"></a>4.SurfaceFlinger 卡住导致重启</h2> 
+<p>搜索<code>关键字</code> <strong>I watchdog</strong> ,<br /> 查看是否有 <strong>surfaceflinger hang</strong>&#xff0c;默认卡住<code>40s</code>&#xff0c;就会重启。</p> 
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy81ODUxMjU2LTg3OTUxN2UwZmFkMDZjYzgucG5n?x-oss-process&#61;image/format,png" alt="img" /></p> 
+<p>SurfaceFlinger 卡住</p> 
+<h2><a id="5Native__137"></a>5.Native 方法执行时间过长导致重启</h2> 
+<p>线程状态 <strong>Native</strong>&#xff0c;查看是否有<br /> <strong>PowerManagerService.nativeSetAutoSuspend</strong></p> 
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy81ODUxMjU2LTVhMzc4NjM3MDdlNDU4YmIucG5n?x-oss-process&#61;image/format,png" alt="img" /></p> 
+<p>Native 方法执行时间过长</p> 
+<h2><a id="6Zygote_Fork__148"></a>6.Zygote Fork 进程时卡住</h2> 
+<p>线程状态<strong>Native</strong>&#xff0c;查看是否有<br /> <strong>Process.zygoteSendArgsAndGetResult</strong></p> 
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy81ODUxMjU2LWRmZDQ5OWUzNjhkYTA0OTAucG5n?x-oss-process&#61;image/format,png" alt="img" /></p> 
+<p>Zygote Fork 进程时卡住</p> 
+<h2><a id="7Dump__159"></a>7.Dump 时间过长</h2> 
+<p><code>Dump</code> 超过<strong>60s</strong> 可能会引起手机重启。<br /> 搜索<code>关键字</code><br /> <strong>dumpStackTraces</strong><br /> 或<br /> <strong>dumpStackTraces process</strong></p> 
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy81ODUxMjU2LTU1NGZjZWNjN2I5ZDA3YjgucG5n?x-oss-process&#61;image/format,png" alt="img" /></p> 
+<p>Dump 时间过长</p> 
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy81ODUxMjU2LTI1MjMzNDc3MzRkMjg1MTcucG5n?x-oss-process&#61;image/format,png" alt="img" /></p> 
+<p>前面有ANR 发生</p> 
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy81ODUxMjU2LTkxNjM0M2FlYzlkZDlhZmMucG5n?x-oss-process&#61;image/format,png" alt="img" /></p> 
+<p>前面有ANR 发生</p> 
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy81ODUxMjU2LWFjMmYzYmRjNmE1NjdkMmQucG5n?x-oss-process&#61;image/format,png" alt="img" /></p> 
+<p>前面有fatal JE NE KE 等Exception发生</p> 
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy81ODUxMjU2LWU1NjFjNWVhN2YxMDQ3OTEucG5n?x-oss-process&#61;image/format,png" alt="img" /></p> 
+<p>自动化测试脚本有call dumpsys 去dump 系统信息</p> 
+<h1><a id="_Android_O_Log__197"></a>六、 Android O以上导 Log 注意事项</h1> 
+<p><code>Android O</code> 以上的 <code>mtklog</code> 和<code>db</code> 不在同一个目录&#xff0c;需要执行以下<code>adb</code>命令 导<code>Log</code>.</p> 
+<pre><code class="prism language-bash">//1. 导 MTK log 
 adb pull /sdcard/mtklog
 //2. 导 AEE log&#xff0c;如果没有&#xff0c;请执行第3步
  adb pull /data/aee_exp
 //3.导 data 下MTK缓存 的aee log
- adb pull /data/vendor/mtklog/aee_exp</code></pre>
+ adb pull /data/vendor/mtklog/aee_exp
+</code></pre>
+                </div>
+                <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/markdown_views-89f5acb30b.css" rel="stylesheet">
+                <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/style-49037e4d27.css" rel="stylesheet">
+        </div>
+        <div id="treeSkill"></div>
+    </article>
