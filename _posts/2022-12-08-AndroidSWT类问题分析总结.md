@@ -13,17 +13,6 @@ tags:
     - Watch dog
 ---
 
-    <article class="baidu_pl">
-        <div id="article_content" class="article_content clearfix">
-        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-03853629ec.css">
-                <div id="content_views" class="markdown_views prism-atom-one-light">
-                    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-                        <path stroke-linecap="round" d="M5,0 0,2.5 5,5z" id="raphael-marker-block" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
-                    </svg>
-                    <h1><a id="SWT__0"></a>SWT 重启问题分析</h1> 
-<blockquote> 
- <p>一、SWT 重启问题简介<br /> 二、SWT 重启问题处理流程<br /> 三、SWT 重启问题的原因<br /> 四、SWT 重启问题分析流程<br /> 五、SWT 重启问题分析举例<br /> 六、Android O以上导 Log 注意事项</p> 
-</blockquote> 
 <h1><a id="_SWT__9"></a>一、 SWT 重启问题简介</h1> 
 <p><strong>SWT(Software Watch Dog )</strong> 主要用来监控<code>SystemServer</code>等<code>重要线程/Service</code> 的运行情况。如果发现其阻塞超过 <strong>60s</strong> ,看门狗进程就会把系统重启&#xff0c;进而保证系统可以恢复到正常状态。</p> 
 <p><strong>判断阻塞的方法</strong>&#xff1a;</p> 
@@ -104,9 +93,3 @@ adb pull /sdcard/mtklog
 //3.导 data 下MTK缓存 的aee log
  adb pull /data/vendor/mtklog/aee_exp
 </code></pre>
-                </div>
-                <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/markdown_views-89f5acb30b.css" rel="stylesheet">
-                <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/style-49037e4d27.css" rel="stylesheet">
-        </div>
-        <div id="treeSkill"></div>
-    </article>
