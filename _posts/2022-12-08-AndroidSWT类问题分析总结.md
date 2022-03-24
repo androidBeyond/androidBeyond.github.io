@@ -12,19 +12,7 @@ tags:
 	- SWT
 ---
 
-     <article class="baidu_pl">
-        <div id="article_content" class="article_content clearfix">
-        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-03853629ec.css">
-                <div id="content_views" class="htmledit_views">
-                    <div class="rich_media_content" id="js_content"> 
- <p><img class="rich_pages" src="https://img-blog.csdnimg.cn/img_convert/485469c0d8e6e3a9c417a187221e6dd1.gif" alt="640?wx_fmt&#61;gif" /></p>
- <p><img src="https://img-blog.csdnimg.cn/img_convert/90a933132be74e109e55ea4316ee4c81.png" alt="640?wx_fmt&#61;other" /></p>
- <p>极力推荐文章&#xff1a;欢迎收藏<a href="https://mp.weixin.qq.com/s?__biz&#61;MzU4MTIzMjM3MA&#61;&#61;&amp;mid&#61;2247484493&amp;idx&#61;1&amp;sn&#61;7867fe976b61ef99568a95263e788379&amp;scene&#61;21#wechat_redirect">Android 干货分享 </a></p>
- <p><img src="https://img-blog.csdnimg.cn/img_convert/90a933132be74e109e55ea4316ee4c81.png" alt="640?wx_fmt&#61;other" /></p>
- <p>本篇文章主要介绍 <code>Android</code> 开发中的部分知识点&#xff0c;通过阅读本篇文章&#xff0c;您将收获以下内容:</p>
- <blockquote>
-  <p>一、SWT 手机重启问题简介</p>
- </blockquote>
+<article class="baidu_pl">   
  <h1>一、 SWT 手机重启问题简介</h1>
  <p>SWT(Software Watch Dog ) 主要用来监控<code>SystemServer</code>等<code>重要线程/Service</code> 的运行情况。如果发现其阻塞超过 60s ,看门狗进程就会把系统重启&#xff0c;进而保证系统可以恢复到正常状态。</p>
  <p>判断阻塞的方法&#xff1a;</p>
