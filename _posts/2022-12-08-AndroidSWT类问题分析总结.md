@@ -10,7 +10,7 @@ catalog: true
 tags:
     - Android
     - SWT
-    - Watch dog
+    - 稳定性
 ---
 
 <h1><a id="_SWT__9"></a>一、 SWT 重启问题简介</h1> 
