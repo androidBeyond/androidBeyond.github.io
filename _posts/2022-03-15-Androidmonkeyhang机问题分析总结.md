@@ -34,7 +34,7 @@ tags:
 5,monkey整机安装大应用测试复现->复现问题<br>
 做了如上测试后会有一些新的怀疑点，从而可以从增加一些正向分析排查的点。</p>
 <p>
-通过相关排查，和之前怀疑的近期修改无关，问题一直存在，只是某些修改如性能调优等让概率变大，我们同步进行如下排查和处理：
+通过相关排查，和之前怀疑的近期修改无关，问题一直存在，只是某些修改如性能调优等让概率变大，我们同步进行如下排查和处理：<br>
 1，回退lmkd 水位相关修改进行整机monkey测试->复现问题。<br>
 2，打开kmemleak定期抓取内存信息排查内存泄漏->未获取到内存泄漏相关异常。<br>
 3，camera 进行排查内存是否有大内存申请->未获取异常信息。<br>
@@ -43,13 +43,13 @@ tags:
 通过如上工作基本确定是低内存导致，导致低内存的原因一般是内存泄漏或者有大应用一直被启动或者启动太多进程导致，也就是是查杀机制如kswapd,lmkd出现异常，所以加lmkd异常log的同时打开一些开关继续定期抓取slabinfo内存信息排查泄漏。
 </p>
 <h4>抓取kmemleak和slabinfo</h4>
-<strong>Kmemleak</strong>
+<strong>Kmemleak</strong><br>
 <p>Kmemleak 为kernel 2.6.31引入的工具，用于检查内存泄漏。
 可以追踪kmalloc(), vmalloc(), kmem_cache_alloc()等函数引起的内存泄漏，一般用于slab内存泄漏，<br>
-打开kmemleak:
-    CONFIG_DEBUG_KMEMLEAK=y  
-    CONFIG_DEBUG_KMEMLEAK_DEFAULT_OFF=n
-    CONFIG_DEBUG_KMEMLEAK_EARLY_LOG_SIZE =40000//logsize最大
+打开kmemleak:<br>
+    CONFIG_DEBUG_KMEMLEAK=y  <br>
+    CONFIG_DEBUG_KMEMLEAK_DEFAULT_OFF=n<br>
+    CONFIG_DEBUG_KMEMLEAK_EARLY_LOG_SIZE =40000//logsize最大<br>
 adb shell 进去 看是否存在sys/kernel/debug/kmemleak这个节点，如果存在表明enable。
 第一次scan：echo scan > sys/kernel/debug/kmemleak//开始扫描
 然后 cat sys/kernel/debug/kmemleak   会得到很多backtrace，但是这其中有些是误抓的
@@ -72,9 +72,9 @@ kmemleak的特征是A backtrace会越来越多，不断增长,而且这里就是
 <p>
 <img src="https://img-blog.csdnimg.cn/0e0000f34fb0435a93fc22e21d8ddaef.png" alt="" />
 </p>
-所以怀疑是查杀出了问题并做了如下处理：
-   1，修改swapnass和psi测试->未复现。
-   2，负责性能的同事添加lmkd的相关log打印排查lmkd为何后期未查杀进程。
+所以怀疑是查杀出了问题并做了如下处理：<br>
+   1，修改swapnass和psi测试->未复现。<br>
+   2，负责性能的同事添加lmkd的相关log打印排查lmkd为何后期未查杀进程。<br>
    通过复测我们误认为是psi查杀和swapnass的修改修复了问题，其实凑巧psi的修改关闭了导致问题的feature,使得问题被意外的处理掉了，最终是lmkd中复现抓到的添加的日志，看到的问题的根因。
 <h4>问题根因</h4>
  LMK没有去杀进程：
