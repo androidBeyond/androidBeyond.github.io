@@ -50,7 +50,7 @@ tags:
     CONFIG_DEBUG_KMEMLEAK=y  <br>
     CONFIG_DEBUG_KMEMLEAK_DEFAULT_OFF=n<br>
     CONFIG_DEBUG_KMEMLEAK_EARLY_LOG_SIZE =40000//logsize最大<br>
-adb shell 进去 看是否存在sys/kernel/debug/kmemleak这个节点，如果存在表明enable。
+adb shell 进去 看是否存在sys/kernel/debug/kmemleak这个节点，如果存在表明enable。<br>
 第一次scan：echo scan > sys/kernel/debug/kmemleak//开始扫描 <br>
 然后 cat sys/kernel/debug/kmemleak   会得到很多backtrace，但是这其中有些是误抓的
 （kmemleak存在误报情况）<br>
