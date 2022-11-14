@@ -1,4 +1,4 @@
-﻿---
+---
 layout:     post
 title:      Android Monkey hang机问题分析总结
 subtitle:   最近公司项目在monkey过程中出现大量的hang机重启问题，block项目进度，影响CF,领导要求重点攻关,在此记录下攻关分析过程
@@ -6,11 +6,11 @@ date:       2022-03-15
 author:     coderman
 header-img: img/article-bg.jpg
 top: false
-no-catalog: true
+no-catalog: false
 tags:
     - android
     - 死机重启
-	- Monkey
+    - Monkey
 --- 
 <p>
 <img src="" alt="" />
