@@ -51,12 +51,12 @@ tags:
     CONFIG_DEBUG_KMEMLEAK_DEFAULT_OFF=n<br>
     CONFIG_DEBUG_KMEMLEAK_EARLY_LOG_SIZE =40000//logsize最大<br>
 adb shell 进去 看是否存在sys/kernel/debug/kmemleak这个节点，如果存在表明enable。
-第一次scan：echo scan > sys/kernel/debug/kmemleak//开始扫描
+第一次scan：echo scan > sys/kernel/debug/kmemleak//开始扫描 <br>
 然后 cat sys/kernel/debug/kmemleak   会得到很多backtrace，但是这其中有些是误抓的
-（kmemleak存在误报情况）
-然后echo clear > sys/kernel/debug/kmemleak   清除log 
-第二次scan：echo scan > sys/kernel/debug/kmemleak//开始扫描
-过段时间等待leak的积累，然后 cat sys/kernel/debug/kmemleak  
+（kmemleak存在误报情况）<br>
+然后echo clear > sys/kernel/debug/kmemleak   清除log <br>
+第二次scan：echo scan > sys/kernel/debug/kmemleak//开始扫描<br>
+过段时间等待leak的积累，然后 cat sys/kernel/debug/kmemleak  <br>
 很多第一次误报的backtrace没有了，会得到很多重复的backtrace，假设这样的backtrace
 称为A <br>
 kmemleak的特征是A backtrace会越来越多，不断增长,而且这里就是泄漏的点
