@@ -59,14 +59,14 @@ adb shell 进去 看是否存在sys/kernel/debug/kmemleak这个节点，如果�
 过段时间等待leak的积累，然后 cat sys/kernel/debug/kmemleak  <br>
 很多第一次误报的backtrace没有了，会得到很多重复的backtrace，假设这样的backtrace
 称为A <br>
-kmemleak的特征是A backtrace会越来越多，不断增长,而且这里就是泄漏的点
+kmemleak的特征是A backtrace会越来越多，不断增长,而且这里就是泄漏的点 <br>
 <strong>slabinfo</strong>
 <p>
-通过抓取slabinfo持续关注slabtrace 是否有明显增长的backtrace, 即可能为泄露点
-打开slabinfo：
-     CONFIG_SLUB=y
-     CONFIG_SLUB_DEBUG=y
-     CONFIG_SLUB_DEBUG_ON=y
+通过抓取slabinfo持续关注slabtrace 是否有明显增长的backtrace, 即可能为泄露点 <br>
+打开slabinfo： <br>
+     CONFIG_SLUB=y  <br>
+     CONFIG_SLUB_DEBUG=y  <br>
+     CONFIG_SLUB_DEBUG_ON=y  <br>
 如上其实都是从kernel方面入手分析的一些检查内存泄漏的手段，上层其实只是做些辅助，为提高效率便写了一个定时抓取各种内存信息的脚本，处理没有固定复现路径的问题很有用.
 在继续看mainlog的过程中，我们发现monkey dump的procrank 数据中swap是基本被所有的进程用光，各个进程的内存并没有比较离谱的，都是正常的申请，</p>
 <p>
